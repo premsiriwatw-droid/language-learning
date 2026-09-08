@@ -11,7 +11,8 @@ class ExerciseFactory extends Factory
     public function definition(): array
     {
         return [
-            'lesson_id' => fake()->numberBetween(1, 1000),
+            // Supply an existing Lesson with for($lesson) or lesson_id.
+            'lesson_id' => null,
             'type' => fake()->randomElement(['multiple_choice', 'fill_blank', 'translation', 'arrange_words']),
             'title' => fake()->sentence(),
         ];

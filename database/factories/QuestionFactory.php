@@ -22,6 +22,8 @@ class QuestionFactory extends Factory
             'exercise_id' => Exercise::factory(),
             'question' => fake()->sentence(),
             'explanation' => null,
+            'audio_path' => null,
+            'image_path' => null,
         ];
     }
 }

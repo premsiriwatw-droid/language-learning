@@ -18,7 +18,8 @@ class VocabularyFactory extends Factory
     public function definition(): array
     {
         return [
-            'lesson_id' => fake()->numberBetween(1, 1000),
+            // Supply an existing Lesson with for($lesson) or lesson_id.
+            'lesson_id' => null,
             'word' => fake()->word(),
             'pinyin' => null,
             'meaning' => fake()->sentence(),

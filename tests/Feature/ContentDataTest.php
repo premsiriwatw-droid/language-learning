@@ -11,10 +11,12 @@ use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Support\CreatesContentLesson;
 use Tests\TestCase;
 
 class ContentDataTest extends TestCase
 {
+    use CreatesContentLesson;
     use LazilyRefreshDatabase;
 
     public function test_clean_sqlite_migrations_create_the_content_schema(): void
@@ -25,7 +27,7 @@ class ContentDataTest extends TestCase
         $tables = [
             'vocabularies' => ['id', 'lesson_id', 'word', 'pinyin', 'meaning', 'example_sentence', 'example_pinyin', 'example_meaning', 'created_at', 'updated_at'],
             'exercises' => ['id', 'lesson_id', 'type', 'title', 'created_at', 'updated_at'],
-            'questions' => ['id', 'exercise_id', 'question', 'explanation', 'created_at', 'updated_at'],
+            'questions' => ['id', 'exercise_id', 'question', 'explanation', 'audio_path', 'image_path', 'created_at', 'updated_at'],
             'answers' => ['id', 'question_id', 'answer', 'is_correct', 'created_at', 'updated_at'],
         ];
 
@@ -37,10 +39,7 @@ class ContentDataTest extends TestCase
             $this->assertTrue(Schema::hasIndex($table, [$column]));
         }
 
-        $this->assertSame([], Schema::getForeignKeys('vocabularies'));
-        $this->assertSame([], Schema::getForeignKeys('exercises'));
-
-        foreach (['questions' => ['exercise_id', 'exercises'], 'answers' => ['question_id', 'questions']] as $table => [$column, $parent]) {
+        foreach (['vocabularies' => ['lesson_id', 'lessons'], 'exercises' => ['lesson_id', 'lessons'], 'questions' => ['exercise_id', 'exercises'], 'answers' => ['question_id', 'questions']] as $table => [$column, $parent]) {
             $foreignKeys = Schema::getForeignKeys($table);
 
             $this->assertCount(1, $foreignKeys);
@@ -53,8 +52,10 @@ class ContentDataTest extends TestCase
 
     public function test_vocabulary_persists_chinese_pinyin_and_thai_content(): void
     {
+        $lesson = $this->createContentLesson();
+
         $attributes = [
-            'lesson_id' => 42,
+            'lesson_id' => $lesson->id,
             'word' => '你好',
             'pinyin' => 'nǐ hǎo',
             'meaning' => 'สวัสดี',
@@ -72,13 +73,15 @@ class ContentDataTest extends TestCase
 
     public function test_optional_content_fields_can_be_omitted(): void
     {
+        $lesson = $this->createContentLesson();
+
         $vocabulary = Vocabulary::create([
-            'lesson_id' => 42,
+            'lesson_id' => $lesson->id,
             'word' => '你好',
             'meaning' => 'สวัสดี',
         ])->fresh();
         $question = Question::create([
-            'exercise_id' => Exercise::factory()->create()->id,
+            'exercise_id' => Exercise::factory()->for($lesson)->create()->id,
             'question' => '你好 แปลว่าอะไร?',
         ])->fresh();
 
@@ -87,20 +90,24 @@ class ContentDataTest extends TestCase
         }
 
         $this->assertNull($question->explanation);
+        $this->assertNull($question->audio_path);
+        $this->assertNull($question->image_path);
     }
 
     #[DataProvider('exerciseTypes')]
     public function test_exercise_types_are_stored_as_strings(string $type): void
     {
+        $lesson = $this->createContentLesson();
+
         $exercise = Exercise::create([
-            'lesson_id' => 42,
+            'lesson_id' => $lesson->id,
             'type' => $type,
             'title' => 'Greetings Practice',
         ])->fresh();
 
         $this->assertSame($type, $exercise->type);
         $this->assertSame('Greetings Practice', $exercise->title);
-        $this->assertSame(42, $exercise->lesson_id);
+        $this->assertSame($lesson->id, $exercise->lesson_id);
     }
 
     public static function exerciseTypes(): array
@@ -110,12 +117,15 @@ class ContentDataTest extends TestCase
             'fill blank' => ['fill_blank'],
             'translation' => ['translation'],
             'arrange words' => ['arrange_words'],
+            'listening' => ['listening'],
+            'image choice' => ['image_choice'],
+            'custom type' => ['custom_type'],
         ];
     }
 
     public function test_question_bank_relationships_and_boolean_casts(): void
     {
-        $exercise = Exercise::factory()->create(['type' => 'multiple_choice']);
+        $exercise = Exercise::factory()->for($this->createContentLesson())->create(['type' => 'multiple_choice']);
         $question = $exercise->questions()->create([
             'question' => '你好 แปลว่าอะไร?',
             'explanation' => '你好 ใช้กล่าวทักทาย',
@@ -126,7 +136,7 @@ class ContentDataTest extends TestCase
             $question->answers()->create(['answer' => $text, 'is_correct' => $correct]);
         }
 
-        $otherQuestion = Question::factory()->create();
+        $otherQuestion = Question::factory()->for(Exercise::factory()->for($exercise->lesson))->create();
         Answer::factory()->for($otherQuestion)->create();
 
         $exercise = $exercise->fresh('questions.answers');
@@ -145,7 +155,7 @@ class ContentDataTest extends TestCase
 
     public function test_arrange_words_content_can_be_stored(): void
     {
-        $exercise = Exercise::factory()->create(['type' => 'arrange_words']);
+        $exercise = Exercise::factory()->for($this->createContentLesson())->create(['type' => 'arrange_words']);
         $question = $exercise->questions()->create([
             'question' => 'เรียงคำให้ถูกต้อง: 我 / 学生 / 是',
         ]);
@@ -161,12 +171,14 @@ class ContentDataTest extends TestCase
 
     public function test_deleting_an_exercise_cascades_to_its_questions_and_answers(): void
     {
-        $exercise = Exercise::factory()->has(
+        $exercise = Exercise::factory()->for($this->createContentLesson())->has(
             Question::factory()->count(2)->has(Answer::factory()->count(2))
         )->create();
         $questionIds = $exercise->questions()->pluck('id');
         $answerIds = Answer::whereIn('question_id', $questionIds)->pluck('id');
-        $unrelatedAnswer = Answer::factory()->create();
+        $unrelatedAnswer = Answer::factory()->for(
+            Question::factory()->for(Exercise::factory()->for($exercise->lesson))
+        )->create();
 
         DB::table('exercises')->where('id', $exercise->id)->delete();
 
@@ -180,7 +192,7 @@ class ContentDataTest extends TestCase
 
     public function test_deleting_a_question_cascades_only_to_its_answers(): void
     {
-        $exercise = Exercise::factory()->create();
+        $exercise = Exercise::factory()->for($this->createContentLesson())->create();
         $question = Question::factory()->for($exercise)->has(Answer::factory()->count(2))->create();
         $sibling = Question::factory()->for($exercise)->has(Answer::factory())->create();
         $answerIds = $question->answers()->pluck('id');

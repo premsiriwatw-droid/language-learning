@@ -15,9 +15,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // เรียกใช้ LearningStructureSeeder เพื่อสร้างโครงสร้างข้อมูลก่อน
         $this->call([
             LearningStructureSeeder::class,
+            ChineseContentSeeder::class,
         ]);
 
         User::factory()->create([

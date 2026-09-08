@@ -15,7 +15,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // เรียกใช้ LearningStructureSeeder เพื่อสร้างโครงสร้างข้อมูลก่อน
+        $this->call([
+            LearningStructureSeeder::class,
+        ]);
 
         User::factory()->create([
             'name' => 'Test User',

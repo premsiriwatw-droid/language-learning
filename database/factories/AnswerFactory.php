@@ -6,16 +6,9 @@ use App\Models\Answer;
 use App\Models\Question;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<Answer>
- */
+/** @extends Factory<Answer> */
 class AnswerFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
@@ -23,5 +16,15 @@ class AnswerFactory extends Factory
             'answer' => fake()->sentence(),
             'is_correct' => false,
         ];
+    }
+
+    public function correct(): static
+    {
+        return $this->state(fn () => ['is_correct' => true]);
+    }
+
+    public function incorrect(): static
+    {
+        return $this->state(fn () => ['is_correct' => false]);
     }
 }

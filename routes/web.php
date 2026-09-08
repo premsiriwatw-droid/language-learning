@@ -1,7 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\LearningController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
@@ -41,4 +42,19 @@ Route::middleware('auth')->group(function () {
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
-});
+
+// ================================
+// Learning Routes
+// ================================
+
+// หน้าเลือกภาษา / คอร์ส
+Route::get('/languages', [LearningController::class, 'indexLanguages']);
+
+// หน้าเลือก Unit ของแต่ละ Course
+Route::get('/courses/{course}/units', [LearningController::class, 'showUnits']);
+
+// หน้าเลือก Lesson และเนื้อหาการเรียน
+Route::get('/units/{unit}/lessons', [LearningController::class, 'showLessons']);
+
+Route::get('/lessons/{lesson}', [LearningController::class, 'showLessonContent']);        });
+

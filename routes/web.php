@@ -1,18 +1,25 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\QuizController;
 use App\Http\Controllers\LearningController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-// 1. หน้าเลือกภาษา / คอร์ส
+// Quiz
+Route::get('/quiz/{exercise}', [QuizController::class, 'show'])
+    ->name('quiz.show');
+
+Route::post('/quiz/{exercise}', [QuizController::class, 'submit'])
+    ->name('quiz.submit');
+
+// Learning
 Route::get('/languages', [LearningController::class, 'indexLanguages']);
 
-// 2. หน้าเลือก Unit ของแต่ละ Course
 Route::get('/courses/{course}/units', [LearningController::class, 'showUnits']);
 
-// 3. หน้าเลือก Lesson และเนื้อหาการเรียน
 Route::get('/units/{unit}/lessons', [LearningController::class, 'showLessons']);
+
 Route::get('/lessons/{lesson}', [LearningController::class, 'showLessonContent']);

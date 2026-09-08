@@ -5,16 +5,9 @@ namespace Database\Factories;
 use App\Models\Exercise;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<Exercise>
- */
+/** @extends Factory<Exercise> */
 class ExerciseFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
@@ -23,5 +16,37 @@ class ExerciseFactory extends Factory
             'type' => fake()->randomElement(['multiple_choice', 'fill_blank', 'translation', 'arrange_words']),
             'title' => fake()->sentence(),
         ];
+    }
+
+    public function fillBlank(): static
+    {
+        return $this->state(fn () => [
+            'type' => 'fill_blank',
+            'title' => 'Fill in the Blank',
+        ]);
+    }
+
+    public function listening(): static
+    {
+        return $this->state(fn () => [
+            'type' => 'listening',
+            'title' => 'Listening Practice',
+        ]);
+    }
+
+    public function multipleChoice(): static
+    {
+        return $this->state(fn () => [
+            'type' => 'multiple_choice',
+            'title' => 'Multiple Choice',
+        ]);
+    }
+
+    public function imageChoice(): static
+    {
+        return $this->state(fn () => [
+            'type' => 'image_choice',
+            'title' => 'Image Choice',
+        ]);
     }
 }

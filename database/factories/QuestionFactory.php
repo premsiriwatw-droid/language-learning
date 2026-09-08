@@ -6,16 +6,9 @@ use App\Models\Exercise;
 use App\Models\Question;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<Question>
- */
+/** @extends Factory<Question> */
 class QuestionFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
@@ -25,5 +18,13 @@ class QuestionFactory extends Factory
             'audio_path' => null,
             'image_path' => null,
         ];
+    }
+
+    public function chinese(string $question, ?string $explanation = null): static
+    {
+        return $this->state(fn () => [
+            'question' => $question,
+            'explanation' => $explanation,
+        ]);
     }
 }

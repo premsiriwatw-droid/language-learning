@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LangLearn - @yield('title')</title>
-    <!-- โหลด Tailwind CSS สำหรับทดสอบ (ถ้าใช้ npm run dev ของ Laravel อยู่แล้ว ให้ใช้ @vite แทน) -->
+    {{-- โหลด Tailwind CSS สำหรับทดสอบ --}}
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }

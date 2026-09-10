@@ -61,7 +61,7 @@ class AuthController extends Controller
 
         // ตอนนี้ใช้ Profile เป็นหน้าหลัง Login ชั่วคราว
         // เพื่อไม่ไปสร้าง Home/Dashboard ชนกับคนที่ 5
-        return redirect()->route('profile');
+        return redirect('/languages');
     }
 
 
@@ -105,9 +105,7 @@ class AuthController extends Controller
             // ถ้าก่อนหน้านี้ผู้ใช้พยายามเข้า page ที่ต้อง Login
             // Laravel จะพากลับไป page นั้น
             // ถ้าไม่มี จะไป Profile
-            return redirect()->intended(
-                route('profile')
-            );
+                        return redirect()->intended('/languages');
         }
 
 

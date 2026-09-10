@@ -11,10 +11,23 @@ trait CreatesContentLesson
 {
     private function createContentLesson(): Lesson
     {
-        $language = Language::create(['name' => 'Test language']);
-        $course = Course::forceCreate(['language_id' => $language->id, 'title' => 'Test course']);
-        $unit = Unit::forceCreate(['course_id' => $course->id, 'title' => 'Test unit']);
+        $language = Language::create([
+            'name' => 'Test language',
+        ]);
 
-        return Lesson::forceCreate(['unit_id' => $unit->id, 'title' => 'Test lesson']);
+        $course = Course::forceCreate([
+            'language_id' => $language->id,
+            'title' => 'Test course',
+        ]);
+
+        $unit = Unit::forceCreate([
+            'course_id' => $course->id,
+            'title' => 'Test unit',
+        ]);
+
+        return Lesson::forceCreate([
+            'unit_id' => $unit->id,
+            'title' => 'Test lesson',
+        ]);
     }
 }

@@ -16,7 +16,6 @@ use Tests\TestCase;
 
 class ContentDataTest extends TestCase
 {
-    use CreatesContentLesson;
     use LazilyRefreshDatabase;
     use CreatesContentLesson;
 
@@ -26,12 +25,6 @@ class ContentDataTest extends TestCase
         $this->assertSame(':memory:', DB::connection()->getDatabaseName());
 
         $tables = [
-<<<<<<< HEAD
-            'vocabularies' => ['id', 'lesson_id', 'word', 'pinyin', 'meaning', 'example_sentence', 'example_pinyin', 'example_meaning', 'created_at', 'updated_at'],
-            'exercises' => ['id', 'lesson_id', 'type', 'title', 'created_at', 'updated_at'],
-            'questions' => ['id', 'exercise_id', 'question', 'explanation', 'audio_path', 'image_path', 'created_at', 'updated_at'],
-            'answers' => ['id', 'question_id', 'answer', 'is_correct', 'created_at', 'updated_at'],
-=======
             'vocabularies' => [
                 'id',
                 'lesson_id',
@@ -70,7 +63,6 @@ class ContentDataTest extends TestCase
                 'created_at',
                 'updated_at',
             ],
->>>>>>> 5b769e8 (feat: integrate content data structure)
         ];
 
         foreach ($tables as $table => $columns) {
@@ -91,16 +83,12 @@ class ContentDataTest extends TestCase
             );
         }
 
-<<<<<<< HEAD
-        foreach (['vocabularies' => ['lesson_id', 'lessons'], 'exercises' => ['lesson_id', 'lessons'], 'questions' => ['exercise_id', 'exercises'], 'answers' => ['question_id', 'questions']] as $table => [$column, $parent]) {
-=======
         foreach ([
             'vocabularies' => ['lesson_id', 'lessons'],
             'exercises' => ['lesson_id', 'lessons'],
             'questions' => ['exercise_id', 'exercises'],
             'answers' => ['question_id', 'questions'],
         ] as $table => [$column, $parent]) {
->>>>>>> 5b769e8 (feat: integrate content data structure)
             $foreignKeys = Schema::getForeignKeys($table);
 
             $matchingForeignKey = collect($foreignKeys)->first(
@@ -152,13 +140,8 @@ class ContentDataTest extends TestCase
         ]);
 
         $question = Question::create([
-<<<<<<< HEAD
-            'exercise_id' => Exercise::factory()->for($lesson)->create()->id,
-            'question' => '你好 แปลว่าอะไร?',
-=======
             'exercise_id' => $exercise->id,
             'question' => 'คำทักทายคืออะไร?',
->>>>>>> 5b769e8 (feat: integrate content data structure)
         ])->fresh();
 
         foreach ([
@@ -206,18 +189,11 @@ class ContentDataTest extends TestCase
 
     public function test_question_bank_relationships_and_boolean_casts(): void
     {
-<<<<<<< HEAD
-        $exercise = Exercise::factory()->for($this->createContentLesson())->create(['type' => 'multiple_choice']);
-        $question = $exercise->questions()->create([
-            'question' => '你好 แปลว่าอะไร?',
-            'explanation' => '你好 ใช้กล่าวทักทาย',
-=======
         $lesson = $this->createContentLesson();
 
         $exercise = Exercise::factory()->create([
             'lesson_id' => $lesson->id,
             'type' => 'multiple_choice',
->>>>>>> 5b769e8 (feat: integrate content data structure)
         ]);
 
         $question = $exercise->questions()->create([
@@ -239,10 +215,6 @@ class ContentDataTest extends TestCase
             ]);
         }
 
-<<<<<<< HEAD
-        $otherQuestion = Question::factory()->for(Exercise::factory()->for($exercise->lesson))->create();
-        Answer::factory()->for($otherQuestion)->create();
-=======
         $otherExercise = Exercise::factory()->create([
             'lesson_id' => $lesson->id,
         ]);
@@ -254,11 +226,11 @@ class ContentDataTest extends TestCase
         Answer::factory()
             ->for($otherQuestion)
             ->create();
->>>>>>> 5b769e8 (feat: integrate content data structure)
 
         $exercise = $exercise->fresh('questions.answers');
 
         $this->assertCount(1, $exercise->questions);
+
         $this->assertTrue(
             $exercise->questions->first()->is($question)
         );
@@ -293,18 +265,7 @@ class ContentDataTest extends TestCase
 
     public function test_arrange_words_content_can_be_stored(): void
     {
-<<<<<<< HEAD
-        $exercise = Exercise::factory()->for($this->createContentLesson())->create(['type' => 'arrange_words']);
-        $question = $exercise->questions()->create([
-            'question' => 'เรียงคำให้ถูกต้อง: 我 / 学生 / 是',
-        ]);
-        $answer = $question->answers()->create([
-            'answer' => '我是学生',
-            'is_correct' => true,
-        ])->fresh();
-=======
         $lesson = $this->createContentLesson();
->>>>>>> 5b769e8 (feat: integrate content data structure)
 
         $exercise = Exercise::factory()->create([
             'lesson_id' => $lesson->id,
@@ -337,18 +298,7 @@ class ContentDataTest extends TestCase
 
     public function test_deleting_an_exercise_cascades_to_its_questions_and_answers(): void
     {
-<<<<<<< HEAD
-        $exercise = Exercise::factory()->for($this->createContentLesson())->has(
-            Question::factory()->count(2)->has(Answer::factory()->count(2))
-        )->create();
-        $questionIds = $exercise->questions()->pluck('id');
-        $answerIds = Answer::whereIn('question_id', $questionIds)->pluck('id');
-        $unrelatedAnswer = Answer::factory()->for(
-            Question::factory()->for(Exercise::factory()->for($exercise->lesson))
-        )->create();
-=======
         $lesson = $this->createContentLesson();
->>>>>>> 5b769e8 (feat: integrate content data structure)
 
         $exercise = Exercise::factory()->create([
             'lesson_id' => $lesson->id,
@@ -382,14 +332,7 @@ class ContentDataTest extends TestCase
 
     public function test_deleting_a_question_cascades_only_to_its_answers(): void
     {
-<<<<<<< HEAD
-        $exercise = Exercise::factory()->for($this->createContentLesson())->create();
-        $question = Question::factory()->for($exercise)->has(Answer::factory()->count(2))->create();
-        $sibling = Question::factory()->for($exercise)->has(Answer::factory())->create();
-        $answerIds = $question->answers()->pluck('id');
-=======
         $lesson = $this->createContentLesson();
->>>>>>> 5b769e8 (feat: integrate content data structure)
 
         $exercise = Exercise::factory()->create([
             'lesson_id' => $lesson->id,

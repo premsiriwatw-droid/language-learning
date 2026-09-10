@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\LearningController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\QuizController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -57,4 +58,10 @@ Route::get('/courses/{course}/units', [LearningController::class, 'showUnits']);
 Route::get('/units/{unit}/lessons', [LearningController::class, 'showLessons']);
 
 Route::get('/lessons/{lesson}', [LearningController::class, 'showLessonContent']);        });
+
+Route::get('/quiz/{exercise}', [QuizController::class, 'show'])
+    ->name('quiz.show');
+
+Route::post('/quiz/{exercise}', [QuizController::class, 'submit'])
+    ->name('quiz.submit');
 

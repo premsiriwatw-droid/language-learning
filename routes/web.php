@@ -65,3 +65,11 @@ Route::get('/quiz/{exercise}', [QuizController::class, 'show'])
 Route::post('/quiz/{exercise}', [QuizController::class, 'submit'])
     ->name('quiz.submit');
 
+Route::get('/lessons/{lesson}/learn', [LearningController::class, 'learn'])
+    ->name('lessons.learn');
+
+Route::get('/lessons/{lesson}/learn/{step}', [LearningController::class, 'learnStep'])
+    ->name('lessons.learn.step');
+
+Route::post('/lessons/{lesson}/learn/{step}', [LearningController::class, 'submitLearnStep'])
+    ->name('lessons.learn.submit');

@@ -128,15 +128,29 @@
 
         <div class="bg-white border-2 border-gray-200 border-b-4 rounded-3xl p-8">
 
+            {{-- ========================= --}}
             {{-- Review Header --}}
+            {{-- ========================= --}}
             <div class="text-center mb-6">
 
-                <div class="text-4xl mb-3">
-                    {{ $exerciseType === 'fill_blank' ? '🧩' : '🎯' }}
+                <div class="text-5xl mb-3">
+                    @if($exerciseType === 'fill_blank')
+                        🧩
+                    @elseif($exerciseType === 'listening')
+                        🔊
+                    @else
+                        🎯
+                    @endif
                 </div>
 
                 <p class="text-emerald-500 font-bold mb-2">
-                    {{ $exerciseType === 'fill_blank' ? 'Word Bank' : 'Mini Review' }}
+                    @if($exerciseType === 'fill_blank')
+                        Word Bank
+                    @elseif($exerciseType === 'listening')
+                        Listening
+                    @else
+                        Mini Review
+                    @endif
                 </p>
 
                 <h2 class="text-2xl font-extrabold text-gray-800">
@@ -144,6 +158,48 @@
                 </h2>
 
             </div>
+
+
+            {{-- ========================= --}}
+            {{-- Listening Audio --}}
+            {{-- ========================= --}}
+            @if($exerciseType === 'listening')
+
+                <div class="mb-6 text-center">
+
+                    @if($question->audio_path)
+
+                        <div class="bg-emerald-50 border-2 border-emerald-100 rounded-2xl p-6">
+
+                            <p class="text-sm text-gray-500 font-bold mb-4">
+                                กดฟังเสียงแล้วเลือกคำตอบ
+                            </p>
+
+                            <audio
+                                controls
+                                class="w-full"
+                            >
+                                <source
+                                    src="{{ asset($question->audio_path) }}"
+                                    type="audio/mpeg"
+                                >
+
+                                เบราว์เซอร์ของคุณไม่รองรับการเล่นเสียง
+                            </audio>
+
+                        </div>
+
+                    @else
+
+                        <div class="bg-gray-50 border-2 border-gray-200 rounded-2xl p-6 text-gray-500">
+                            🔊 ยังไม่มีไฟล์เสียงสำหรับข้อนี้
+                        </div>
+
+                    @endif
+
+                </div>
+
+            @endif
 
 
             {{-- ========================= --}}
@@ -180,23 +236,21 @@
 
                 @csrf
 
-
-                {{-- Fill Blank = 2 columns --}}
-                {{-- Multiple Choice = 1 column --}}
-                <div class="{{ $exerciseType === 'fill_blank'
-                    ? 'grid grid-cols-2 gap-3'
-                    : 'grid grid-cols-1 gap-3' }}"
-                >
+                <div class="
+                    {{ in_array($exerciseType, ['fill_blank', 'listening'], true)
+                        ? 'grid grid-cols-2 gap-3'
+                        : 'grid grid-cols-1 gap-3' }}
+                ">
 
                     @foreach($question->answers as $answer)
 
                         @php
                             /*
                              * multiple_choice / image_choice
-                             * QuizAnswerChecker ต้องการ Answer ID
+                             * ใช้ Answer ID
                              *
                              * fill_blank / listening
-                             * QuizAnswerChecker ต้องการข้อความคำตอบ
+                             * ใช้ข้อความคำตอบ
                              */
                             $answerValue = in_array(
                                 $exerciseType,
@@ -206,33 +260,16 @@
                                 ? $answer->answer
                                 : $answer->id;
 
-
-                            /*
-                             * เช็กว่าคำตอบนี้คือคำตอบที่ผู้ใช้เลือกหรือไม่
-                             */
                             $isSelected =
                                 (string) $selectedAnswer ===
                                 (string) $answerValue;
 
-
-                            /*
-                             * คำตอบที่ถูกต้อง
-                             */
                             $isCorrectAnswer =
                                 (bool) $answer->is_correct;
 
-
-                            /*
-                             * สีเริ่มต้น
-                             */
                             $answerClasses =
                                 'border-gray-200 text-gray-700';
 
-
-                            /*
-                             * ตอบผิด
-                             * ตัวที่เลือกจะเป็นสีแดง
-                             */
                             if (
                                 $reviewResult === 'wrong' &&
                                 $isSelected
@@ -241,11 +278,6 @@
                                     'border-red-400 bg-red-50 text-red-600';
                             }
 
-
-                            /*
-                             * ตอบถูก
-                             * คำตอบที่ถูกจะเป็นสีเขียว
-                             */
                             if (
                                 $reviewResult === 'correct' &&
                                 $isCorrectAnswer
@@ -291,8 +323,6 @@
 
                                 {{ $answer->answer }}
 
-
-                                {{-- Correct icon --}}
                                 @if(
                                     $reviewResult === 'correct' &&
                                     $isCorrectAnswer
@@ -302,8 +332,6 @@
                                     </span>
                                 @endif
 
-
-                                {{-- Wrong icon --}}
                                 @if(
                                     $reviewResult === 'wrong' &&
                                     $isSelected

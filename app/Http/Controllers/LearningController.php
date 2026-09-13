@@ -64,8 +64,12 @@ class LearningController extends Controller
             ]);
         }
 
+        /*
+         * เมื่อเรียนครบทุก Step แล้ว
+         * กลับไปหน้ารวมบทเรียนของ Unit
+         */
         if ($step > $total) {
-            return redirect('/lessons/' . $lesson->id);
+            return redirect('/units/' . $lesson->unit_id . '/lessons');
         }
 
         $current = $flow[$step - 1];

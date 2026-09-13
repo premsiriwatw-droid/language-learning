@@ -112,4 +112,10 @@ function lessonApp(vocabularies, lessonId) {
     }
 }
 </script>
+@extends('layouts.app')
+
+@section('title', 'แบบทดสอบ')
+
+@section('content')
+
 @endsection

@@ -20,6 +20,7 @@ class FrontendController extends Controller
     {
         $progressPercent = 80;
         $userXp = 120;
+        $lessons = [ ... ];
         
         $lessons = [
             ['id' => 1, 'title' => 'Lesson 1', 'is_completed' => true, 'is_locked' => false],

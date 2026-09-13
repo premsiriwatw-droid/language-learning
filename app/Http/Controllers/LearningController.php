@@ -137,6 +137,7 @@ class LearningController extends Controller
                 'multiple_choice',
                 'fill_blank',
                 'listening',
+                'image_choice',
             ])
             ->orderBy('id')
             ->get();
@@ -157,6 +158,12 @@ class LearningController extends Controller
             ->firstWhere(
                 'type',
                 'listening'
+            );
+
+        $imageChoice = $reviewExercises
+            ->firstWhere(
+                'type',
+                'image_choice'
             );
 
         $flow = [];
@@ -201,7 +208,7 @@ class LearningController extends Controller
         }
 
         /*
-         * หลังเรียนคำศัพท์ทั้งหมด
+         * หลังเรียนคำศัพท์ครบทั้งหมด
          * แทรก Listening
          */
         if ($listening?->questions->first()) {
@@ -210,6 +217,18 @@ class LearningController extends Controller
                 'exercise_type' => $listening->type,
                 'exercise' => $listening,
                 'question' => $listening->questions->first(),
+            ];
+        }
+
+        /*
+         * ปิดท้ายด้วย Image Choice
+         */
+        if ($imageChoice?->questions->first()) {
+            $flow[] = [
+                'type' => 'review',
+                'exercise_type' => $imageChoice->type,
+                'exercise' => $imageChoice,
+                'question' => $imageChoice->questions->first(),
             ];
         }
 

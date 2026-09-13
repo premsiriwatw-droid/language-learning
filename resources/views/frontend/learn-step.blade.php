@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $lesson->title ?? 'เรียนคำศัพท์')
+@section('title', $lesson->title ?? 'เรียนรู้คำศัพท์')
 
 @section('content')
 
@@ -138,6 +138,8 @@
                         🧩
                     @elseif($exerciseType === 'listening')
                         🔊
+                    @elseif($exerciseType === 'image_choice')
+                        🖼️
                     @else
                         🎯
                     @endif
@@ -148,6 +150,8 @@
                         Word Bank
                     @elseif($exerciseType === 'listening')
                         Listening
+                    @elseif($exerciseType === 'image_choice')
+                        Image Choice
                     @else
                         Mini Review
                     @endif
@@ -203,12 +207,44 @@
 
 
             {{-- ========================= --}}
+            {{-- Image Choice Image --}}
+            {{-- ========================= --}}
+            @if($exerciseType === 'image_choice')
+
+                <div class="mb-6">
+
+                    @if($question->image_path)
+
+                        <div class="bg-gray-50 border-2 border-gray-200 rounded-2xl p-4">
+
+                            <img
+                                src="{{ asset($question->image_path) }}"
+                                alt="รูปภาพสำหรับคำถาม"
+                                class="w-full max-h-72 object-contain rounded-xl"
+                            >
+
+                        </div>
+
+                    @else
+
+                        <div class="bg-gray-50 border-2 border-gray-200 rounded-2xl p-6 text-center text-gray-500">
+                            🖼️ ยังไม่มีรูปภาพสำหรับข้อนี้
+                        </div>
+
+                    @endif
+
+                </div>
+
+            @endif
+
+
+            {{-- ========================= --}}
             {{-- Result Message --}}
             {{-- ========================= --}}
             @if($reviewResult === 'wrong')
 
                 <div class="mb-5 bg-red-50 border-2 border-red-200 text-red-600 rounded-xl p-4 text-center font-bold">
-                    ❌ ยังไม่ถูก ลองอีกครั้ง
+                    ✕ ยังไม่ถูก ลองอีกครั้ง
                 </div>
 
             @endif
@@ -217,7 +253,7 @@
             @if($reviewResult === 'correct')
 
                 <div class="mb-5 bg-emerald-50 border-2 border-emerald-200 text-emerald-600 rounded-xl p-4 text-center font-bold">
-                    ✅ ถูกต้อง!
+                    ✓ ถูกต้อง!
                 </div>
 
             @endif
@@ -237,7 +273,11 @@
                 @csrf
 
                 <div class="
-                    {{ in_array($exerciseType, ['fill_blank', 'listening'], true)
+                    {{ in_array(
+                        $exerciseType,
+                        ['fill_blank', 'listening', 'image_choice'],
+                        true
+                    )
                         ? 'grid grid-cols-2 gap-3'
                         : 'grid grid-cols-1 gap-3' }}
                 ">
@@ -285,6 +325,9 @@
                                 $answerClasses =
                                     'border-emerald-500 bg-emerald-50 text-emerald-600';
                             }
+
+                            $allowCheckedStyle =
+                                !$reviewResult;
                         @endphp
 
 
@@ -314,9 +357,9 @@
                                     text-center
                                     font-bold
                                     {{ $answerClasses }}
-                                    {{ $reviewResult === 'correct'
-                                        ? ''
-                                        : 'hover:border-emerald-400 peer-checked:border-emerald-500' }}
+                                    {{ $allowCheckedStyle
+                                        ? 'hover:border-emerald-400 peer-checked:border-emerald-500 peer-checked:bg-emerald-50'
+                                        : '' }}
                                     transition-all
                                 "
                             >
@@ -362,7 +405,9 @@
                         ]) }}"
                         class="mt-6 block w-full text-center py-3 rounded-xl bg-emerald-500 text-white font-bold border-b-4 border-emerald-600 hover:bg-emerald-600 active:border-b-0"
                     >
-                        ถัดไป →
+                        {{ $step >= $total
+                            ? 'จบบทเรียน 🎉'
+                            : 'ถัดไป →' }}
                     </a>
 
                 @else

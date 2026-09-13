@@ -136,14 +136,14 @@ class LearningController extends Controller
         $correct = $checker->check($question, $submitted);
 
         if (!$correct) {
-            return back()
-                ->with('review_result', 'wrong')
-                ->withInput();
-        }
+        return back()
+            ->with('review_result', 'wrong')
+            ->with('selected_answer', $submitted)
+            ->withInput();
+    }
 
-        return redirect()->route('lessons.learn.step', [
-            'lesson' => $lesson->id,
-            'step' => $step + 1,
-        ])->with('review_result', 'correct');
+        return back()
+            ->with('review_result', 'correct')
+            ->with('selected_answer', $submitted);
     }
 }

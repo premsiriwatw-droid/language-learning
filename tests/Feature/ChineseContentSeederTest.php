@@ -51,7 +51,7 @@ class ChineseContentSeederTest extends TestCase
                 );
 
                 $this->assertCount(
-                    in_array($exercise->type, ['multiple_choice', 'image_choice']) ? 4 : 1,
+                    in_array($exercise->type, ['multiple_choice', 'fill_blank', 'image_choice']) ? 4 : 1,
                     $question->answers
                 );
 
@@ -100,7 +100,7 @@ class ChineseContentSeederTest extends TestCase
         $this->assertDatabaseCount('vocabularies', 20);
         $this->assertDatabaseCount('exercises', 12);
         $this->assertDatabaseCount('questions', 12);
-        $this->assertDatabaseCount('answers', 30);
+        $this->assertDatabaseCount('answers', 39);
 
         $this->assertSame([], DB::select('PRAGMA foreign_key_check'));
     }
@@ -232,7 +232,7 @@ class ChineseContentSeederTest extends TestCase
         $this->assertDatabaseCount('vocabularies', 20);
         $this->assertDatabaseCount('exercises', 12);
         $this->assertDatabaseCount('questions', 12);
-        $this->assertDatabaseCount('answers', 30);
+        $this->assertDatabaseCount('answers', 39);
 
         $this->assertDatabaseHas('users', [
             'email' => 'test@example.com',

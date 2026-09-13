@@ -58,34 +58,7 @@ class LearningController extends Controller
 
     public function learnStep(Lesson $lesson, int $step)
 {
-    $lesson->load('vocabularies');
-
-    $vocabularies = $lesson->vocabularies->values();
-
-    $reviewExercise = Exercise::with(['questions.answers'])
-        ->where('lesson_id', $lesson->id)
-        ->where('type', 'multiple_choice')
-        ->first();
-
-    $reviewQuestion = $reviewExercise?->questions->first();
-
-    $flow = [];
-
-    foreach ($vocabularies as $index => $vocabulary) {
-
-        $flow[] = [
-            'type' => 'vocabulary',
-            'vocabulary' => $vocabulary,
-        ];
-
-        // หลังศัพท์ 2 คำแรก ใส่ Mini Review
-        if ($index === 1 && $reviewQuestion) {
-            $flow[] = [
-                'type' => 'review',
-                'question' => $reviewQuestion,
-            ];
-        }
-    }
+    $flow = $this->buildLessonFlow($lesson);
 
     $total = count($flow);
 
@@ -109,41 +82,96 @@ class LearningController extends Controller
         'total' => $total,
     ]);
 }
-    public function submitLearnStep(
-        Request $request,
-        Lesson $lesson,
-        int $step,
-        QuizAnswerChecker $checker
-    ) {
-        $lesson->load('vocabularies');
 
-        $reviewExercise = Exercise::with(['questions.answers'])
-            ->where('lesson_id', $lesson->id)
-            ->where('type', 'multiple_choice')
-            ->first();
 
-        $question = $reviewExercise?->questions->first();
+public function submitLearnStep(
+    Request $request,
+    Lesson $lesson,
+    int $step,
+    QuizAnswerChecker $checker
+) {
+    $flow = $this->buildLessonFlow($lesson);
 
-        if (!$question) {
-            return redirect()->route('lessons.learn.step', [
-                'lesson' => $lesson->id,
-                'step' => $step + 1,
-            ]);
-        }
+    $current = $flow[$step - 1] ?? null;
 
-        $submitted = $request->input('answer');
+    // ป้องกันการ POST ไปยัง step ที่ไม่มีอยู่
+    if (!$current) {
+        return redirect()->route('lessons.learn', [
+            'lesson' => $lesson->id,
+        ]);
+    }
 
-        $correct = $checker->check($question, $submitted);
+    // ถ้า step นี้ไม่ใช่ review ให้ไป step ถัดไป
+    if ($current['type'] !== 'review') {
+        return redirect()->route('lessons.learn.step', [
+            'lesson' => $lesson->id,
+            'step' => $step + 1,
+        ]);
+    }
 
-        if (!$correct) {
+    $question = $current['question'];
+
+    $submitted = $request->input('answer');
+
+    $correct = $checker->check($question, $submitted);
+
+    if (!$correct) {
         return back()
             ->with('review_result', 'wrong')
             ->with('selected_answer', $submitted)
             ->withInput();
     }
 
-        return back()
-            ->with('review_result', 'correct')
-            ->with('selected_answer', $submitted);
+    return back()
+        ->with('review_result', 'correct')
+        ->with('selected_answer', $submitted);
+}
+
+
+private function buildLessonFlow(Lesson $lesson): array
+{
+    $lesson->load('vocabularies');
+    $vocabularies = $lesson->vocabularies->values();
+
+    $reviewExercises = Exercise::with(['questions.answers'])
+        ->where('lesson_id', $lesson->id)
+        ->whereIn('type', ['multiple_choice', 'fill_blank'])
+        ->orderBy('id')
+        ->get();
+
+    $multipleChoice = $reviewExercises
+        ->firstWhere('type', 'multiple_choice');
+
+    $fillBlank = $reviewExercises
+        ->firstWhere('type', 'fill_blank');
+
+    $flow = [];
+
+    foreach ($vocabularies as $index => $vocabulary) {
+        $flow[] = [
+            'type' => 'vocabulary',
+            'vocabulary' => $vocabulary,
+        ];
+
+        if ($index === 1 && $multipleChoice?->questions->first()) {
+            $flow[] = [
+                'type' => 'review',
+                'exercise_type' => $multipleChoice->type,
+                'exercise' => $multipleChoice,
+                'question' => $multipleChoice->questions->first(),
+            ];
+        }
+
+        if ($index === 3 && $fillBlank?->questions->first()) {
+            $flow[] = [
+                'type' => 'review',
+                'exercise_type' => $fillBlank->type,
+                'exercise' => $fillBlank,
+                'question' => $fillBlank->questions->first(),
+            ];
+        }
     }
+
+    return $flow;
+}
 }

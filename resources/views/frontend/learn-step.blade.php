@@ -6,7 +6,9 @@
 
 <div class="max-w-xl mx-auto">
 
+    {{-- ========================= --}}
     {{-- Progress --}}
+    {{-- ========================= --}}
     <div class="mb-8">
         <div class="flex justify-between text-sm text-gray-500 mb-2">
             <span>{{ $lesson->title ?? 'Lesson' }}</span>
@@ -16,7 +18,8 @@
         <div class="w-full bg-gray-200 rounded-full h-3">
             <div
                 class="bg-emerald-500 h-3 rounded-full transition-all"
-                style="width: {{ ($step / $total) * 100 }}%">
+                style="width: {{ ($step / $total) * 100 }}%"
+            >
             </div>
         </div>
     </div>
@@ -80,7 +83,9 @@
         </div>
 
 
+        {{-- ========================= --}}
         {{-- Vocabulary Navigation --}}
+        {{-- ========================= --}}
         <div class="mt-6 flex gap-3">
 
             @if($step > 1)
@@ -89,7 +94,8 @@
                         'lesson' => $lesson->id,
                         'step' => $step - 1
                     ]) }}"
-                    class="w-1/3 text-center py-3 rounded-xl border-2 border-gray-300 font-bold text-gray-600 hover:bg-gray-100">
+                    class="w-1/3 text-center py-3 rounded-xl border-2 border-gray-300 font-bold text-gray-600 hover:bg-gray-100"
+                >
                     ← ย้อนกลับ
                 </a>
             @endif
@@ -99,7 +105,8 @@
                     'lesson' => $lesson->id,
                     'step' => $step + 1
                 ]) }}"
-                class="flex-1 text-center py-3 rounded-xl bg-emerald-500 text-white font-bold border-b-4 border-emerald-600 hover:bg-emerald-600 active:border-b-0">
+                class="flex-1 text-center py-3 rounded-xl bg-emerald-500 text-white font-bold border-b-4 border-emerald-600 hover:bg-emerald-600 active:border-b-0"
+            >
                 ถัดไป →
             </a>
 
@@ -113,18 +120,23 @@
 
         @php
             $question = $current['question'];
+            $exerciseType = $current['exercise_type'] ?? null;
+
+            $selectedAnswer = session('selected_answer');
+            $reviewResult = session('review_result');
         @endphp
 
         <div class="bg-white border-2 border-gray-200 border-b-4 rounded-3xl p-8">
 
+            {{-- Review Header --}}
             <div class="text-center mb-6">
 
                 <div class="text-4xl mb-3">
-                    🎯
+                    {{ $exerciseType === 'fill_blank' ? '🧩' : '🎯' }}
                 </div>
 
                 <p class="text-emerald-500 font-bold mb-2">
-                    Mini Review
+                    {{ $exerciseType === 'fill_blank' ? 'Word Bank' : 'Mini Review' }}
                 </p>
 
                 <h2 class="text-2xl font-extrabold text-gray-800">
@@ -134,20 +146,30 @@
             </div>
 
 
-            {{-- Answer Result Message --}}
-            @if(session('review_result') === 'wrong')
+            {{-- ========================= --}}
+            {{-- Result Message --}}
+            {{-- ========================= --}}
+            @if($reviewResult === 'wrong')
+
                 <div class="mb-5 bg-red-50 border-2 border-red-200 text-red-600 rounded-xl p-4 text-center font-bold">
                     ❌ ยังไม่ถูก ลองอีกครั้ง
                 </div>
+
             @endif
 
-            @if(session('review_result') === 'correct')
+
+            @if($reviewResult === 'correct')
+
                 <div class="mb-5 bg-emerald-50 border-2 border-emerald-200 text-emerald-600 rounded-xl p-4 text-center font-bold">
                     ✅ ถูกต้อง!
                 </div>
+
             @endif
 
 
+            {{-- ========================= --}}
+            {{-- Answer Form --}}
+            {{-- ========================= --}}
             <form
                 method="POST"
                 action="{{ route('lessons.learn.submit', [
@@ -158,54 +180,137 @@
 
                 @csrf
 
-                <div class="grid grid-cols-1 gap-3">
+
+                {{-- Fill Blank = 2 columns --}}
+                {{-- Multiple Choice = 1 column --}}
+                <div class="{{ $exerciseType === 'fill_blank'
+                    ? 'grid grid-cols-2 gap-3'
+                    : 'grid grid-cols-1 gap-3' }}"
+                >
 
                     @foreach($question->answers as $answer)
 
                         @php
-                            $selectedAnswer = session('selected_answer');
-                            $reviewResult = session('review_result');
+                            /*
+                             * multiple_choice / image_choice
+                             * QuizAnswerChecker ต้องการ Answer ID
+                             *
+                             * fill_blank / listening
+                             * QuizAnswerChecker ต้องการข้อความคำตอบ
+                             */
+                            $answerValue = in_array(
+                                $exerciseType,
+                                ['fill_blank', 'listening'],
+                                true
+                            )
+                                ? $answer->answer
+                                : $answer->id;
 
-                            $isSelected = (string) $selectedAnswer === (string) $answer->id;
-                            $isCorrectAnswer = (bool) $answer->is_correct;
 
-                            $answerClasses = 'border-gray-200 text-gray-700';
+                            /*
+                             * เช็กว่าคำตอบนี้คือคำตอบที่ผู้ใช้เลือกหรือไม่
+                             */
+                            $isSelected =
+                                (string) $selectedAnswer ===
+                                (string) $answerValue;
 
-                            if ($reviewResult === 'wrong' && $isSelected) {
-                                $answerClasses = 'border-red-400 bg-red-50 text-red-600';
+
+                            /*
+                             * คำตอบที่ถูกต้อง
+                             */
+                            $isCorrectAnswer =
+                                (bool) $answer->is_correct;
+
+
+                            /*
+                             * สีเริ่มต้น
+                             */
+                            $answerClasses =
+                                'border-gray-200 text-gray-700';
+
+
+                            /*
+                             * ตอบผิด
+                             * ตัวที่เลือกจะเป็นสีแดง
+                             */
+                            if (
+                                $reviewResult === 'wrong' &&
+                                $isSelected
+                            ) {
+                                $answerClasses =
+                                    'border-red-400 bg-red-50 text-red-600';
                             }
 
-                            if ($reviewResult === 'correct' && $isCorrectAnswer) {
-                                $answerClasses = 'border-emerald-500 bg-emerald-50 text-emerald-600';
+
+                            /*
+                             * ตอบถูก
+                             * คำตอบที่ถูกจะเป็นสีเขียว
+                             */
+                            if (
+                                $reviewResult === 'correct' &&
+                                $isCorrectAnswer
+                            ) {
+                                $answerClasses =
+                                    'border-emerald-500 bg-emerald-50 text-emerald-600';
                             }
                         @endphp
 
-                        <label class="cursor-pointer">
+
+                        <label
+                            class="{{ $reviewResult === 'correct'
+                                ? ''
+                                : 'cursor-pointer' }}"
+                        >
 
                             <input
                                 type="radio"
                                 name="answer"
-                                value="{{ $answer->id }}"
+                                value="{{ $answerValue }}"
                                 class="hidden peer"
                                 {{ $isSelected ? 'checked' : '' }}
                                 {{ $reviewResult === 'correct' ? 'disabled' : '' }}
                                 required
                             >
 
-                            <div class="border-2 border-b-4 rounded-xl p-4 text-center font-bold
-                                        {{ $answerClasses }}
-                                        hover:border-emerald-400
-                                        peer-checked:border-emerald-500
-                                        transition-all">
+
+                            <div
+                                class="
+                                    border-2
+                                    border-b-4
+                                    rounded-xl
+                                    p-4
+                                    text-center
+                                    font-bold
+                                    {{ $answerClasses }}
+                                    {{ $reviewResult === 'correct'
+                                        ? ''
+                                        : 'hover:border-emerald-400 peer-checked:border-emerald-500' }}
+                                    transition-all
+                                "
+                            >
 
                                 {{ $answer->answer }}
 
-                                @if($reviewResult === 'correct' && $isCorrectAnswer)
-                                    <span class="ml-2">✓</span>
+
+                                {{-- Correct icon --}}
+                                @if(
+                                    $reviewResult === 'correct' &&
+                                    $isCorrectAnswer
+                                )
+                                    <span class="ml-2">
+                                        ✓
+                                    </span>
                                 @endif
 
-                                @if($reviewResult === 'wrong' && $isSelected)
-                                    <span class="ml-2">✕</span>
+
+                                {{-- Wrong icon --}}
+                                @if(
+                                    $reviewResult === 'wrong' &&
+                                    $isSelected
+                                )
+                                    <span class="ml-2">
+                                        ✕
+                                    </span>
                                 @endif
 
                             </div>
@@ -217,15 +322,18 @@
                 </div>
 
 
-                <button
-                @if(session('review_result') === 'correct')
+                {{-- ========================= --}}
+                {{-- Review Navigation --}}
+                {{-- ========================= --}}
+                @if($reviewResult === 'correct')
 
                     <a
                         href="{{ route('lessons.learn.step', [
                             'lesson' => $lesson->id,
                             'step' => $step + 1
                         ]) }}"
-                        class="mt-6 block w-full text-center py-3 rounded-xl bg-emerald-500 text-white font-bold border-b-4 border-emerald-600 hover:bg-emerald-600 active:border-b-0">
+                        class="mt-6 block w-full text-center py-3 rounded-xl bg-emerald-500 text-white font-bold border-b-4 border-emerald-600 hover:bg-emerald-600 active:border-b-0"
+                    >
                         ถัดไป →
                     </a>
 
@@ -233,14 +341,12 @@
 
                     <button
                         type="submit"
-                        class="mt-6 w-full py-3 rounded-xl bg-emerald-500 text-white font-bold border-b-4 border-emerald-600 hover:bg-emerald-600 active:border-b-0">
+                        class="mt-6 w-full py-3 rounded-xl bg-emerald-500 text-white font-bold border-b-4 border-emerald-600 hover:bg-emerald-600 active:border-b-0"
+                    >
                         ตรวจคำตอบ
                     </button>
 
                 @endif
-
-                </form>
-                </button>
 
             </form>
 

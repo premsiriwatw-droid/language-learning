@@ -19,7 +19,12 @@ return [
             'fill_blank' => [
                 'question' => 'เติมคำทักทาย: 你___！',
                 'explanation' => '你好 (nǐ hǎo) ใช้กล่าวสวัสดี',
-                'answers' => [['好', true]],
+                'answers' => [
+                    ['好', true],
+                    ['谢', false],
+                    ['再', false],
+                    ['对', false],
+                ],
             ],
             'listening' => [
                 'question' => 'ฟังเสียงแล้วพิมพ์คำทักทายที่ได้ยิน',
@@ -53,7 +58,12 @@ return [
             'fill_blank' => [
                 'question' => 'เติมคำให้หมายถึง ฉันเป็นนักเรียน: 我___学生。',
                 'explanation' => '我是学生。 (Wǒ shì xuésheng.) แปลว่า ฉันเป็นนักเรียน',
-                'answers' => [['是', true]],
+                'answers' => [
+                    ['是', true],
+                    ['叫', false],
+                    ['我', false],
+                    ['你', false],
+                ],
             ],
             'listening' => [
                 'question' => 'ฟังเสียงแล้วพิมพ์คำที่ได้ยิน',
@@ -89,7 +99,12 @@ return [
             'fill_blank' => [
                 'question' => 'เติมตัวเลขที่หายไป: 一、二、___、四。',
                 'explanation' => '三 (sān) อยู่ระหว่าง 二 และ 四',
-                'answers' => [['三', true]],
+                'answers' => [
+                    ['三', true],
+                    ['一', false],
+                    ['五', false],
+                    ['八', false],
+                ],
             ],
             'listening' => [
                 'question' => 'ฟังเสียงแล้วพิมพ์ตัวเลขที่ได้ยินเป็นภาษาจีน',

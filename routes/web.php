@@ -73,3 +73,7 @@ Route::get('/lessons/{lesson}/learn/{step}', [LearningController::class, 'learnS
 
 Route::post('/lessons/{lesson}/learn/{step}', [LearningController::class, 'submitLearnStep'])
     ->name('lessons.learn.submit');
+
+Route::get('/profile', function () {
+    return view('frontend.profile');
+})->middleware('auth'); // บังคับว่าต้องล็อกอินก่อนถึงจะเห็นหน้านี้

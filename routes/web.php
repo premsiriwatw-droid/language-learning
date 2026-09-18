@@ -3,7 +3,6 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\LearningController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\QuizController;
 
 Route::get('/', function () {
@@ -78,19 +77,3 @@ Route::post('/lessons/{lesson}/learn/{step}', [LearningController::class, 'submi
 Route::get('/profile', function () {
     return view('frontend.profile');
 })->middleware('auth'); // บังคับว่าต้องล็อกอินก่อนถึงจะเห็นหน้านี้
-// Learning
-Route::get('/languages', [LearningController::class, 'indexLanguages']);
-
-Route::get('/courses/{course}/units', [LearningController::class, 'showUnits']);
-
-Route::get('/units/{unit}/lessons', [LearningController::class, 'showLessons']);
-
-Route::get('/lessons/{lesson}', [LearningController::class, 'showLessonContent']);
-
-
-Route::get('/dev/languages', [FrontendController::class, 'languages']);
-Route::get('/dev/lessons', [FrontendController::class, 'lessons']);
-
-// Route เพิ่มเติมสำหรับ Flow การเรียนรู้
-Route::get('/dev/lesson/{id}', [FrontendController::class, 'lessonShow']);
-Route::get('/dev/quiz/{id}', [FrontendController::class, 'quizShow']);

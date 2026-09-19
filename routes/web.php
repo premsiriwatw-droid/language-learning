@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\ContentManagementController;
 use App\Http\Controllers\LearningController;
 use App\Http\Controllers\QuizController;
 use Illuminate\Support\Facades\Route;
@@ -29,7 +30,6 @@ Route::middleware('guest')->group(function () {
         ->name('login.authenticate');
 });
 
-
 /*
 |--------------------------------------------------------------------------
 | Authenticated User Routes
@@ -54,16 +54,62 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/lessons/{lesson}', [LearningController::class, 'showLessonContent'])
         ->name('lessons.show');
-});
 
+    /*
+    |--------------------------------------------------------------------------
+    | Content Management Routes
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('content')->name('content.')->group(function () {
+        Route::get('/lessons/{lesson}', [ContentManagementController::class, 'index'])
+            ->name('index');
+
+        Route::post('/lessons/{lesson}/vocabularies', [ContentManagementController::class, 'storeVocabulary'])
+            ->name('vocabularies.store');
+
+        Route::put('/vocabularies/{vocabulary}', [ContentManagementController::class, 'updateVocabulary'])
+            ->name('vocabularies.update');
+
+        Route::delete('/vocabularies/{vocabulary}', [ContentManagementController::class, 'destroyVocabulary'])
+            ->name('vocabularies.destroy');
+
+        Route::post('/lessons/{lesson}/exercises', [ContentManagementController::class, 'storeExercise'])
+            ->name('exercises.store');
+
+        Route::put('/exercises/{exercise}', [ContentManagementController::class, 'updateExercise'])
+            ->name('exercises.update');
+
+        Route::delete('/exercises/{exercise}', [ContentManagementController::class, 'destroyExercise'])
+            ->name('exercises.destroy');
+
+        Route::post('/exercises/{exercise}/questions', [ContentManagementController::class, 'storeQuestion'])
+            ->name('questions.store');
+
+        Route::put('/questions/{question}', [ContentManagementController::class, 'updateQuestion'])
+            ->name('questions.update');
+
+        Route::delete('/questions/{question}', [ContentManagementController::class, 'destroyQuestion'])
+            ->name('questions.destroy');
+
+        Route::post('/questions/{question}/answers', [ContentManagementController::class, 'storeAnswer'])
+            ->name('answers.store');
+
+        Route::put('/answers/{answer}', [ContentManagementController::class, 'updateAnswer'])
+            ->name('answers.update');
+
+        Route::delete('/answers/{answer}', [ContentManagementController::class, 'destroyAnswer'])
+            ->name('answers.destroy');
+    });
+});
 
 /*
 |--------------------------------------------------------------------------
 | Quiz Routes
 |--------------------------------------------------------------------------
 |
-| คงพฤติกรรมเดิมของ Quiz System ไว้
-| Quiz routes ไม่อยู่ใน auth middleware
+| Keep the existing Quiz System behavior.
+| Quiz routes remain outside the auth middleware.
 |
 */
 
@@ -73,13 +119,13 @@ Route::get('/quiz/{exercise}', [QuizController::class, 'show'])
 Route::post('/quiz/{exercise}', [QuizController::class, 'submit'])
     ->name('quiz.submit');
 
-
 /*
 |--------------------------------------------------------------------------
 | Lesson Learning Flow
 |--------------------------------------------------------------------------
 |
-| Learning flow เดิมสามารถเข้าถึงได้โดยไม่ผ่าน auth middleware
+| Keep the existing learning flow behavior.
+| Learning routes remain outside the auth middleware.
 |
 */
 

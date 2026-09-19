@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $lesson->title ?? 'เรียนรู้คำศัพท์')
+@section('title', $lesson->title ?? 'เรียนคำศัพท์')
 
 @section('content')
 
@@ -244,7 +244,7 @@
             @if($reviewResult === 'wrong')
 
                 <div class="mb-5 bg-red-50 border-2 border-red-200 text-red-600 rounded-xl p-4 text-center font-bold">
-                    ✕ ยังไม่ถูก ลองอีกครั้ง
+                    ❌ ยังไม่ถูก ลองอีกครั้ง
                 </div>
 
             @endif
@@ -253,7 +253,7 @@
             @if($reviewResult === 'correct')
 
                 <div class="mb-5 bg-emerald-50 border-2 border-emerald-200 text-emerald-600 rounded-xl p-4 text-center font-bold">
-                    ✓ ถูกต้อง!
+                    ✅ ถูกต้อง!
                 </div>
 
             @endif
@@ -325,9 +325,6 @@
                                 $answerClasses =
                                     'border-emerald-500 bg-emerald-50 text-emerald-600';
                             }
-
-                            $allowCheckedStyle =
-                                !$reviewResult;
                         @endphp
 
 
@@ -342,7 +339,7 @@
                                 name="answer"
                                 value="{{ $answerValue }}"
                                 class="hidden peer"
-                                {{ $isSelected ? 'checked' : '' }}
+                                {{ $isSelected && $reviewResult !== 'wrong' ? 'checked' : '' }}
                                 {{ $reviewResult === 'correct' ? 'disabled' : '' }}
                                 required
                             >
@@ -357,9 +354,9 @@
                                     text-center
                                     font-bold
                                     {{ $answerClasses }}
-                                    {{ $allowCheckedStyle
-                                        ? 'hover:border-emerald-400 peer-checked:border-emerald-500 peer-checked:bg-emerald-50'
-                                        : '' }}
+                                    {{ $reviewResult === 'correct'
+                                        ? ''
+                                        : 'hover:border-emerald-400 peer-checked:border-emerald-500 peer-checked:bg-emerald-50' }}
                                     transition-all
                                 "
                             >
@@ -405,9 +402,7 @@
                         ]) }}"
                         class="mt-6 block w-full text-center py-3 rounded-xl bg-emerald-500 text-white font-bold border-b-4 border-emerald-600 hover:bg-emerald-600 active:border-b-0"
                     >
-                        {{ $step >= $total
-                            ? 'จบบทเรียน 🎉'
-                            : 'ถัดไป →' }}
+                        {{ $step >= $total ? 'จบบทเรียน 🎉' : 'ถัดไป →' }}
                     </a>
 
                 @else

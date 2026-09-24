@@ -1,30 +1,28 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\ContentManagementController;
 use App\Http\Controllers\LearningController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\QuizController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
-// ================================
-// Authentication Routes
-// ================================
 
-// สำหรับผู้ใช้ที่ยังไม่ได้ Login
+/*
+|--------------------------------------------------------------------------
+| Authentication Routes
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware('guest')->group(function () {
-
-    // Register
     Route::get('/register', [AuthController::class, 'showRegister'])
         ->name('register');
 
     Route::post('/register', [AuthController::class, 'register'])
         ->name('register.store');
 
-
-    // Login
     Route::get('/login', [AuthController::class, 'showLogin'])
         ->name('login');
 
@@ -32,39 +30,104 @@ Route::middleware('guest')->group(function () {
         ->name('login.authenticate');
 });
 
+/*
+|--------------------------------------------------------------------------
+| Authenticated User Routes
+|--------------------------------------------------------------------------
+*/
 
-// สำหรับผู้ใช้ที่ Login แล้ว
 Route::middleware('auth')->group(function () {
-
-    // Profile
     Route::get('/profile', [AuthController::class, 'profile'])
         ->name('profile');
 
-
-    // Logout
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
 
-// ================================
-// Learning Routes
-// ================================
+    Route::get('/languages', [LearningController::class, 'indexLanguages'])
+        ->name('languages.index');
 
-// หน้าเลือกภาษา / คอร์ส
-Route::get('/languages', [LearningController::class, 'indexLanguages']);
+    Route::get('/courses/{course}/units', [LearningController::class, 'showUnits'])
+        ->name('courses.units');
 
-// หน้าเลือก Unit ของแต่ละ Course
-Route::get('/courses/{course}/units', [LearningController::class, 'showUnits']);
+    Route::get('/units/{unit}/lessons', [LearningController::class, 'showLessons'])
+        ->name('units.lessons');
 
-// หน้าเลือก Lesson และเนื้อหาการเรียน
-Route::get('/units/{unit}/lessons', [LearningController::class, 'showLessons']);
+    Route::get('/lessons/{lesson}', [LearningController::class, 'showLessonContent'])
+        ->name('lessons.show');
 
-Route::get('/lessons/{lesson}', [LearningController::class, 'showLessonContent']);        });
+    /*
+    |--------------------------------------------------------------------------
+    | Content Management Routes
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('content')->name('content.')->group(function () {
+        Route::get('/lessons/{lesson}', [ContentManagementController::class, 'index'])
+            ->name('index');
+
+        Route::post('/lessons/{lesson}/vocabularies', [ContentManagementController::class, 'storeVocabulary'])
+            ->name('vocabularies.store');
+
+        Route::put('/vocabularies/{vocabulary}', [ContentManagementController::class, 'updateVocabulary'])
+            ->name('vocabularies.update');
+
+        Route::delete('/vocabularies/{vocabulary}', [ContentManagementController::class, 'destroyVocabulary'])
+            ->name('vocabularies.destroy');
+
+        Route::post('/lessons/{lesson}/exercises', [ContentManagementController::class, 'storeExercise'])
+            ->name('exercises.store');
+
+        Route::put('/exercises/{exercise}', [ContentManagementController::class, 'updateExercise'])
+            ->name('exercises.update');
+
+        Route::delete('/exercises/{exercise}', [ContentManagementController::class, 'destroyExercise'])
+            ->name('exercises.destroy');
+
+        Route::post('/exercises/{exercise}/questions', [ContentManagementController::class, 'storeQuestion'])
+            ->name('questions.store');
+
+        Route::put('/questions/{question}', [ContentManagementController::class, 'updateQuestion'])
+            ->name('questions.update');
+
+        Route::delete('/questions/{question}', [ContentManagementController::class, 'destroyQuestion'])
+            ->name('questions.destroy');
+
+        Route::post('/questions/{question}/answers', [ContentManagementController::class, 'storeAnswer'])
+            ->name('answers.store');
+
+        Route::put('/answers/{answer}', [ContentManagementController::class, 'updateAnswer'])
+            ->name('answers.update');
+
+        Route::delete('/answers/{answer}', [ContentManagementController::class, 'destroyAnswer'])
+            ->name('answers.destroy');
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Quiz Routes
+|--------------------------------------------------------------------------
+|
+| Keep the existing Quiz System behavior.
+| Quiz routes remain outside the auth middleware.
+|
+*/
 
 Route::get('/quiz/{exercise}', [QuizController::class, 'show'])
     ->name('quiz.show');
 
 Route::post('/quiz/{exercise}', [QuizController::class, 'submit'])
     ->name('quiz.submit');
+
+/*
+|--------------------------------------------------------------------------
+| Lesson Learning Flow
+|--------------------------------------------------------------------------
+|
+| Keep the existing learning flow behavior.
+| Learning routes remain outside the auth middleware.
+|
+*/
 
 Route::get('/lessons/{lesson}/learn', [LearningController::class, 'learn'])
     ->name('lessons.learn');
@@ -74,23 +137,3 @@ Route::get('/lessons/{lesson}/learn/{step}', [LearningController::class, 'learnS
 
 Route::post('/lessons/{lesson}/learn/{step}', [LearningController::class, 'submitLearnStep'])
     ->name('lessons.learn.submit');
-
-Route::get('/profile', function () {
-    return view('frontend.profile');
-})->middleware('auth'); // บังคับว่าต้องล็อกอินก่อนถึงจะเห็นหน้านี้
-// Learning
-Route::get('/languages', [LearningController::class, 'indexLanguages']);
-
-Route::get('/courses/{course}/units', [LearningController::class, 'showUnits']);
-
-Route::get('/units/{unit}/lessons', [LearningController::class, 'showLessons']);
-
-Route::get('/lessons/{lesson}', [LearningController::class, 'showLessonContent']);
-
-
-Route::get('/dev/languages', [FrontendController::class, 'languages']);
-Route::get('/dev/lessons', [FrontendController::class, 'lessons']);
-
-// Route เพิ่มเติมสำหรับ Flow การเรียนรู้
-Route::get('/dev/lesson/{id}', [FrontendController::class, 'lessonShow']);
-Route::get('/dev/quiz/{id}', [FrontendController::class, 'quizShow']);

@@ -3,78 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LangLearn - @yield('title')</title>
-    {{-- โหลด Tailwind CSS สำหรับทดสอบ --}}
+    <title>LangLearn - @yield('title', 'เรียนภาษา')</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    </style>
-    <!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LangLearn - @yield('title')</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- เพิ่ม Alpine.js สำหรับ UI Interactivity -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <style>
-        body { font-family: 'Nunito', 'Segoe UI', sans-serif; }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/learner-profile.css') }}">
+    @stack('styles')
 </head>
 <body class="bg-gray-50 text-gray-800 pb-12">
-    
-    <nav class="bg-white border-b-2 border-gray-200 sticky top-0 z-10">
-        <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-            <a href="/dev/languages" class="text-2xl font-extrabold text-emerald-500 tracking-tight hover:opacity-80 transition">
-                LangLearn
-            </a>
-            
-            <div class="flex items-center gap-4 font-bold text-gray-500">
-                <div class="flex items-center gap-1 text-amber-500">
-                    <span>🔥</span> <span>5</span>
-                </div>
-                <div class="flex items-center gap-1 text-blue-500">
-                    <span>⚡</span> <span>120</span>
-                </div>
-                <div class="w-8 h-8 rounded-full bg-gray-200 border-2 border-gray-300"></div>
+    <a class="skip-link" href="#main-content">ข้ามไปเนื้อหา</a>
+    <nav class="site-nav" aria-label="เมนูหลัก">
+        <div class="site-nav-inner">
+            <a href="{{ url('/languages') }}" class="site-brand"><span aria-hidden="true" class="brand-mark">L</span> LangLearn</a>
+            <div class="site-nav-links">
+                <a href="{{ url('/languages') }}" @if(request()->is('languages', 'courses/*', 'units/*', 'lessons/*')) aria-current="page" @endif>บทเรียน</a>
+                @auth
+                    <a href="{{ route('profile') }}" @if(request()->is('profile')) aria-current="page" @endif>โปรไฟล์</a>
+                    <span class="nav-initial" aria-hidden="true">{{ mb_substr(auth()->user()->name, 0, 1) }}</span>
+                @else
+                    <a href="{{ route('login') }}">เข้าสู่ระบบ</a>
+                @endauth
             </div>
         </div>
     </nav>
-
-    <main class="max-w-3xl mx-auto mt-8 px-4">
+    <main id="main-content" class="max-w-3xl mx-auto mt-8 px-4 site-main">
         @yield('content')
     </main>
-
-</body>
-</html>
-</head>
-<body class="bg-gray-50 text-gray-800 pb-12">
-    
-    <!-- Navbar -->
-    <nav class="bg-white border-b-2 border-gray-200 sticky top-0 z-10">
-        <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-            <a href="/dev/languages" class="text-2xl font-extrabold text-emerald-500 tracking-tight hover:opacity-80 transition">
-                LangLearn
-            </a>
-            
-            <div class="flex items-center gap-4 font-bold text-gray-500">
-                <div class="flex items-center gap-1 text-amber-500">
-                    <span>🔥</span> <span>5</span>
-                </div>
-                <div class="flex items-center gap-1 text-blue-500">
-                    <span>⚡</span> <span>{{ $userXp ?? 120 }}</span>
-                </div>
-                <!-- พื้นที่สำหรับ User Avatar (คนที่ 1 ทำ) -->
-                <div class="w-8 h-8 rounded-full bg-gray-200 border-2 border-gray-300"></div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="max-w-3xl mx-auto mt-8 px-4">
-        @yield('content')
-    </main>
-
+    @stack('scripts')
 </body>
 </html>

@@ -5,6 +5,8 @@ use App\Http\Controllers\LearningController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\QuizController;
+use App\Http\Controllers\ProgressProfileController;
+use App\Http\Middleware\RememberLearningVisit;
 
 Route::get('/', function () {
     return view('welcome');
@@ -37,8 +39,14 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
 
     // Profile
-    Route::get('/profile', [AuthController::class, 'profile'])
+    Route::get('/profile', [ProgressProfileController::class, 'show'])
         ->name('profile');
+
+    Route::post('/profile/upload', [ProgressProfileController::class, 'upload'])
+        ->name('profile.photo.upload');
+
+    Route::get('/profile/photo', [ProgressProfileController::class, 'photo'])
+        ->name('profile.photo');
 
 
     // Logout
@@ -70,14 +78,12 @@ Route::get('/lessons/{lesson}/learn', [LearningController::class, 'learn'])
     ->name('lessons.learn');
 
 Route::get('/lessons/{lesson}/learn/{step}', [LearningController::class, 'learnStep'])
+    ->middleware(RememberLearningVisit::class)
     ->name('lessons.learn.step');
 
 Route::post('/lessons/{lesson}/learn/{step}', [LearningController::class, 'submitLearnStep'])
     ->name('lessons.learn.submit');
 
-Route::get('/profile', function () {
-    return view('frontend.profile');
-})->middleware('auth'); // บังคับว่าต้องล็อกอินก่อนถึงจะเห็นหน้านี้
 // Learning
 Route::get('/languages', [LearningController::class, 'indexLanguages']);
 

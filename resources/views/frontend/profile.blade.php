@@ -1,56 +1,121 @@
-{{-- พิกัดไฟล์: resources/views/frontend/profile.blade.php --}}
-@extends('layouts.app') {{-- เปลี่ยนเป็นชื่อ Layout ของคุณ หากไม่ได้ใช้ให้ลบบรรทัดนี้ออก --}}
+@extends('layouts.app')
+@section('title', 'โปรไฟล์ของฉัน')
 
 @section('content')
-<div style="max-width: 500px; margin: 40px auto; padding: 20px; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-family: sans-serif;">
+<div class="learner-profile">
+    <a class="back-link" href="{{ url('/languages') }}"><span aria-hidden="true">←</span> กลับหน้าหลัก</a>
 
-    {{-- 1. ปุ่มกลับหน้าหลัก (พิกัด: บนสุดซ้ายมือ) --}}
-    <div style="margin-bottom: 20px;">
-        <a href="{{ url('/') }}" style="text-decoration: none; color: #007bff; font-weight: bold;">
-            ❮ กลับหน้าหลัก
-        </a>
-    </div>
+    <header class="profile-heading">
+        <div>
+            <p class="eyebrow">พื้นที่การเรียนรู้ของคุณ</p>
+            <h1>โปรไฟล์ของฉัน<span class="heading-dot">.</span></h1>
+            <p class="muted">ค่อย ๆ เรียนรู้ เก่งขึ้นในทุกวัน</p>
+        </div>
+        <span class="learning-badge"><span aria-hidden="true">✦</span> เรียนรู้ในแบบของคุณ</span>
+    </header>
 
-    {{-- 2. รูปโปรไฟล์และการอัปโหลด (พิกัด: ตรงกลางส่วนบน) --}}
-    <div style="text-align: center; margin-bottom: 30px;">
-        <img src="{{ auth()->user()->profile_photo_path ? asset('storage/'.auth()->user()->profile_photo_path) : asset('images/default.png') }}" 
-             alt="Profile" 
-             style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #28a745;">
-        
-        <form action="{{ url('/profile/upload') }}" method="POST" enctype="multipart/form-data" style="margin-top: 15px;">
+    @if(session('status'))
+        <div class="profile-notice success-notice" role="status">{{ session('status') }}</div>
+    @endif
+    @if($errors->has('photo'))
+        <div class="profile-notice error-notice" role="alert" id="photo-error">{{ $errors->first('photo') }}</div>
+    @endif
+
+    <section class="profile-card identity-card" aria-labelledby="learner-name">
+        <div class="identity-main">
+            <div class="profile-avatar" id="profile-avatar">
+                @if($hasPhoto)
+                    <img id="avatar-preview" src="{{ route('profile.photo') }}" alt="รูปโปรไฟล์ของ {{ $user->name }}" width="100" height="100">
+                @else
+                    <span id="avatar-initial" aria-hidden="true">{{ mb_substr($user->name, 0, 1) }}</span>
+                    <img id="avatar-preview" alt="ตัวอย่างรูปโปรไฟล์ที่เลือก" width="100" height="100" hidden>
+                @endif
+            </div>
+            <div class="identity-copy">
+                <p class="eyebrow">ยินดีต้อนรับกลับมา</p>
+                <h2 id="learner-name">{{ $user->name }}</h2>
+                <p class="muted user-email">{{ $user->email }}</p>
+            </div>
+        </div>
+        <form class="photo-form" action="{{ route('profile.photo.upload') }}" method="POST" enctype="multipart/form-data">
             @csrf
-            <input type="file" name="photo" accept="image/*" style="font-size: 14px;">
-            <button type="submit" style="background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
-                เปลี่ยนรูป
-            </button>
+            <label for="profile-photo" class="field-label">เปลี่ยนรูปโปรไฟล์</label>
+            <p id="photo-help" class="field-hint">JPG, PNG หรือ WebP ไม่เกิน 2 MB</p>
+            <input id="profile-photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" required
+                aria-describedby="photo-help photo-feedback{{ $errors->has('photo') ? ' photo-error' : '' }}"
+                @if($errors->has('photo')) aria-invalid="true" @endif>
+            <p id="photo-feedback" class="field-hint" role="status" aria-live="polite"></p>
+            <button class="profile-button secondary-button" type="submit">บันทึกรูปโปรไฟล์ <span aria-hidden="true">↗</span></button>
         </form>
+    </section>
+
+    <div class="profile-stats">
+        <section class="profile-card stat-card hsk-card" aria-labelledby="hsk-label">
+            <span class="stat-icon" aria-hidden="true">文</span>
+            <p id="hsk-label" class="stat-label">ระดับภาษาจีน</p>
+            <p class="stat-value">{{ $hskLevel !== null ? 'HSK '.$hskLevel : 'ยังไม่ระบุ' }}</p>
+            <p class="field-hint">{{ $hskLevel !== null ? 'ระดับภาษาที่บันทึกในโปรไฟล์' : 'เมื่อมีข้อมูลระดับภาษา จะแสดงที่นี่' }}</p>
+        </section>
+        <section class="profile-card stat-card stars-card" aria-labelledby="stars-label">
+            <span class="stat-icon" aria-hidden="true">★</span>
+            <p id="stars-label" class="stat-label">ดาวสะสม</p>
+            <p class="stat-value">{{ number_format($progress['stars']) }} <span>ดวง</span></p>
+            <p class="field-hint">รางวัลจากบทเรียนที่ผ่านแล้ว</p>
+        </section>
+        <section class="profile-card stat-card xp-card" aria-labelledby="xp-label">
+            <span class="stat-icon" aria-hidden="true">ϟ</span>
+            <p id="xp-label" class="stat-label">ประสบการณ์</p>
+            <p class="stat-value">{{ number_format($progress['xp']) }} <span>XP</span></p>
+            <p class="field-hint">สะสมจากผลการเรียนของคุณ</p>
+        </section>
     </div>
 
-    {{-- 4. ระดับภาษา (HSK) & 5. ดาวสะสม (พิกัด: ตรงกลางหน้าจอ วางเรียงคู่กัน) --}}
-    <div style="display: flex; gap: 15px; margin-bottom: 30px;">
-        <div style="flex: 1; background-color: #fff3cd; padding: 15px; border-radius: 8px; text-align: center;">
-            <p style="margin: 0; font-size: 14px; color: #666;">ระดับภาษา</p>
-            <h3 style="margin: 5px 0 0 0; color: #856404;">HSK {{ auth()->user()->hsk_level ?? 1 }}</h3>
+    <section class="profile-card learning-card" aria-labelledby="learning-title">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">เส้นทางการเรียนรู้</p>
+                <h2 id="learning-title">ความคืบหน้าของฉัน</h2>
+            </div>
+            <span class="progress-pill">{{ $progress['completed'] }} / {{ $progress['total'] }} บทเรียน</span>
         </div>
-        <div style="flex: 1; background-color: #d4edda; padding: 15px; border-radius: 8px; text-align: center;">
-            <p style="margin: 0; font-size: 14px; color: #666;">ดาวสะสม</p>
-            <h3 style="margin: 5px 0 0 0; color: #155724;">⭐ {{ auth()->user()->stars ?? 0 }}</h3>
+        <div class="progress-caption">
+            <span>บทเรียนที่เรียนจบแล้ว จากบทเรียนทั้งหมด</span>
+            <strong>{{ $progress['percentage'] }}%</strong>
         </div>
-    </div>
-
-    {{-- 3. บทเรียนที่เรียนถึง (พิกัด: ส่วนล่างสุด) --}}
-    <div style="background-color: #e9ecef; padding: 15px; border-radius: 8px;">
-        <p style="margin: 0 0 5px 0; font-size: 14px; color: #555;">กำลังเรียนอยู่:</p>
-        <h4 style="margin: 0 0 15px 0; color: #333;">
-            {{ auth()->user()->current_lesson ?? 'ยังไม่ได้ระบุบทเรียน' }}
-        </h4>
-        
-        {{-- แถบสถานะความคืบหน้า (Progress Bar) --}}
-        <div style="background-color: #dee2e6; border-radius: 10px; height: 10px; width: 100%;">
-            <div style="background-color: #007bff; height: 10px; border-radius: 10px; width: 45%;"></div>
-        </div>
-        <p style="margin: 5px 0 0 0; font-size: 12px; color: #666; text-align: right;">ความคืบหน้า 45%</p>
-    </div>
-
+        <progress class="profile-progress" aria-label="ความคืบหน้าบทเรียนทั้งหมด"
+            value="{{ $progress['percentage'] }}" max="100">{{ $progress['percentage'] }}%</progress>
+        @if($progress['latest']?->lesson)
+            @php($latest = $progress['latest'])
+            <div class="resume-card">
+                <span class="resume-icon" aria-hidden="true">↗</span>
+                <div class="resume-copy">
+                    <p class="eyebrow">บทเรียนที่เปิดล่าสุด</p>
+                    <h3>{{ $latest->lesson->title }}</h3>
+                    <p class="field-hint">{{ $latest->lesson->unit?->course?->title }} · {{ $latest->lesson->unit?->title }}</p>
+                    <p class="field-hint">ขั้นที่ {{ $latest->last_step }}@if($latest->completed_at) · เรียนจบแล้ว@endif</p>
+                </div>
+                <a class="profile-button primary-button" href="{{ route('lessons.learn.step', ['lesson' => $latest->lesson_id, 'step' => $latest->last_step]) }}">
+                    {{ $latest->completed_at ? 'ทบทวนบทเรียน' : 'เรียนต่อ' }} <span aria-hidden="true">→</span>
+                </a>
+            </div>
+        @else
+            <div class="resume-card">
+                <span class="resume-icon" aria-hidden="true">✦</span>
+                <div class="resume-copy">
+                    <h3>{{ $progress['total'] ? 'พร้อมเริ่มบทเรียนแรกหรือยัง?' : 'บทเรียนกำลังมา' }}</h3>
+                    <p class="field-hint">{{ $progress['total'] ? 'เลือกบทเรียน แล้วกลับมาเรียนต่อได้จากหน้านี้' : 'กลับมาเลือกภาษาได้เมื่อมีบทเรียนพร้อมให้เรียน' }}</p>
+                </div>
+                <a class="profile-button primary-button" href="{{ url('/languages') }}">เลือกบทเรียน <span aria-hidden="true">→</span></a>
+            </div>
+        @endif
+        @unless($progress['available'])
+            <p class="field-hint progress-note">ขณะนี้ยังบันทึกความคืบหน้าไม่ได้ กรุณาลองใหม่ภายหลัง</p>
+        @endunless
+    </section>
+    <p class="profile-footer"><span aria-hidden="true">✦</span> ทุกบทเรียนเล็ก ๆ คืออีกก้าวของคุณ</p>
 </div>
 @endsection
+
+@push('scripts')
+<script src="{{ asset('js/learner-profile.js') }}" defer></script>
+@endpush

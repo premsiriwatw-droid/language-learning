@@ -3,7 +3,9 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\ContentManagementController;
 use App\Http\Controllers\LearningController;
+use App\Http\Controllers\ProgressProfileController;
 use App\Http\Controllers\QuizController;
+use App\Http\Middleware\RememberLearningVisit;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -37,11 +39,35 @@ Route::middleware('guest')->group(function () {
 */
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [AuthController::class, 'profile'])
+    /*
+    |--------------------------------------------------------------------------
+    | Profile
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/profile', [ProgressProfileController::class, 'show'])
         ->name('profile');
+
+    Route::post('/profile/upload', [ProgressProfileController::class, 'upload'])
+        ->name('profile.photo.upload');
+
+    Route::get('/profile/photo', [ProgressProfileController::class, 'photo'])
+        ->name('profile.photo');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Authentication
+    |--------------------------------------------------------------------------
+    */
 
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Learning Structure
+    |--------------------------------------------------------------------------
+    */
 
     Route::get('/languages', [LearningController::class, 'indexLanguages'])
         ->name('languages.index');
@@ -133,6 +159,7 @@ Route::get('/lessons/{lesson}/learn', [LearningController::class, 'learn'])
     ->name('lessons.learn');
 
 Route::get('/lessons/{lesson}/learn/{step}', [LearningController::class, 'learnStep'])
+    ->middleware(RememberLearningVisit::class)
     ->name('lessons.learn.step');
 
 Route::post('/lessons/{lesson}/learn/{step}', [LearningController::class, 'submitLearnStep'])

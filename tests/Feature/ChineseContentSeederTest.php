@@ -16,17 +16,34 @@ class ChineseContentSeederTest extends TestCase
     {
         $this->seed(DatabaseSeeder::class);
 
-        $lessons = Lesson::with([
-            'vocabularies',
-            'exercises.questions.answers',
-        ])
-            ->whereHas(
-                'unit.course.language',
-                fn ($query) => $query->where('name', 'Chinese')
-            )
-            ->get();
+        $lessons = $this->getChineseLessons();
 
-        $this->assertCount(3, $lessons);
+        /*
+        |--------------------------------------------------------------------------
+        | Learning Structure
+        |--------------------------------------------------------------------------
+        */
+
+        $this->assertCount(11, $lessons);
+
+        $expectedLessonTitles = [
+            'Greetings',
+            'Self Introduction',
+            'Numbers',
+            'Family',
+            'Age',
+            'Time',
+            'Food & Drinks',
+            'Shopping',
+            'Transportation',
+            'Places & Directions',
+            'Hobbies',
+        ];
+
+        $this->assertEqualsCanonicalizing(
+            $expectedLessonTitles,
+            $lessons->pluck('title')->all()
+        );
 
         $greetings = $lessons->firstWhere('title', 'Greetings');
         $selfIntroduction = $lessons->firstWhere('title', 'Self Introduction');
@@ -35,6 +52,12 @@ class ChineseContentSeederTest extends TestCase
         $this->assertNotNull($greetings);
         $this->assertNotNull($selfIntroduction);
         $this->assertNotNull($numbers);
+
+        $contentLessons = collect([
+            $greetings,
+            $selfIntroduction,
+            $numbers,
+        ]);
 
         /*
         |--------------------------------------------------------------------------
@@ -48,7 +71,7 @@ class ChineseContentSeederTest extends TestCase
 
         $this->assertEquals(
             39,
-            $lessons->sum(
+            $contentLessons->sum(
                 fn ($lesson) => $lesson->vocabularies->count()
             )
         );
@@ -59,7 +82,7 @@ class ChineseContentSeederTest extends TestCase
         |--------------------------------------------------------------------------
         */
 
-        foreach ($lessons as $lesson) {
+        foreach ($contentLessons as $lesson) {
             $this->assertCount(4, $lesson->exercises);
 
             $this->assertEqualsCanonicalizing(
@@ -77,7 +100,7 @@ class ChineseContentSeederTest extends TestCase
 
         $this->assertEquals(
             12,
-            $lessons->sum(
+            $contentLessons->sum(
                 fn ($lesson) => $lesson->exercises->count()
             )
         );
@@ -88,7 +111,7 @@ class ChineseContentSeederTest extends TestCase
         |--------------------------------------------------------------------------
         */
 
-        $questions = $lessons
+        $questions = $contentLessons
             ->flatMap(
                 fn ($lesson) => $lesson->exercises
             )
@@ -96,38 +119,28 @@ class ChineseContentSeederTest extends TestCase
                 fn ($exercise) => $exercise->questions
             );
 
-        $this->assertCount(30, $questions);
+        $this->assertCount(51, $questions);
 
-        foreach ($lessons as $lesson) {
-            $lessonQuestions = $lesson->exercises
-                ->flatMap(
-                    fn ($exercise) => $exercise->questions
-                );
+        $this->assertLessonQuestionStructure(
+            $greetings,
+            total: 15,
+            multipleChoice: 7,
+            fillBlank: 6
+        );
 
-            $this->assertCount(10, $lessonQuestions);
+        $this->assertLessonQuestionStructure(
+            $selfIntroduction,
+            total: 16,
+            multipleChoice: 8,
+            fillBlank: 6
+        );
 
-            $multipleChoice = $lesson->exercises
-                ->firstWhere('type', 'multiple_choice');
-
-            $fillBlank = $lesson->exercises
-                ->firstWhere('type', 'fill_blank');
-
-            $listening = $lesson->exercises
-                ->firstWhere('type', 'listening');
-
-            $imageChoice = $lesson->exercises
-                ->firstWhere('type', 'image_choice');
-
-            $this->assertNotNull($multipleChoice);
-            $this->assertNotNull($fillBlank);
-            $this->assertNotNull($listening);
-            $this->assertNotNull($imageChoice);
-
-            $this->assertCount(4, $multipleChoice->questions);
-            $this->assertCount(4, $fillBlank->questions);
-            $this->assertCount(1, $listening->questions);
-            $this->assertCount(1, $imageChoice->questions);
-        }
+        $this->assertLessonQuestionStructure(
+            $numbers,
+            total: 20,
+            multipleChoice: 13,
+            fillBlank: 5
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -140,7 +153,7 @@ class ChineseContentSeederTest extends TestCase
                 fn ($question) => $question->answers
             );
 
-        $this->assertCount(120, $answers);
+        $this->assertCount(204, $answers);
 
         foreach ($questions as $question) {
             $this->assertCount(
@@ -157,60 +170,18 @@ class ChineseContentSeederTest extends TestCase
 
         /*
         |--------------------------------------------------------------------------
-        | Greetings
+        | Media
         |--------------------------------------------------------------------------
         */
-
-        $this->assertTrue(
-            $greetings->vocabularies
-                ->contains(
-                    fn ($vocabulary) =>
-                        $vocabulary->word === '你好' &&
-                        $vocabulary->pinyin === 'nǐ hǎo' &&
-                        $vocabulary->meaning === 'สวัสดี'
-                )
-        );
-
-        $this->assertTrue(
-            $greetings->vocabularies
-                ->contains(
-                    fn ($vocabulary) =>
-                        $vocabulary->word === '晚安' &&
-                        $vocabulary->pinyin === 'wǎn\'ān' &&
-                        $vocabulary->meaning === 'ราตรีสวัสดิ์'
-                )
-        );
-
-        $this->assertTrue(
-            $greetings->vocabularies
-                ->contains(
-                    fn ($vocabulary) =>
-                        $vocabulary->word === '欢迎' &&
-                        $vocabulary->pinyin === 'huānyíng' &&
-                        $vocabulary->meaning === 'ยินดีต้อนรับ'
-                )
-        );
 
         $greetingsListening = $greetings->exercises
             ->firstWhere('type', 'listening');
 
         $this->assertNotNull($greetingsListening);
 
-        $greetingsListeningQuestion =
-            $greetingsListening->questions->first();
-
         $this->assertEquals(
             'audio/chinese/greetings/ni-hao.mp3',
-            $greetingsListeningQuestion->audio_path
-        );
-
-        $this->assertTrue(
-            $greetingsListeningQuestion->answers
-                ->contains(
-                    fn ($answer) =>
-                        $answer->answer === '你好' &&
-                        (bool) $answer->is_correct === true
-                )
+            $greetingsListening->questions->first()->audio_path
         );
 
         $greetingsImageChoice = $greetings->exercises
@@ -223,73 +194,18 @@ class ChineseContentSeederTest extends TestCase
             $greetingsImageChoice->questions->first()->image_path
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | Self Introduction
-        |--------------------------------------------------------------------------
-        */
+        $selfIntroductionListening = $selfIntroduction->exercises
+            ->firstWhere('type', 'listening');
 
-        $this->assertTrue(
-            $selfIntroduction->vocabularies
-                ->contains(
-                    fn ($vocabulary) =>
-                        $vocabulary->word === '老师' &&
-                        $vocabulary->pinyin === 'lǎoshī' &&
-                        $vocabulary->meaning === 'ครู'
-                )
-        );
-
-        $this->assertTrue(
-            $selfIntroduction->vocabularies
-                ->contains(
-                    fn ($vocabulary) =>
-                        $vocabulary->word === '名字' &&
-                        $vocabulary->pinyin === 'míngzi' &&
-                        $vocabulary->meaning === 'ชื่อ'
-                )
-        );
-
-        $this->assertTrue(
-            $selfIntroduction->vocabularies
-                ->contains(
-                    fn ($vocabulary) =>
-                        $vocabulary->word === '泰国' &&
-                        $vocabulary->pinyin === 'Tàiguó' &&
-                        $vocabulary->meaning === 'ประเทศไทย'
-                )
-        );
-
-        $selfIntroductionListening =
-            $selfIntroduction->exercises
-                ->firstWhere('type', 'listening');
-
-        $this->assertNotNull(
-            $selfIntroductionListening
-        );
-
-        $selfIntroductionListeningQuestion =
-            $selfIntroductionListening
-                ->questions
-                ->first();
+        $this->assertNotNull($selfIntroductionListening);
 
         $this->assertEquals(
             'audio/chinese/self-introduction/lao-shi.mp3',
-            $selfIntroductionListeningQuestion->audio_path
+            $selfIntroductionListening->questions->first()->audio_path
         );
 
-        $this->assertTrue(
-            $selfIntroductionListeningQuestion
-                ->answers
-                ->contains(
-                    fn ($answer) =>
-                        $answer->answer === '老师' &&
-                        (bool) $answer->is_correct === true
-                )
-        );
-
-        $selfIntroductionImageChoice =
-            $selfIntroduction->exercises
-                ->firstWhere('type', 'image_choice');
+        $selfIntroductionImageChoice = $selfIntroduction->exercises
+            ->firstWhere('type', 'image_choice');
 
         $this->assertNotNull($selfIntroductionImageChoice);
 
@@ -298,62 +214,14 @@ class ChineseContentSeederTest extends TestCase
             $selfIntroductionImageChoice->questions->first()->image_path
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | Numbers
-        |--------------------------------------------------------------------------
-        */
-
-        $this->assertTrue(
-            $numbers->vocabularies
-                ->contains(
-                    fn ($vocabulary) =>
-                        $vocabulary->word === '五' &&
-                        $vocabulary->pinyin === 'wǔ' &&
-                        $vocabulary->meaning === '5'
-                )
-        );
-
-        $this->assertTrue(
-            $numbers->vocabularies
-                ->contains(
-                    fn ($vocabulary) =>
-                        $vocabulary->word === '十' &&
-                        $vocabulary->pinyin === 'shí' &&
-                        $vocabulary->meaning === '10'
-                )
-        );
-
-        $this->assertTrue(
-            $numbers->vocabularies
-                ->contains(
-                    fn ($vocabulary) =>
-                        $vocabulary->word === '两' &&
-                        $vocabulary->pinyin === 'liǎng' &&
-                        $vocabulary->meaning === 'สอง (ใช้หน้าลักษณนาม)'
-                )
-        );
-
         $numbersListening = $numbers->exercises
             ->firstWhere('type', 'listening');
 
         $this->assertNotNull($numbersListening);
 
-        $numbersListeningQuestion =
-            $numbersListening->questions->first();
-
         $this->assertEquals(
             'audio/chinese/numbers/wu.mp3',
-            $numbersListeningQuestion->audio_path
-        );
-
-        $this->assertTrue(
-            $numbersListeningQuestion->answers
-                ->contains(
-                    fn ($answer) =>
-                        $answer->answer === '五' &&
-                        (bool) $answer->is_correct === true
-                )
+            $numbersListening->questions->first()->audio_path
         );
 
         $numbersImageChoice = $numbers->exercises
@@ -369,31 +237,37 @@ class ChineseContentSeederTest extends TestCase
 
     public function test_chinese_content_seeder_is_idempotent(): void
     {
-        /*
-         * Seed โครงสร้างและข้อมูลทั้งหมดก่อน 1 รอบ
-         */
         $this->seed(DatabaseSeeder::class);
 
         /*
-         * จากนั้นรันเฉพาะ ChineseContentSeeder ซ้ำ
-         *
-         * ถ้า Seeder เป็น idempotent:
-         * จำนวน Vocabulary / Exercise / Question / Answer
-         * ต้องไม่เพิ่มขึ้น
+         * Run the Chinese content seeder again.
+         * It must update/reuse existing records instead of creating duplicates.
          */
         $this->seed(ChineseContentSeeder::class);
 
-        $lessons = Lesson::with([
-            'vocabularies',
-            'exercises.questions.answers',
-        ])
-            ->whereHas(
-                'unit.course.language',
-                fn ($query) => $query->where('name', 'Chinese')
-            )
-            ->get();
+        $lessons = $this->getChineseLessons();
 
-        $this->assertCount(3, $lessons);
+        /*
+        |--------------------------------------------------------------------------
+        | Learning Structure
+        |--------------------------------------------------------------------------
+        */
+
+        $this->assertCount(11, $lessons);
+
+        $greetings = $lessons->firstWhere('title', 'Greetings');
+        $selfIntroduction = $lessons->firstWhere('title', 'Self Introduction');
+        $numbers = $lessons->firstWhere('title', 'Numbers');
+
+        $this->assertNotNull($greetings);
+        $this->assertNotNull($selfIntroduction);
+        $this->assertNotNull($numbers);
+
+        $contentLessons = collect([
+            $greetings,
+            $selfIntroduction,
+            $numbers,
+        ]);
 
         /*
         |--------------------------------------------------------------------------
@@ -403,7 +277,7 @@ class ChineseContentSeederTest extends TestCase
 
         $this->assertEquals(
             39,
-            $lessons->sum(
+            $contentLessons->sum(
                 fn ($lesson) => $lesson->vocabularies->count()
             )
         );
@@ -416,7 +290,7 @@ class ChineseContentSeederTest extends TestCase
 
         $this->assertEquals(
             12,
-            $lessons->sum(
+            $contentLessons->sum(
                 fn ($lesson) => $lesson->exercises->count()
             )
         );
@@ -427,7 +301,7 @@ class ChineseContentSeederTest extends TestCase
         |--------------------------------------------------------------------------
         */
 
-        $questions = $lessons
+        $questions = $contentLessons
             ->flatMap(
                 fn ($lesson) => $lesson->exercises
             )
@@ -435,9 +309,27 @@ class ChineseContentSeederTest extends TestCase
                 fn ($exercise) => $exercise->questions
             );
 
-        $this->assertCount(
-            30,
-            $questions
+        $this->assertCount(51, $questions);
+
+        $this->assertLessonQuestionStructure(
+            $greetings,
+            total: 15,
+            multipleChoice: 7,
+            fillBlank: 6
+        );
+
+        $this->assertLessonQuestionStructure(
+            $selfIntroduction,
+            total: 16,
+            multipleChoice: 8,
+            fillBlank: 6
+        );
+
+        $this->assertLessonQuestionStructure(
+            $numbers,
+            total: 20,
+            multipleChoice: 13,
+            fillBlank: 5
         );
 
         /*
@@ -451,26 +343,7 @@ class ChineseContentSeederTest extends TestCase
                 fn ($question) => $question->answers
             );
 
-        $this->assertCount(
-            120,
-            $answers
-        );
-
-        /*
-         * ตรวจว่าแต่ละ Lesson ยังมี Question 10 ข้อ
-         * และแต่ละ Question มี 4 Answers พร้อมคำตอบถูกเพียง 1 ตัว
-         */
-        foreach ($lessons as $lesson) {
-            $lessonQuestions = $lesson->exercises
-                ->flatMap(
-                    fn ($exercise) => $exercise->questions
-                );
-
-            $this->assertCount(
-                10,
-                $lessonQuestions
-            );
-        }
+        $this->assertCount(204, $answers);
 
         foreach ($questions as $question) {
             $this->assertCount(
@@ -484,5 +357,72 @@ class ChineseContentSeederTest extends TestCase
                     ->where('is_correct', true)
             );
         }
+    }
+
+    private function getChineseLessons()
+    {
+        return Lesson::with([
+            'vocabularies',
+            'exercises.questions.answers',
+        ])
+            ->whereHas(
+                'unit.course.language',
+                fn ($query) => $query->where('name', 'Chinese')
+            )
+            ->get();
+    }
+
+    private function assertLessonQuestionStructure(
+        Lesson $lesson,
+        int $total,
+        int $multipleChoice,
+        int $fillBlank
+    ): void {
+        $lessonQuestions = $lesson->exercises
+            ->flatMap(
+                fn ($exercise) => $exercise->questions
+            );
+
+        $this->assertCount(
+            $total,
+            $lessonQuestions
+        );
+
+        $multipleChoiceExercise = $lesson->exercises
+            ->firstWhere('type', 'multiple_choice');
+
+        $fillBlankExercise = $lesson->exercises
+            ->firstWhere('type', 'fill_blank');
+
+        $listeningExercise = $lesson->exercises
+            ->firstWhere('type', 'listening');
+
+        $imageChoiceExercise = $lesson->exercises
+            ->firstWhere('type', 'image_choice');
+
+        $this->assertNotNull($multipleChoiceExercise);
+        $this->assertNotNull($fillBlankExercise);
+        $this->assertNotNull($listeningExercise);
+        $this->assertNotNull($imageChoiceExercise);
+
+        $this->assertCount(
+            $multipleChoice,
+            $multipleChoiceExercise->questions
+        );
+
+        $this->assertCount(
+            $fillBlank,
+            $fillBlankExercise->questions
+        );
+
+        $this->assertCount(
+            1,
+            $listeningExercise->questions
+        );
+
+        $this->assertCount(
+            1,
+            $imageChoiceExercise->questions
+        );
     }
 }

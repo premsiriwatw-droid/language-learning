@@ -89,7 +89,10 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::prefix('content')->name('content.')->group(function () {
+    Route::middleware(['admin'])
+    ->prefix('content')
+    ->name('content.')
+    ->group(function () {
         Route::get('/lessons/{lesson}', [ContentManagementController::class, 'index'])
             ->name('index');
 

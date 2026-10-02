@@ -52,6 +52,17 @@
                 </a>
 
                 @auth
+                    @if(auth()->user()->is_admin)
+                        <a
+                            href="{{ route('admin.languages.index') }}"
+                            @if(request()->is('admin/*'))
+                                aria-current="page"
+                            @endif
+                        >
+                            Admin
+                        </a>
+                    @endif
+
                     <a
                         href="{{ route('profile') }}"
                         @if(request()->is('profile'))

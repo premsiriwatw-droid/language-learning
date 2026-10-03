@@ -6,9 +6,7 @@
 
 <div class="max-w-xl mx-auto">
 
-    {{-- ========================= --}}
     {{-- Progress --}}
-    {{-- ========================= --}}
     <div class="mb-8">
         <div class="flex justify-between text-sm text-gray-500 mb-2">
             <span>{{ $lesson->title ?? 'Lesson' }}</span>
@@ -19,15 +17,11 @@
             <div
                 class="bg-emerald-500 h-3 rounded-full transition-all"
                 style="width: {{ ($step / $total) * 100 }}%"
-            >
-            </div>
+            ></div>
         </div>
     </div>
 
-
-    {{-- ========================= --}}
     {{-- Vocabulary Step --}}
-    {{-- ========================= --}}
     @if($current['type'] === 'vocabulary')
 
         @php
@@ -82,10 +76,7 @@
 
         </div>
 
-
-        {{-- ========================= --}}
         {{-- Vocabulary Navigation --}}
-        {{-- ========================= --}}
         <div class="mt-6 flex gap-3">
 
             @if($step > 1)
@@ -100,37 +91,50 @@
                 </a>
             @endif
 
-            <a
-                href="{{ route('lessons.learn.step', [
+            {{-- ส่ง POST เพื่อยืนยันว่าเรียนคำศัพท์ step นี้แล้ว --}}
+            <form
+                method="POST"
+                action="{{ route('lessons.learn.submit', [
                     'lesson' => $lesson->id,
-                    'step' => $step + 1
+                    'step' => $step
                 ]) }}"
-                class="flex-1 text-center py-3 rounded-xl bg-emerald-500 text-white font-bold border-b-4 border-emerald-600 hover:bg-emerald-600 active:border-b-0"
+                class="flex-1"
             >
-                ถัดไป →
-            </a>
+                @csrf
+
+                <button
+                    type="submit"
+                    class="w-full text-center py-3 rounded-xl bg-emerald-500 text-white font-bold border-b-4 border-emerald-600 hover:bg-emerald-600 active:border-b-0"
+                >
+                    {{ $step >= $total ? 'จบบทเรียน 🎉' : 'ถัดไป →' }}
+                </button>
+            </form>
 
         </div>
 
-
-    {{-- ========================= --}}
     {{-- Review Step --}}
-    {{-- ========================= --}}
     @elseif($current['type'] === 'review')
 
         @php
             $question = $current['question'];
             $exerciseType = $current['exercise_type'] ?? null;
 
-            $selectedAnswer = session('selected_answer');
-            $reviewResult = session('review_result');
+            // $reviewResult และ $selectedAnswer มาจาก Controller
         @endphp
 
         <div class="bg-white border-2 border-gray-200 border-b-4 rounded-3xl p-8">
 
-            {{-- ========================= --}}
+            {{-- Validation Error --}}
+            @if($errors->has('answer'))
+                <div
+                    class="mb-5 bg-red-50 border-2 border-red-200 text-red-600 rounded-xl p-4 text-center font-bold"
+                    role="alert"
+                >
+                    {{ $errors->first('answer') }}
+                </div>
+            @endif
+
             {{-- Review Header --}}
-            {{-- ========================= --}}
             <div class="text-center mb-6">
 
                 <div class="text-5xl mb-3">
@@ -163,26 +167,18 @@
 
             </div>
 
-
-            {{-- ========================= --}}
             {{-- Listening Audio --}}
-            {{-- ========================= --}}
             @if($exerciseType === 'listening')
-
                 <div class="mb-6 text-center">
 
                     @if($question->audio_path)
-
                         <div class="bg-emerald-50 border-2 border-emerald-100 rounded-2xl p-6">
 
                             <p class="text-sm text-gray-500 font-bold mb-4">
                                 กดฟังเสียงแล้วเลือกคำตอบ
                             </p>
 
-                            <audio
-                                controls
-                                class="w-full"
-                            >
+                            <audio controls class="w-full">
                                 <source
                                     src="{{ asset($question->audio_path) }}"
                                     type="audio/mpeg"
@@ -192,29 +188,20 @@
                             </audio>
 
                         </div>
-
                     @else
-
                         <div class="bg-gray-50 border-2 border-gray-200 rounded-2xl p-6 text-gray-500">
                             🔊 ยังไม่มีไฟล์เสียงสำหรับข้อนี้
                         </div>
-
                     @endif
 
                 </div>
-
             @endif
 
-
-            {{-- ========================= --}}
             {{-- Image Choice Image --}}
-            {{-- ========================= --}}
             @if($exerciseType === 'image_choice')
-
                 <div class="mb-6">
 
                     @if($question->image_path)
-
                         <div class="bg-gray-50 border-2 border-gray-200 rounded-2xl p-4">
 
                             <img
@@ -224,44 +211,35 @@
                             >
 
                         </div>
-
                     @else
-
                         <div class="bg-gray-50 border-2 border-gray-200 rounded-2xl p-6 text-center text-gray-500">
                             🖼️ ยังไม่มีรูปภาพสำหรับข้อนี้
                         </div>
-
                     @endif
 
                 </div>
-
             @endif
 
-
-            {{-- ========================= --}}
             {{-- Result Message --}}
-            {{-- ========================= --}}
             @if($reviewResult === 'wrong')
-
-                <div class="mb-5 bg-red-50 border-2 border-red-200 text-red-600 rounded-xl p-4 text-center font-bold">
+                <div
+                    class="mb-5 bg-red-50 border-2 border-red-200 text-red-600 rounded-xl p-4 text-center font-bold"
+                    role="status"
+                >
                     ❌ ยังไม่ถูก ลองอีกครั้ง
                 </div>
-
             @endif
-
 
             @if($reviewResult === 'correct')
-
-                <div class="mb-5 bg-emerald-50 border-2 border-emerald-200 text-emerald-600 rounded-xl p-4 text-center font-bold">
+                <div
+                    class="mb-5 bg-emerald-50 border-2 border-emerald-200 text-emerald-600 rounded-xl p-4 text-center font-bold"
+                    role="status"
+                >
                     ✅ ถูกต้อง!
                 </div>
-
             @endif
 
-
-            {{-- ========================= --}}
             {{-- Answer Form --}}
-            {{-- ========================= --}}
             <form
                 method="POST"
                 action="{{ route('lessons.learn.submit', [
@@ -269,29 +247,21 @@
                     'step' => $step
                 ]) }}"
             >
-
                 @csrf
 
-                <div class="
-                    {{ in_array(
-                        $exerciseType,
-                        ['fill_blank', 'listening', 'image_choice'],
-                        true
-                    )
-                        ? 'grid grid-cols-2 gap-3'
-                        : 'grid grid-cols-1 gap-3' }}
-                ">
+                <div class="{{ in_array(
+                    $exerciseType,
+                    ['fill_blank', 'listening', 'image_choice'],
+                    true
+                )
+                    ? 'grid grid-cols-2 gap-3'
+                    : 'grid grid-cols-1 gap-3' }}">
 
                     @foreach($question->answers as $answer)
 
                         @php
-                            /*
-                             * multiple_choice / image_choice
-                             * ใช้ Answer ID
-                             *
-                             * fill_blank / listening
-                             * ใช้ข้อความคำตอบ
-                             */
+                            // Fill Blank / Listening ส่งข้อความ
+                            // Multiple Choice / Image Choice ส่ง Answer ID
                             $answerValue = in_array(
                                 $exerciseType,
                                 ['fill_blank', 'listening'],
@@ -304,35 +274,26 @@
                                 (string) $selectedAnswer ===
                                 (string) $answerValue;
 
-                            $isCorrectAnswer =
-                                (bool) $answer->is_correct;
+                            $isCorrectAnswer = (bool) $answer->is_correct;
 
-                            $answerClasses =
-                                'border-gray-200 text-gray-700';
+                            $answerClasses = 'border-gray-200 text-gray-700';
 
-                            if (
-                                $reviewResult === 'wrong' &&
-                                $isSelected
-                            ) {
+                            // ตอบผิด แสดงสีแดงเฉพาะตัวเลือกที่ผู้เรียนเลือก
+                            if ($reviewResult === 'wrong' && $isSelected) {
                                 $answerClasses =
                                     'border-red-400 bg-red-50 text-red-600';
                             }
 
-                            if (
-                                $reviewResult === 'correct' &&
-                                $isCorrectAnswer
-                            ) {
+                            // แสดงคำตอบถูกหลังผู้เรียนตอบถูกแล้วเท่านั้น
+                            if ($reviewResult === 'correct' && $isCorrectAnswer) {
                                 $answerClasses =
                                     'border-emerald-500 bg-emerald-50 text-emerald-600';
                             }
                         @endphp
 
-
-                        <label
-                            class="{{ $reviewResult === 'correct'
-                                ? ''
-                                : 'cursor-pointer' }}"
-                        >
+                        <label class="{{ $reviewResult === 'correct'
+                            ? ''
+                            : 'cursor-pointer' }}">
 
                             <input
                                 type="radio"
@@ -344,41 +305,28 @@
                                 required
                             >
 
-
-                            <div
-                                class="
-                                    border-2
-                                    border-b-4
-                                    rounded-xl
-                                    p-4
-                                    text-center
-                                    font-bold
-                                    {{ $answerClasses }}
-                                    {{ $reviewResult === 'correct'
-                                        ? ''
-                                        : 'hover:border-emerald-400 peer-checked:border-emerald-500 peer-checked:bg-emerald-50' }}
-                                    transition-all
-                                "
-                            >
+                            <div class="
+                                border-2
+                                border-b-4
+                                rounded-xl
+                                p-4
+                                text-center
+                                font-bold
+                                {{ $answerClasses }}
+                                {{ $reviewResult === 'correct'
+                                    ? ''
+                                    : 'hover:border-emerald-400 peer-checked:border-emerald-500 peer-checked:bg-emerald-50' }}
+                                transition-all
+                            ">
 
                                 {{ $answer->answer }}
 
-                                @if(
-                                    $reviewResult === 'correct' &&
-                                    $isCorrectAnswer
-                                )
-                                    <span class="ml-2">
-                                        ✓
-                                    </span>
+                                @if($reviewResult === 'correct' && $isCorrectAnswer)
+                                    <span class="ml-2">✓</span>
                                 @endif
 
-                                @if(
-                                    $reviewResult === 'wrong' &&
-                                    $isSelected
-                                )
-                                    <span class="ml-2">
-                                        ✕
-                                    </span>
+                                @if($reviewResult === 'wrong' && $isSelected)
+                                    <span class="ml-2">✕</span>
                                 @endif
 
                             </div>
@@ -389,10 +337,7 @@
 
                 </div>
 
-
-                {{-- ========================= --}}
                 {{-- Review Navigation --}}
-                {{-- ========================= --}}
                 @if($reviewResult === 'correct')
 
                     <a

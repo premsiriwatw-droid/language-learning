@@ -55,7 +55,7 @@ class LessonCrudTest extends TestCase
         $vocabulary = Vocabulary::factory()->for($lesson2)->create();
         $exercise = Exercise::factory()->for($lesson2)->create();
 
-        $response = $this->actingAs($admin)->delete(route('admin.lessons.destroy', $lesson2));
+        $response = $this->actingAs($admin)->delete(route('admin.lessons.destroy', $lesson2), ['confirm_name' => $lesson2->title]);
 
         $response->assertRedirect(route('admin.units.lessons.index', $unit));
         $this->assertModelMissing($lesson2);

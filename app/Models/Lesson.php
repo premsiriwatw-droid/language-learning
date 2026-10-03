@@ -45,11 +45,7 @@ class Lesson extends Model
      */
     public function nextLesson(): ?self
     {
-        return static::query()
-            ->where('unit_id', $this->unit_id)
-            ->where('position', '>', $this->position)
-            ->orderBy('position')
-            ->first();
+        return $this->nextSibling();
     }
 
     /**
@@ -57,10 +53,6 @@ class Lesson extends Model
      */
     public function previousLesson(): ?self
     {
-        return static::query()
-            ->where('unit_id', $this->unit_id)
-            ->where('position', '<', $this->position)
-            ->orderByDesc('position')
-            ->first();
+        return $this->previousSibling();
     }
 }

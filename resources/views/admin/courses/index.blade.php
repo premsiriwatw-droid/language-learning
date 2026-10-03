@@ -72,7 +72,7 @@
             <input
                 type="text"
                 name="title"
-                value="{{ old('title') }}"
+                value="{{ old('_edit_id') ? '' : old('title') }}"
                 required
                 placeholder="เช่น Chinese Beginner"
                 class="flex-1 border-2 border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-400"
@@ -94,7 +94,7 @@
         @forelse ($courses as $course)
 
             <div
-                x-data="{ editing: false }"
+                x-data="{ editing: {{ (string) old('_edit_id') === (string) $course->id ? 'true' : 'false' }} }"
                 class="bg-white border-2 border-gray-200 rounded-2xl p-5"
             >
 
@@ -127,21 +127,12 @@
                             แก้ไข
                         </button>
 
-                        <form
-                            action="{{ route('admin.courses.destroy', $course) }}"
-                            method="POST"
-                            onsubmit="return confirm('ลบคอร์ส &quot;{{ $course->title }}&quot; พร้อมทั้ง {{ $course->units_count }} Unit ที่อยู่ภายใต้คอร์สนี้ (รวมถึง Lesson และเนื้อหาทั้งหมด)? ย้อนกลับไม่ได้')"
+                        <a
+                            href="{{ route('admin.courses.delete', $course) }}"
+                            class="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 font-bold hover:bg-red-100"
                         >
-                            @csrf
-                            @method('DELETE')
-
-                            <button
-                                type="submit"
-                                class="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 font-bold hover:bg-red-100"
-                            >
-                                ลบ
-                            </button>
-                        </form>
+                            ลบ
+                        </a>
 
                     </div>
 
@@ -158,11 +149,12 @@
                 >
                     @csrf
                     @method('PUT')
+                    <input type="hidden" name="_edit_id" value="{{ $course->id }}">
 
                     <input
                         type="text"
                         name="title"
-                        value="{{ $course->title }}"
+                        value="{{ (string) old('_edit_id') === (string) $course->id ? old('title') : $course->title }}"
                         required
                         class="flex-1 border-2 border-gray-200 rounded-xl px-3 py-2"
                     >

@@ -51,7 +51,7 @@ class UnitCrudTest extends TestCase
         $unit3 = Unit::factory()->for($course)->create();
         $lessonInUnit2 = \App\Models\Lesson::factory()->for($unit2)->create();
 
-        $response = $this->actingAs($admin)->delete(route('admin.units.destroy', $unit2));
+        $response = $this->actingAs($admin)->delete(route('admin.units.destroy', $unit2), ['confirm_name' => $unit2->title]);
 
         $response->assertRedirect(route('admin.courses.units.index', $course));
         $this->assertModelMissing($unit2);

@@ -58,7 +58,7 @@ class LanguageCrudTest extends TestCase
         $course = $lesson->unit->course;
         $language = $course->language;
 
-        $response = $this->actingAs($admin)->delete(route('admin.languages.destroy', $language));
+        $response = $this->actingAs($admin)->delete(route('admin.languages.destroy', $language), ['confirm_name' => $language->name]);
 
         $response->assertRedirect(route('admin.languages.index'));
         $this->assertModelMissing($language);

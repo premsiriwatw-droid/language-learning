@@ -12,6 +12,8 @@ use App\Http\Controllers\QuizController;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\RememberLearningVisit;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\UserManagementController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -92,7 +94,10 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::prefix('content')->name('content.')->group(function () {
+    Route::middleware(['admin'])
+    ->prefix('content')
+    ->name('content.')
+    ->group(function () {
         Route::get('/lessons/{lesson}', [ContentManagementController::class, 'index'])
             ->name('index');
 
@@ -239,3 +244,35 @@ Route::get('/lessons/{lesson}/learn/{step}', [LearningController::class, 'learnS
 
 Route::post('/lessons/{lesson}/learn/{step}', [LearningController::class, 'submitLearnStep'])
     ->name('lessons.learn.submit');
+
+// ========================================
+// Admin Routes
+// ========================================
+
+Route::middleware(['auth', 'admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+
+        // Dashboard
+        Route::get('/dashboard', [
+            AdminDashboardController::class,
+            'index'
+        ])->name('dashboard');
+
+        // User Management
+        Route::get('/users', [
+            UserManagementController::class,
+            'index'
+        ])->name('users.index');
+
+        Route::get('/users/{user}/edit', [
+            UserManagementController::class,
+            'edit'
+        ])->name('users.edit');
+
+        Route::put('/users/{user}', [
+            UserManagementController::class,
+            'update'
+        ])->name('users.update');
+    });

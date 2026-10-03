@@ -15,7 +15,7 @@ class UnitCrudTest extends TestCase
 
     public function test_new_units_are_appended_to_the_end_of_the_course_automatically(): void
     {
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->create(['role' => 'admin']);
         $course = $this->createLanguageWithCourse();
 
         $this->actingAs($admin)->post(route('admin.courses.units.store', $course), ['title' => 'Unit 1']);
@@ -30,7 +30,7 @@ class UnitCrudTest extends TestCase
 
     public function test_admin_can_rename_a_unit_without_changing_its_course(): void
     {
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->create(['role' => 'admin']);
         $unit = $this->createCourseWithUnit();
 
         $response = $this->actingAs($admin)->put(route('admin.units.update', $unit), [
@@ -44,7 +44,7 @@ class UnitCrudTest extends TestCase
 
     public function test_deleting_a_unit_cascades_to_its_lessons_and_resequences_siblings(): void
     {
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->create(['role' => 'admin']);
         $course = $this->createLanguageWithCourse();
         $unit1 = Unit::factory()->for($course)->create();
         $unit2 = Unit::factory()->for($course)->create();
@@ -64,7 +64,7 @@ class UnitCrudTest extends TestCase
 
     public function test_reorder_persists_a_new_unit_sequence(): void
     {
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->create(['role' => 'admin']);
         $course = $this->createLanguageWithCourse();
         $unitA = Unit::factory()->for($course)->create();
         $unitB = Unit::factory()->for($course)->create();
@@ -82,7 +82,7 @@ class UnitCrudTest extends TestCase
 
     public function test_reorder_rejects_a_list_that_does_not_match_the_courses_units(): void
     {
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->create(['role' => 'admin']);
         $course = $this->createLanguageWithCourse();
         $unitA = Unit::factory()->for($course)->create();
         $unitB = Unit::factory()->for($course)->create();

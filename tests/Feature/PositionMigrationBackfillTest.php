@@ -22,8 +22,8 @@ class PositionMigrationBackfillTest extends TestCase
 
     public function test_existing_units_and_lessons_get_sequential_positions_per_parent_in_creation_order(): void
     {
-        // Undo the two 2026_10_01 migrations (is_admin, then position).
-        $this->artisan('migrate:rollback', ['--step' => 2])->assertSuccessful();
+        // Undo the add_position migration (the latest one).
+        $this->artisan('migrate:rollback', ['--step' => 1])->assertSuccessful();
         $this->assertFalse(Schema::hasColumn('units', 'position'));
 
         $now = now();

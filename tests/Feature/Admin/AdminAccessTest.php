@@ -19,7 +19,7 @@ class AdminAccessTest extends TestCase
 
     public function test_non_admin_user_is_forbidden(): void
     {
-        $user = User::factory()->create(['is_admin' => false]);
+        $user = User::factory()->create(['role' => 'user']);
 
         $response = $this->actingAs($user)->get(route('admin.languages.index'));
 
@@ -28,10 +28,30 @@ class AdminAccessTest extends TestCase
 
     public function test_admin_user_can_view_the_languages_screen(): void
     {
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->create(['role' => 'admin']);
 
         $response = $this->actingAs($admin)->get(route('admin.languages.index'));
 
         $response->assertOk();
+    }
+
+    public function test_non_admin_user_cannot_change_the_learning_structure(): void
+    {
+        $user = User::factory()->create(['role' => 'user']);
+
+        $response = $this->actingAs($user)->post(route('admin.languages.store'), [
+            'name' => 'Should not be created',
+        ]);
+
+        $response->assertForbidden();
+        $this->assertDatabaseMissing('languages', ['name' => 'Should not be created']);
+    }
+
+    public function test_admin_dashboard_from_main_is_still_reachable_for_admins(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)->get(route('admin.dashboard'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.users.index'))->assertOk();
     }
 }

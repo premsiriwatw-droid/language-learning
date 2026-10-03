@@ -52,7 +52,7 @@
                 </a>
 
                 @auth
-                    @if(auth()->user()->is_admin)
+                    @if(auth()->user()->isAdmin())
                         <a
                             href="{{ route('admin.languages.index') }}"
                             @if(request()->is('admin/*'))

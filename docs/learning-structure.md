@@ -5,7 +5,7 @@
 - คอลัมน์ `position` ใน `units` (ลำดับภายใน Course) และ `lessons` (ลำดับภายใน Unit)
   - migration backfill ข้อมูลเดิมตามลำดับ id เดิม → ลำดับที่ผู้เรียนเห็นไม่เปลี่ยน
   - Unit/Lesson ใหม่ต่อท้ายให้อัตโนมัติ, ลบแล้วจัดลำดับใหม่ไม่มีช่องว่าง, Admin กด ↑ ↓ เพื่อสลับลำดับ
-- คอลัมน์ `users.is_admin` (ไม่ fillable — ตั้งผ่าน `php artisan app:make-admin email@x.com`)
+- สิทธิ์ Admin ใช้ระบบของ main (`users.role = 'admin'`, `User::isAdmin()`, middleware alias `admin`) — route ทั้งหมดอยู่ใต้ `['auth', 'admin']`
 - ไม่ได้แก้ relationship ของ Vocabulary/Exercise/Question/Answer และไม่ได้แตะ Quiz/Progress
 
 ## สำหรับคนที่ 5 (Progress / Unlock)
@@ -32,6 +32,6 @@ FK เป็น `cascade` อยู่แล้ว: ลบ Language/Course/Unit/
 ## วิธีรัน
 ```bash
 php artisan migrate
-php artisan app:make-admin you@example.com
+ADMIN_PASSWORD=... php artisan db:seed --class=AdminUserSeeder   # หรือตั้ง role ผ่านหน้า User Management
 php artisan test
 ```

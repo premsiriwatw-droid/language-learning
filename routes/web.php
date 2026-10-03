@@ -9,7 +9,6 @@ use App\Http\Controllers\ContentManagementController;
 use App\Http\Controllers\LearningController;
 use App\Http\Controllers\ProgressProfileController;
 use App\Http\Controllers\QuizController;
-use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\RememberLearningVisit;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminDashboardController;
@@ -150,7 +149,7 @@ Route::middleware('auth')->group(function () {
 |
 */
 
-Route::middleware(['auth', EnsureUserIsAdmin::class])
+Route::middleware(['auth', 'admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {

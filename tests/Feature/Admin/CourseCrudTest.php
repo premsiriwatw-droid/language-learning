@@ -16,7 +16,7 @@ class CourseCrudTest extends TestCase
 
     public function test_admin_can_create_a_course_under_a_language(): void
     {
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->create(['role' => 'admin']);
         $language = Language::factory()->create();
 
         $response = $this->actingAs($admin)->post(
@@ -33,7 +33,7 @@ class CourseCrudTest extends TestCase
 
     public function test_title_is_required(): void
     {
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->create(['role' => 'admin']);
         $language = Language::factory()->create();
 
         $response = $this->actingAs($admin)->post(
@@ -47,7 +47,7 @@ class CourseCrudTest extends TestCase
 
     public function test_admin_can_rename_a_course(): void
     {
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->create(['role' => 'admin']);
         $course = Course::factory()->for(Language::factory())->create(['title' => 'Old title']);
 
         $response = $this->actingAs($admin)->put(route('admin.courses.update', $course), [
@@ -60,7 +60,7 @@ class CourseCrudTest extends TestCase
 
     public function test_deleting_a_course_cascades_to_its_units_and_lessons(): void
     {
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->create(['role' => 'admin']);
         $unit = $this->createCourseWithUnit();
         $course = $unit->course;
 

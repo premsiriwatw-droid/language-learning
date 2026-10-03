@@ -17,7 +17,7 @@ class LessonCrudTest extends TestCase
 
     public function test_new_lessons_are_appended_to_the_end_of_the_unit_automatically(): void
     {
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->create(['role' => 'admin']);
         $unit = $this->createCourseWithUnit();
 
         $this->actingAs($admin)->post(route('admin.units.lessons.store', $unit), ['title' => 'Greetings']);
@@ -31,7 +31,7 @@ class LessonCrudTest extends TestCase
 
     public function test_admin_can_edit_a_lessons_title_and_content(): void
     {
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->create(['role' => 'admin']);
         $lesson = $this->createUnitWithLesson();
 
         $response = $this->actingAs($admin)->put(route('admin.lessons.update', $lesson), [
@@ -47,7 +47,7 @@ class LessonCrudTest extends TestCase
 
     public function test_deleting_a_lesson_cascades_to_its_content_and_resequences_siblings(): void
     {
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->create(['role' => 'admin']);
         $unit = $this->createCourseWithUnit();
         $lesson1 = Lesson::factory()->for($unit)->create();
         $lesson2 = Lesson::factory()->for($unit)->create();
@@ -69,7 +69,7 @@ class LessonCrudTest extends TestCase
 
     public function test_reorder_persists_a_new_lesson_sequence(): void
     {
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->create(['role' => 'admin']);
         $unit = $this->createCourseWithUnit();
         $lessonA = Lesson::factory()->for($unit)->create();
         $lessonB = Lesson::factory()->for($unit)->create();
@@ -101,7 +101,7 @@ class LessonCrudTest extends TestCase
 
     public function test_editing_a_lesson_does_not_touch_its_vocabulary_or_exercises(): void
     {
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->create(['role' => 'admin']);
         $lesson = $this->createUnitWithLesson();
         $vocabulary = Vocabulary::factory()->for($lesson)->create();
         $exercise = Exercise::factory()->for($lesson)->create();

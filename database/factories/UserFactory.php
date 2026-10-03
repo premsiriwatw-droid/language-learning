@@ -42,15 +42,4 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
-
-    /**
-     * Indicate that the user is an admin, able to manage the Learning
-     * Structure (Language/Course/Unit/Lesson) screens.
-     */
-    public function admin(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'is_admin' => true,
-        ]);
-    }
 }

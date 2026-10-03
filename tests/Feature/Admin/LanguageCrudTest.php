@@ -15,7 +15,7 @@ class LanguageCrudTest extends TestCase
 
     public function test_admin_can_create_a_language(): void
     {
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->create(['role' => 'admin']);
 
         $response = $this->actingAs($admin)->post(route('admin.languages.store'), [
             'name' => 'Chinese',
@@ -28,7 +28,7 @@ class LanguageCrudTest extends TestCase
 
     public function test_name_is_required(): void
     {
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->create(['role' => 'admin']);
 
         $response = $this->actingAs($admin)->post(route('admin.languages.store'), [
             'name' => '',
@@ -40,7 +40,7 @@ class LanguageCrudTest extends TestCase
 
     public function test_admin_can_rename_a_language(): void
     {
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->create(['role' => 'admin']);
         $language = Language::factory()->create(['name' => 'Chinese']);
 
         $response = $this->actingAs($admin)->put(route('admin.languages.update', $language), [
@@ -53,7 +53,7 @@ class LanguageCrudTest extends TestCase
 
     public function test_deleting_a_language_cascades_to_its_courses_units_and_lessons(): void
     {
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->create(['role' => 'admin']);
         $lesson = $this->createUnitWithLesson();
         $course = $lesson->unit->course;
         $language = $course->language;

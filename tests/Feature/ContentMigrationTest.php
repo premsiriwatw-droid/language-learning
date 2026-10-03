@@ -26,14 +26,22 @@ class ContentMigrationTest extends TestCase
         $exercise = $question->exercise;
         $vocabulary = Vocabulary::factory()->create(['lesson_id' => $exercise->lesson_id]);
 
-        $this->artisan('migrate:rollback', ['--step' => 2, '--force' => true])->assertSuccessful();
+        // Target content migrations explicitly; newer modules may add migrations.
+        $contentMigrations = [
+            'database/migrations/2026_09_08_000001_add_lesson_foreign_keys_to_content_tables.php',
+            'database/migrations/2026_09_08_000002_add_media_fields_to_questions.php',
+        ];
+        $this->artisan('migrate:rollback', [
+            '--path' => $contentMigrations,
+            '--force' => true,
+        ])->assertSuccessful();
 
         $this->assertSame([], Schema::getForeignKeys('vocabularies'));
         $this->assertSame([], Schema::getForeignKeys('exercises'));
         $this->assertFalse(Schema::hasColumn('questions', 'audio_path'));
         $this->assertFalse(Schema::hasColumn('questions', 'image_path'));
 
-        $this->artisan('migrate', ['--force' => true])->assertSuccessful();
+        $this->artisan('migrate', ['--path' => $contentMigrations, '--force' => true])->assertSuccessful();
 
         foreach ([$answer, $question, $exercise, $vocabulary] as $model) {
             $this->assertModelExists($model);

@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             LearningStructureSeeder::class,
             ChineseContentSeeder::class,
+            AdminUserSeeder::class,
         ]);
 
         User::factory()->create([

@@ -39,7 +39,7 @@ class LearningProgressCompletionTest extends TestCase
             ->get(route('lessons.learn', $lesson))
             ->assertRedirect();
 
-        // เปิดท้ายบทหรือส่งข้อที่สองก่อน ไม่ได้รางวัล
+        // เปิดท้ายบทหรือส่งข้อที่สองก่อน ต้องไม่บันทึกการจบบท
         $this->get(route('lessons.learn.step', [
             'lesson' => $lesson->id,
             'step' => 999,
@@ -50,16 +50,23 @@ class LearningProgressCompletionTest extends TestCase
 
         $this->assertDatabaseCount('lesson_progress', 0);
 
+        // ตอบข้อแรก: บันทึกสถานะเพื่อเรียนต่อ แต่ยังไม่ได้รางวัล
         $this->submitAnswer($lesson, 1, $answers[0]['right'])
             ->assertSessionHasNoErrors();
 
-        $this->assertDatabaseCount('lesson_progress', 0);
+        $progress = $this->assertLessonIsInProgress($user, $lesson);
 
-        // ข้อสุดท้ายตอบผิด ยังไม่ถือว่าจบ
+        $this->assertSame(2, $progress->runtime_state['next_step']);
+        $this->assertCount(1, $progress->runtime_state['results']);
+
+        // ข้อสุดท้ายตอบผิด: บันทึกผลไว้ แต่ยังไม่ถือว่าจบ
         $this->submitAnswer($lesson, 2, $answers[1]['wrong'])
             ->assertSessionHasNoErrors();
 
-        $this->assertDatabaseCount('lesson_progress', 0);
+        $progress = $this->assertLessonIsInProgress($user, $lesson);
+
+        $this->assertSame(2, $progress->runtime_state['next_step']);
+        $this->assertCount(2, $progress->runtime_state['results']);
 
         // ลองใหม่จนถูก: ถูกครั้งแรก 1/2 ได้ 30 XP และ 1 ดาว
         $this->submitAnswer($lesson, 2, $answers[1]['right'])
@@ -72,11 +79,12 @@ class LearningProgressCompletionTest extends TestCase
             'stars' => 1,
         ]);
 
-        $progress = LessonProgress::where('user_id', $user->id)
-            ->where('lesson_id', $lesson->id)
-            ->firstOrFail();
+        $progress->refresh();
 
         $this->assertNotNull($progress->completed_at);
+        $this->assertNotNull($progress->runtime_state['finished_at']);
+        $this->assertTrue($progress->runtime_state['progress_saved']);
+        $this->assertDatabaseCount('lesson_progress', 1);
 
         $this->get(route('lessons.learn.summary', $lesson))
             ->assertOk()
@@ -206,6 +214,31 @@ class LearningProgressCompletionTest extends TestCase
             );
 
         $this->assertDatabaseCount('lesson_progress', 0);
+    }
+
+    private function assertLessonIsInProgress(
+        User $user,
+        Lesson $lesson
+    ): LessonProgress {
+        $this->assertDatabaseCount('lesson_progress', 1);
+
+        $this->assertDatabaseHas('lesson_progress', [
+            'user_id' => $user->id,
+            'lesson_id' => $lesson->id,
+            'completed_at' => null,
+            'xp' => 0,
+            'stars' => 0,
+        ]);
+
+        $progress = LessonProgress::where('user_id', $user->id)
+            ->where('lesson_id', $lesson->id)
+            ->firstOrFail();
+
+        $this->assertIsArray($progress->runtime_state);
+        $this->assertNull($progress->runtime_state['finished_at']);
+        $this->assertFalse($progress->runtime_state['progress_saved']);
+
+        return $progress;
     }
 
     private function createQuizLesson(): array

@@ -9,19 +9,25 @@
     <link rel="stylesheet" href="{{ asset('css/learner-profile.css') }}">
     @stack('styles')
 </head>
-<body class="bg-gray-50 text-gray-800 pb-12">
+<body class="bg-gray-50 text-gray-800 pb-12 @yield('body-class')">
     <a class="skip-link" href="#main-content">ข้ามไปเนื้อหา</a>
     <nav class="site-nav" aria-label="เมนูหลัก">
         <div class="site-nav-inner">
-            <a href="{{ url('/languages') }}" class="site-brand"><span aria-hidden="true" class="brand-mark">L</span> LangLearn</a>
+            <a href="{{ url('/languages') }}" class="site-brand" aria-label="LangLearn หน้าหลัก">
+                <span aria-hidden="true" class="brand-mark">L</span>
+                @if(request()->is('languages'))
+                    <span class="brand-word" aria-hidden="true">@foreach(str_split('LangLearn') as $letter)<span class="brand-letter">{{ $letter }}</span>@endforeach</span>
+                @else
+                    LangLearn
+                @endif
+            </a>
             <div class="site-nav-links">
                 <a href="{{ url('/languages') }}" @if(request()->is('languages', 'courses/*', 'units/*', 'lessons/*')) aria-current="page" @endif>บทเรียน</a>
                 @auth
                     <a href="{{ route('profile') }}" @if(request()->is('profile')) aria-current="page" @endif>โปรไฟล์</a>
                     <span class="nav-initial" aria-hidden="true">
                     @if(\Illuminate\Support\Facades\Storage::disk('local')->exists('profile-photos/'.auth()->id().'/avatar'))
-                        <img
-                            src="{{ route('profile.photo') }}"
+                        <img src="{{ route('profile.photo') }}"
                             alt=""
                             width="34"
                             height="34"

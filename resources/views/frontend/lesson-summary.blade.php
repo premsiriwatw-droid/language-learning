@@ -8,7 +8,7 @@
     <div class="bg-white border-2 border-gray-200 border-b-4 rounded-3xl p-6 sm:p-8">
 
         <div class="text-center mb-8">
-            <div class="text-6xl mb-4">🎉</div>
+            <div class="text-6xl mb-4" aria-hidden="true">🎉</div>
 
             <h1 class="text-3xl font-extrabold text-emerald-600">
                 เรียนครบแล้ว!
@@ -44,6 +44,73 @@
                 </p>
             @endif
         </div>
+
+        @if($summary['progress_saved'] ?? false)
+            <div class="mb-6 rounded-2xl border-2 border-amber-200 bg-amber-50 p-5 text-center">
+                <h2 class="font-extrabold text-amber-800">
+                    รางวัลประจำบท
+                </h2>
+
+                <div class="mt-4 grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-amber-800">XP ที่บันทึก</p>
+                        <p class="mt-2 text-3xl font-extrabold text-amber-700">
+                            {{ $summary['saved_xp'] }} XP
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="text-sm text-amber-800">ดาวที่บันทึก</p>
+
+                        <div
+                            class="mt-2 text-3xl"
+                            role="img"
+                            aria-label="{{ $summary['saved_stars'] }} จาก 3 ดาว"
+                        >
+                            @for($star = 1; $star <= 3; $star++)
+                                <span
+                                    aria-hidden="true"
+                                    class="{{ $star <= $summary['saved_stars'] ? 'text-amber-500' : 'text-gray-300' }}"
+                                >★</span>
+                            @endfor
+                        </div>
+
+                        <p class="mt-1 text-sm font-bold text-amber-800">
+                            {{ $summary['saved_stars'] }} / 3 ดาว
+                        </p>
+                    </div>
+                </div>
+
+                <p class="mt-4 text-sm text-amber-800">
+                    บันทึกความคืบหน้าแล้ว
+                    รางวัลเก็บจากการจบบทครั้งแรก
+                    การเรียนซ้ำจะไม่เพิ่ม XP หรือเปลี่ยนดาว
+                </p>
+            </div>
+        @else
+            <div class="mb-6 rounded-2xl border-2 border-gray-200 bg-gray-50 p-5 text-center">
+                @auth
+                    <p class="font-bold text-gray-700">
+                        ยังไม่ได้บันทึกรางวัลของรอบนี้
+                    </p>
+
+                    <p class="mt-2 text-sm text-gray-600">
+                        ผลการเรียนรอบนี้แสดงอยู่ด้านล่าง
+                        หากต้องการบันทึกรางวัล ให้เริ่มเรียนใหม่
+                        หากยังเกิดปัญหา กรุณาแจ้งผู้ดูแล
+                    </p>
+                @else
+                    <p class="font-bold text-gray-700">
+                        เข้าสู่ระบบเพื่อเก็บความคืบหน้าและรางวัล
+                    </p>
+
+                    <p class="mt-2 text-sm text-gray-600">
+                        หลังเข้าสู่ระบบ ให้เริ่มเรียนบทนี้ใหม่
+                        เพื่อบันทึกผลเข้าบัญชีของคุณ
+                    </p>
+                @endauth
+            </div>
+        @endif
 
         <div class="grid grid-cols-2 gap-4">
             <div class="rounded-2xl border-2 border-gray-200 p-4 text-center">

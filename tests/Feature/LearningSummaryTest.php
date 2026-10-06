@@ -20,6 +20,9 @@ class LearningSummaryTest extends TestCase
     {
         $this->freezeTime();
 
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
         $lesson = $this->createContentLesson();
 
         Vocabulary::factory()->create([
@@ -55,9 +58,13 @@ class LearningSummaryTest extends TestCase
             'title' => 'บทถัดไป',
         ]);
 
+        Vocabulary::factory()->create([
+            'lesson_id' => $nextLesson->id,
+        ]);
+
         $this->get(route('lessons.learn', $lesson));
 
-        // ยืนยันคำศัพท์ step แรก
+        // ยืนยันคำศัพท์ขั้นแรก
         $this->post(route('lessons.learn.submit', [
             'lesson' => $lesson->id,
             'step' => 1,
@@ -108,9 +115,11 @@ class LearningSummaryTest extends TestCase
                 && $summary['wrong_attempts'] === 1
                 && $summary['score_percent'] === 50.0
                 && $summary['elapsed_seconds'] === 90
+                && $summary['progress_saved'] === true
             )
             ->assertViewHas('nextLesson', fn ($next) =>
-                $next->is($nextLesson)
+                $next instanceof Lesson
+                && $next->is($nextLesson)
             )
             ->assertSee('50%');
 
@@ -131,7 +140,7 @@ class LearningSummaryTest extends TestCase
                 'step' => 1,
             ]))
             ->assertSessionHas(
-                'learning_runtime.guest.' . $lesson->id,
+                'learning_runtime.' . $user->id . '.' . $lesson->id,
                 fn ($runtime) =>
                     $runtime['results'] === []
                     && $runtime['finished_at'] === null
@@ -193,5 +202,81 @@ class LearningSummaryTest extends TestCase
                 && $summary['wrong_count'] === 0
                 && $summary['score_percent'] === null
             );
+    }
+
+    public function test_summary_skips_empty_lessons_when_finding_next_lesson(): void
+    {
+        $user = User::factory()->create();
+        $lesson = $this->createContentLesson();
+
+        Vocabulary::factory()->create([
+            'lesson_id' => $lesson->id,
+        ]);
+
+        Lesson::forceCreate([
+            'unit_id' => $lesson->unit_id,
+            'title' => 'บทว่าง',
+        ]);
+
+        $nextLesson = Lesson::forceCreate([
+            'unit_id' => $lesson->unit_id,
+            'title' => 'บทถัดไปที่มีเนื้อหา',
+        ]);
+
+        Vocabulary::factory()->create([
+            'lesson_id' => $nextLesson->id,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('lessons.learn', $lesson))
+            ->assertRedirect();
+
+        $this->post(route('lessons.learn.submit', [
+            'lesson' => $lesson->id,
+            'step' => 1,
+        ]))->assertRedirect();
+
+        $this->get(route('lessons.learn.summary', $lesson))
+            ->assertOk()
+            ->assertViewHas('nextLesson', fn ($next) =>
+                $next instanceof Lesson
+                && $next->is($nextLesson)
+            );
+
+        $this->get(route('lessons.learn', $nextLesson))
+            ->assertRedirect();
+    }
+
+    public function test_guest_summary_does_not_link_to_a_locked_next_lesson(): void
+    {
+        $lesson = $this->createContentLesson();
+
+        Vocabulary::factory()->create([
+            'lesson_id' => $lesson->id,
+        ]);
+
+        $nextLesson = Lesson::forceCreate([
+            'unit_id' => $lesson->unit_id,
+            'title' => 'บทถัดไป',
+        ]);
+
+        Vocabulary::factory()->create([
+            'lesson_id' => $nextLesson->id,
+        ]);
+
+        $this->get(route('lessons.learn', $lesson))
+            ->assertRedirect();
+
+        $this->post(route('lessons.learn.submit', [
+            'lesson' => $lesson->id,
+            'step' => 1,
+        ]))->assertRedirect();
+
+        $this->get(route('lessons.learn.summary', $lesson))
+            ->assertOk()
+            ->assertViewHas('nextLesson', null)
+            ->assertDontSee('ไปบทถัดไป');
+
+        $this->assertDatabaseCount('lesson_progress', 0);
     }
 }

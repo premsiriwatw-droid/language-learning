@@ -25,9 +25,9 @@
         <span class="scene-word scene-word-england">Hello.</span>
     </div>
     <div class="language-content">
-        <p class="language-eyebrow"><span aria-hidden="true"></span> เส้นทางใหม่ เริ่มที่คำแรก</p>
+        <p class="language-eyebrow"><span aria-hidden="true"></span> Developed By ทีมงานช่างเจ็ค</p>
         <h1 id="language-heading">อยากเริ่มเรียน<br><span>ภาษาไหนวันนี้?</span></h1>
-        <p class="language-intro">เลือกภาษาที่คุณสนใจ แล้วออกเดินทางไปด้วยกัน</p>
+        <p class="language-intro">เลือกภาษาที่คุณสนใจ แล้วลุยไปด้วยกัน</p>
         <div class="language-picker">
             <div class="picker-heading">
                 <h2>เลือกภาษาของคุณ</h2>
@@ -53,7 +53,7 @@
                     <p class="language-empty">ยังไม่มีภาษาที่พร้อมเรียนในระบบ<br><span>เมื่อมีคอร์สพร้อมแล้ว ภาษาจะปรากฏที่นี่</span></p>
                 @endforelse
             </div>
-            <p class="picker-note"><span aria-hidden="true">✦</span> ทุกบทเรียนเล็ก ๆ คืออีกก้าวของคุณ</p>
+            <p class="picker-note"><span aria-hidden="true">✦</span> เตรียมตัวออกเดินทางได้</p>
         </div>
         <p class="language-signature">สองวัฒนธรรม <span aria-hidden="true">/</span> โลกแห่งการเรียนรู้ใบเดียวกัน</p>
     </div>

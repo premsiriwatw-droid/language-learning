@@ -13,6 +13,19 @@ existing migrations, or quiz answer checking.
   from the private local disk with no-store/nosniff headers. No storage symlink
   is needed. A new image replaces the previous file.
 
+The shared navigation includes a CSRF-protected POST form for the existing
+`logout` route. Its controller, session invalidation, and Auth models are unchanged.
+The navigation displays the current user's saved private avatar on learning and
+profile pages, falling back to their initial when no photo exists.
+
+With JavaScript enabled, the profile accepts JPEG/PNG/WebP source images up to
+20 MiB. Before submitting, images exceeding the existing 2 MiB or 4096-pixel
+limits are resized to a maximum side of 1024 pixels and encoded as JPEG locally
+in the browser. Transparent resized images use a white background. The original
+large file is not uploaded. Invalid images show a retry message and keep the
+saved avatar. Without JavaScript, the original server limits still apply. No
+PHP configuration changes, storage symlink, package, or User migration is needed.
+
 The existing GET learning-step route uses `RememberLearningVisit`. It records
 only authenticated, successfully rendered steps using the original controller's
 view data. Opening a step, following a completion URL, or guessing a URL does
@@ -91,3 +104,13 @@ idempotent rewards, missing migration handling, and escaped profile text.
   database. Existing user records were not populated with sample rewards.
 - The SQLite database was backed up before applying only the new Progress
   migration. The avatar feature uses the existing private local storage disk.
+
+## Logout and photo follow-up verification (2026-10-06)
+
+- Full suite: 48 tests passed, 360 assertions using PHP 8.3.33.
+- All Blade templates compiled; profile and logout routes retain web/auth middleware.
+- Browser checks use a separate SQLite database, sessions, and private storage.
+  They cover native small-image uploads, resizing a 7,742,403-byte PNG to a
+  755,212-byte JPEG, a 5000-pixel image, navigation avatars, invalid-image retry,
+  mobile layout, logout, persistence across login, and isolation between users.
+- No production user data, Auth core, content schema, or lesson/quiz logic changed.

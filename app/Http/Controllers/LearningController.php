@@ -6,12 +6,24 @@ use App\Models\Course;
 use App\Models\Exercise;
 use App\Models\Language;
 use App\Models\Lesson;
+use App\Models\LessonProgress;
 use App\Models\Unit;
+use App\Services\Progress\LearningProgress;
+use App\Services\Progress\LearningRewardCalculator;
+use App\Services\Progress\LessonAccess;
 use App\Services\Quiz\QuizAnswerChecker;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class LearningController extends Controller
 {
+    public function __construct(
+        private LearningProgress $progress,
+        private LearningRewardCalculator $rewardCalculator
+    ) {
+    }
+
     public function indexLanguages()
     {
         $languages = Language::with('courses')->get();
@@ -26,28 +38,35 @@ class LearningController extends Controller
         return view('frontend.units', compact('course'));
     }
 
-    public function showLessons(Unit $unit)
+    public function showLessons(Request $request, Unit $unit)
     {
         $unit->load('lessons');
 
-        return view('frontend.lessons', compact('unit'));
+        $lessonStates = app(LessonAccess::class)->forCourse(
+            (int) $unit->course_id,
+            $request->user()
+        );
+
+        return view('frontend.lessons', [
+            'unit' => $unit,
+            'lessonStates' => $lessonStates,
+        ]);
     }
 
     public function showLessonContent(Lesson $lesson)
     {
-        $lesson->load([
-            'vocabularies',
-            'exercises',
-        ]);
+        $lesson->load(['vocabularies', 'exercises']);
 
         return view('frontend.lesson-content', compact('lesson'));
     }
 
     public function learn(Request $request, Lesson $lesson)
     {
+        $this->ensureLessonAccessible($request, $lesson);
+
         $flow = $this->buildLessonFlow($lesson);
 
-        // เริ่มเรียนใหม่และล้างผลของรอบเดิม
+        // เริ่มรอบใหม่ ไม่ลบรางวัลที่บันทึกไว้แล้ว
         $this->getRuntime($request, $lesson, $flow, true);
 
         return redirect()->route('lessons.learn.step', [
@@ -58,6 +77,8 @@ class LearningController extends Controller
 
     public function learnStep(Request $request, Lesson $lesson, int $step)
     {
+        $this->ensureLessonAccessible($request, $lesson);
+
         $flow = $this->buildLessonFlow($lesson);
         $total = count($flow);
 
@@ -77,16 +98,22 @@ class LearningController extends Controller
         }
 
         if ($step > $total) {
-            // เปิด URL ท้ายบทอย่างเดียวไม่ถือว่าเรียนจบ
-            if ($runtime['finished_at'] === null) {
+            if (!$this->runtimeIsComplete($runtime, $flow)) {
                 return redirect()->route('lessons.learn.step', [
                     'lesson' => $lesson->id,
-                    'step' => $runtime['next_step'],
+                    'step' => min($runtime['next_step'], $total),
                 ]);
             }
 
             return redirect()->route('lessons.learn.summary', [
                 'lesson' => $lesson->id,
+            ]);
+        }
+
+        if ($step > $runtime['next_step']) {
+            return redirect()->route('lessons.learn.step', [
+                'lesson' => $lesson->id,
+                'step' => $runtime['next_step'],
             ]);
         }
 
@@ -100,15 +127,13 @@ class LearningController extends Controller
             ? ($result['solved'] ? 'correct' : 'wrong')
             : null;
 
-        $selectedAnswer = $result['selected_answer'] ?? null;
-
         return view('frontend.learn-step', [
             'lesson' => $lesson,
             'current' => $current,
             'step' => $step,
             'total' => $total,
             'reviewResult' => $reviewResult,
-            'selectedAnswer' => $selectedAnswer,
+            'selectedAnswer' => $result['selected_answer'] ?? null,
         ]);
     }
 
@@ -118,6 +143,8 @@ class LearningController extends Controller
         int $step,
         QuizAnswerChecker $checker
     ) {
+        $this->ensureLessonAccessible($request, $lesson);
+
         $flow = $this->buildLessonFlow($lesson);
 
         if (count($flow) === 0) {
@@ -129,8 +156,6 @@ class LearningController extends Controller
         $runtime = $this->getRuntime($request, $lesson, $flow);
         $current = $flow[$step - 1] ?? null;
 
-        // รับคำตอบเฉพาะ step ที่ยังต้องทำ
-        // ส่งข้อเดิมซ้ำจะไม่เพิ่ม attempts หรือเปลี่ยนผลครั้งแรก
         if (!$current || $step !== $runtime['next_step']) {
             $targetStep = $runtime['next_step'];
 
@@ -148,11 +173,10 @@ class LearningController extends Controller
             ]);
         }
 
-        // ยืนยันว่าเรียนคำศัพท์นี้แล้วด้วย POST
         if ($current['type'] === 'vocabulary') {
             $runtime['next_step']++;
 
-            $this->saveRuntime($request, $lesson, $runtime);
+            $this->saveRuntime($request, $lesson, $runtime, $flow);
 
             return redirect()->route('lessons.learn.step', [
                 'lesson' => $lesson->id,
@@ -176,7 +200,6 @@ class LearningController extends Controller
 
         $submitted = $validated['answer'];
 
-        // ตัวเลือกต้องเป็นของคำถามปัจจุบัน
         if (
             $isChoice
             && !$question->answers->contains('id', (int) $submitted)
@@ -199,7 +222,6 @@ class LearningController extends Controller
             'selected_answer' => null,
         ];
 
-        // บันทึกผลครั้งแรกเพียงครั้งเดียว
         if ($result['attempts'] === 0) {
             $result['first_correct'] = $correct;
         }
@@ -214,14 +236,13 @@ class LearningController extends Controller
 
         $runtime['results'][$question->id] = $result;
 
-        // ตอบผิดอยู่ข้อเดิม ตอบถูกจึงทำข้อถัดไปได้
         if ($correct) {
             $runtime['next_step']++;
         }
 
-        $this->saveRuntime($request, $lesson, $runtime);
+        // บันทึกทั้งคำตอบถูกและคำตอบผิด
+        $this->saveRuntime($request, $lesson, $runtime, $flow);
 
-        // แสดง feedback ก่อนกดถัดไป
         return redirect()->route('lessons.learn.step', [
             'lesson' => $lesson->id,
             'step' => $step,
@@ -230,6 +251,8 @@ class LearningController extends Controller
 
     public function lessonSummary(Request $request, Lesson $lesson)
     {
+        $this->ensureLessonAccessible($request, $lesson);
+
         $flow = $this->buildLessonFlow($lesson);
         $total = count($flow);
 
@@ -241,27 +264,7 @@ class LearningController extends Controller
 
         $runtime = $this->getRuntime($request, $lesson, $flow);
 
-        $isComplete = $runtime['finished_at'] !== null
-            && $runtime['next_step'] === $total + 1
-            && count($runtime['results']) === $runtime['question_count'];
-
-        // ตรวจว่าทุกคำถามผ่านแล้วและมีผลครั้งแรก
-        foreach ($flow as $item) {
-            if ($item['type'] !== 'review') {
-                continue;
-            }
-
-            $result = $runtime['results'][$item['question']->id] ?? [];
-
-            if (
-                ($result['solved'] ?? false) !== true
-                || !is_bool($result['first_correct'] ?? null)
-            ) {
-                $isComplete = false;
-            }
-        }
-
-        if (!$isComplete) {
+        if (!$this->runtimeIsComplete($runtime, $flow)) {
             return redirect()->route('lessons.learn.step', [
                 'lesson' => $lesson->id,
                 'step' => min($runtime['next_step'], $total),
@@ -270,18 +273,42 @@ class LearningController extends Controller
 
         $summary = $this->buildLessonSummary($runtime);
 
-        // หาบทถัดไปใน Unit เดิมตามลำดับ
-        $nextLesson = $lesson->nextLesson();
+        $rewards = $this->rewardCalculator->calculate(
+            $summary['question_count'],
+            $summary['correct_count']
+        );
 
-        // เมื่อหมด Unit ให้หาบทแรกของ Unit ถัดไปใน Course เดิม
-        if (!$nextLesson) {
-            $nextUnit = $lesson->unit?->nextUnit();
+        $summary['calculated_xp'] = $rewards['xp'];
+        $summary['calculated_stars'] = $rewards['stars'];
+        $summary['progress_saved'] = $runtime['progress_saved'] ?? false;
+        $summary['saved_xp'] = $runtime['saved_xp'] ?? null;
+        $summary['saved_stars'] = $runtime['saved_stars'] ?? null;
 
-            while (!$nextLesson && $nextUnit) {
-                $nextLesson = $nextUnit->lessons()->first();
+        $nextLesson = null;
+        $courseId = $lesson->unit?->course_id;
 
-                if (!$nextLesson) {
-                    $nextUnit = $nextUnit->nextUnit();
+        if ($courseId !== null) {
+            $lessonStates = app(LessonAccess::class)->forCourse(
+                (int) $courseId,
+                $request->user()
+            );
+
+            $passedCurrentLesson = false;
+
+            foreach ($lessonStates as $lessonId => $state) {
+                if ((int) $lessonId === (int) $lesson->id) {
+                    $passedCurrentLesson = true;
+                    continue;
+                }
+
+                if (!$passedCurrentLesson || !$state['available']) {
+                    continue;
+                }
+
+                $nextLesson = Lesson::find($lessonId);
+
+                if ($nextLesson !== null) {
+                    break;
                 }
             }
         }
@@ -293,10 +320,45 @@ class LearningController extends Controller
         ]);
     }
 
+    private function runtimeIsComplete(array $runtime, array $flow): bool
+    {
+        $total = count($flow);
+
+        if (
+            $total === 0
+            || ($runtime['finished_at'] ?? null) === null
+            || ($runtime['total_steps'] ?? null) !== $total
+            || ($runtime['next_step'] ?? null) !== $total + 1
+        ) {
+            return false;
+        }
+
+        $questionCount = 0;
+
+        foreach ($flow as $item) {
+            if ($item['type'] !== 'review') {
+                continue;
+            }
+
+            $questionCount++;
+            $result = $runtime['results'][$item['question']->id] ?? [];
+
+            if (
+                ($result['solved'] ?? false) !== true
+                || !is_bool($result['first_correct'] ?? null)
+                || ($result['attempts'] ?? 0) < 1
+            ) {
+                return false;
+            }
+        }
+
+        return ($runtime['question_count'] ?? null) === $questionCount
+            && count($runtime['results'] ?? []) === $questionCount;
+    }
+
     private function buildLessonSummary(array $runtime): array
     {
         $results = collect($runtime['results']);
-
         $questionCount = $runtime['question_count'];
 
         $correctCount = $results
@@ -305,8 +367,6 @@ class LearningController extends Controller
                     $result['first_correct'] === true
             )
             ->count();
-
-        $wrongCount = $questionCount - $correctCount;
 
         $elapsedSeconds = max(
             0,
@@ -318,7 +378,7 @@ class LearningController extends Controller
             'question_count' => $questionCount,
             'content_count' => $runtime['total_steps'],
             'correct_count' => $correctCount,
-            'wrong_count' => $wrongCount,
+            'wrong_count' => $questionCount - $correctCount,
             'wrong_attempts' => (int) $results->sum('wrong_attempts'),
             'score_percent' => $questionCount > 0
                 ? round(($correctCount / $questionCount) * 100, 2)
@@ -340,6 +400,35 @@ class LearningController extends Controller
         return 'learning_runtime.' . $owner . '.' . $lesson->id;
     }
 
+    private function runtimeStorageAvailable(): bool
+    {
+        return $this->progress->available()
+            && Schema::hasColumn('lesson_progress', 'runtime_state');
+    }
+
+    private function runtimeMatches(
+        mixed $runtime,
+        string $signature,
+        int $total,
+        int $questionCount
+    ): bool {
+        return is_array($runtime)
+            && ($runtime['signature'] ?? null) === $signature
+            && ($runtime['total_steps'] ?? null) === $total
+            && ($runtime['question_count'] ?? null) === $questionCount
+            && ($runtime['vocabulary_count'] ?? null) === $total - $questionCount
+            && is_int($runtime['next_step'] ?? null)
+            && $runtime['next_step'] >= 1
+            && $runtime['next_step'] <= $total + 1
+            && is_int($runtime['started_at'] ?? null)
+            && array_key_exists('finished_at', $runtime)
+            && (
+                $runtime['finished_at'] === null
+                || is_int($runtime['finished_at'])
+            )
+            && is_array($runtime['results'] ?? null);
+    }
+
     private function getRuntime(
         Request $request,
         Lesson $lesson,
@@ -348,44 +437,94 @@ class LearningController extends Controller
     ): array {
         $key = $this->runtimeKey($request, $lesson);
 
-        // เมื่อรายการ step เปลี่ยน ให้เริ่มรอบใหม่
         $stepKeys = array_map(
-            static fn (array $item): string =>
-                $item['type'] === 'vocabulary'
-                    ? 'vocabulary:' . $item['vocabulary']->id
-                    : 'review:' . $item['exercise']->id
-                        . ':' . $item['question']->id
-                        . ':' . $item['exercise_type'],
+            static function (array $item): string {
+                if ($item['type'] === 'vocabulary') {
+                    return 'vocabulary:' . $item['vocabulary']->id;
+                }
+
+                $requiredIds = $item['question']->vocabularies
+                    ->pluck('id')
+                    ->sort()
+                    ->values()
+                    ->implode(',');
+
+                return 'review:' . $item['exercise']->id
+                    . ':' . $item['question']->id
+                    . ':' . $item['exercise_type']
+                    . ':requires:' . $requiredIds;
+            },
             $flow
         );
 
         $signature = hash('sha256', implode('|', $stepKeys));
+        $total = count($flow);
+
+        $questionCount = count(array_filter(
+            $flow,
+            static fn (array $item): bool =>
+                $item['type'] === 'review'
+        ));
+
         $runtime = $request->session()->get($key);
+        $savedProgress = null;
+
+        if ($request->user() && $this->runtimeStorageAvailable()) {
+            $savedProgress = LessonProgress::query()
+                ->where('user_id', $request->user()->id)
+                ->where('lesson_id', $lesson->id)
+                ->first();
+        }
+
+        // ใช้รอบที่บันทึกไว้ของผู้ใช้คนนี้
+        // เพื่อคืนสถานะเมื่อ session หาย
+        if (
+            !$restart
+            && $savedProgress
+            && $this->runtimeMatches(
+                $savedProgress->runtime_state,
+                $signature,
+                $total,
+                $questionCount
+            )
+        ) {
+            $runtime = $savedProgress->runtime_state;
+        }
 
         if (
             $restart
-            || !is_array($runtime)
-            || ($runtime['signature'] ?? null) !== $signature
+            || !$this->runtimeMatches(
+                $runtime,
+                $signature,
+                $total,
+                $questionCount
+            )
         ) {
-            $questionCount = count(array_filter(
-                $flow,
-                static fn (array $item): bool =>
-                    $item['type'] === 'review'
-            ));
-
             $runtime = [
                 'signature' => $signature,
                 'started_at' => now()->timestamp,
                 'finished_at' => null,
                 'next_step' => 1,
-                'total_steps' => count($flow),
+                'total_steps' => $total,
                 'question_count' => $questionCount,
-                'vocabulary_count' => count($flow) - $questionCount,
+                'vocabulary_count' => $total - $questionCount,
                 'results' => [],
+                'progress_saved' => false,
+                'saved_xp' => null,
+                'saved_stars' => null,
             ];
 
-            $request->session()->put($key, $runtime);
+            // ล้างรอบเดิมในแถวที่มีอยู่ แต่ไม่แตะรางวัล
+            // การเปิด URL ครั้งแรกยังไม่สร้าง Progress ขึ้นมา
+            if ($savedProgress) {
+                $savedProgress->update([
+                    'runtime_state' => $runtime,
+                    'last_step' => 1,
+                ]);
+            }
         }
+
+        $request->session()->put($key, $runtime);
 
         return $runtime;
     }
@@ -393,15 +532,69 @@ class LearningController extends Controller
     private function saveRuntime(
         Request $request,
         Lesson $lesson,
-        array $runtime
+        array $runtime,
+        array $flow
     ): void {
         if (
-            $runtime['total_steps'] > 0
-            && $runtime['next_step'] > $runtime['total_steps']
+            count($flow) > 0
+            && $runtime['next_step'] === count($flow) + 1
             && $runtime['finished_at'] === null
         ) {
-            // จับเวลาจบครั้งเดียว เมื่อยืนยันครบทุก step
             $runtime['finished_at'] = now()->timestamp;
+        }
+
+        $user = $request->user();
+
+        if ($user && $this->progress->available()) {
+            // บันทึกรางวัลและรอบเรียนใน transaction เดียวกัน
+            DB::transaction(function () use (
+                $user,
+                $lesson,
+                $flow,
+                &$runtime
+            ) {
+                if (
+                    $this->runtimeIsComplete($runtime, $flow)
+                    && !($runtime['progress_saved'] ?? false)
+                ) {
+                    $summary = $this->buildLessonSummary($runtime);
+
+                    $rewards = $this->rewardCalculator->calculate(
+                        $summary['question_count'],
+                        $summary['correct_count']
+                    );
+
+                    $savedProgress = $this->progress->complete(
+                        $user,
+                        $lesson,
+                        $rewards['xp'],
+                        $rewards['stars']
+                    );
+
+                    $runtime['progress_saved'] =
+                        $savedProgress->completed_at !== null;
+
+                    $runtime['saved_xp'] = (int) $savedProgress->xp;
+                    $runtime['saved_stars'] = (int) $savedProgress->stars;
+                }
+
+                if ($this->runtimeStorageAvailable()) {
+                    LessonProgress::updateOrCreate(
+                        [
+                            'user_id' => $user->id,
+                            'lesson_id' => $lesson->id,
+                        ],
+                        [
+                            'runtime_state' => $runtime,
+                            'last_step' => min(
+                                $runtime['next_step'],
+                                $runtime['total_steps']
+                            ),
+                            'last_visited_at' => now(),
+                        ]
+                    );
+                }
+            });
         }
 
         $request->session()->put(
@@ -421,23 +614,40 @@ class LearningController extends Controller
             'image_choice',
         ];
 
-        $reviewsByType = Exercise::with('questions.answers')
+        $reviewsByType = Exercise::with([
+            'questions.answers',
+            'questions.vocabularies',
+        ])
             ->where('lesson_id', $lesson->id)
             ->whereIn('type', $supportedTypes)
             ->orderBy('id')
             ->get()
             ->groupBy('type');
 
-        $flow = [];
+        $vocabularies = $lesson->vocabularies
+            ->sortBy('id')
+            ->values();
 
-        // เพิ่มทุกคำถามจากทุก Exercise ของประเภทที่กำหนด
-        $appendReviews = function (string $type) use (
-            &$flow,
-            $reviewsByType
-        ): void {
+        $lessonVocabularyIds = $vocabularies->pluck('id')->all();
+        $pendingReviews = [];
+
+        foreach ($supportedTypes as $type) {
             foreach ($reviewsByType->get($type, collect()) as $exercise) {
                 foreach ($exercise->questions->sortBy('id') as $question) {
-                    $flow[] = [
+                    $requiredIds = $question->vocabularies
+                        ->pluck('id')
+                        ->all();
+
+                    abort_if(
+                        count(array_diff(
+                            $requiredIds,
+                            $lessonVocabularyIds
+                        )) > 0,
+                        422,
+                        'คำถามผูกกับคำศัพท์นอกบท กรุณาให้ผู้ดูแลแก้ไข'
+                    );
+
+                    $pendingReviews[] = [
                         'type' => 'review',
                         'exercise_type' => $exercise->type,
                         'exercise' => $exercise,
@@ -445,35 +655,67 @@ class LearningController extends Controller
                     ];
                 }
             }
-
-            // ป้องกันการเพิ่มกลุ่มเดิมซ้ำ
-            $reviewsByType->forget($type);
-        };
-
-        $vocabularies = $lesson->vocabularies
-            ->sortBy('id')
-            ->values();
-
-        foreach ($vocabularies as $index => $vocabulary) {
-            $flow[] = [
-                'type' => 'vocabulary',
-                'vocabulary' => $vocabulary,
-            ];
-
-            if ($index === 1) {
-                $appendReviews('multiple_choice');
-            }
-
-            if ($index === 3) {
-                $appendReviews('fill_blank');
-            }
         }
 
-        // เพิ่มประเภทที่เหลือ รวมถึงบทที่มีคำศัพท์น้อยหรือไม่มีเลย
-        foreach ($supportedTypes as $type) {
-            $appendReviews($type);
+        $flow = [];
+        $learnedVocabularyIds = [];
+
+        $appendReadyReviews = function () use (
+            &$flow,
+            &$pendingReviews,
+            &$learnedVocabularyIds
+        ): void {
+            $remaining = [];
+
+            foreach ($pendingReviews as $review) {
+                $requiredIds = $review['question']->vocabularies
+                    ->pluck('id')
+                    ->all();
+
+                $ready = count($requiredIds) > 0
+                    && count(array_diff(
+                        $requiredIds,
+                        $learnedVocabularyIds
+                    )) === 0;
+
+                if ($ready) {
+                    $flow[] = $review;
+                } else {
+                    $remaining[] = $review;
+                }
+            }
+
+            $pendingReviews = $remaining;
+        };
+
+        foreach ($vocabularies->chunk(2) as $batch) {
+            foreach ($batch as $vocabulary) {
+                $flow[] = [
+                    'type' => 'vocabulary',
+                    'vocabulary' => $vocabulary,
+                ];
+
+                $learnedVocabularyIds[] = $vocabulary->id;
+            }
+
+            $appendReadyReviews();
+        }
+
+        foreach ($pendingReviews as $review) {
+            $flow[] = $review;
         }
 
         return $flow;
+    }
+
+    private function ensureLessonAccessible(
+        Request $request,
+        Lesson $lesson
+    ): void {
+        abort_unless(
+            app(LessonAccess::class)->canLearn($request->user(), $lesson),
+            403,
+            'บทนี้ยังไม่เปิดให้เรียน กรุณาเรียนบทก่อนหน้าให้จบ'
+        );
     }
 }

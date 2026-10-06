@@ -7,43 +7,105 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-/**
- * Proves the add_position migration keeps today's ordering for data that
- * already exists in the database (e.g. the seeded Chinese track) by
- * rolling the migration back, inserting "legacy" rows, and migrating
- * forward again.
- *
- * Uses DatabaseMigrations (not RefreshDatabase) because it runs schema
- * changes, which must not happen inside the per-test transaction.
- */
 class PositionMigrationBackfillTest extends TestCase
 {
     use DatabaseMigrations;
 
     public function test_existing_units_and_lessons_get_sequential_positions_per_parent_in_creation_order(): void
     {
-        // Undo the add_position migration (the latest one).
-        $this->artisan('migrate:rollback', ['--step' => 1])->assertSuccessful();
+        // ทดสอบ migration นี้โดยตรง ไม่ขึ้นกับตัวล่าสุด
+        $migration = require database_path(
+            'migrations/2026_10_01_000001_add_position_to_units_and_lessons_tables.php'
+        );
+
+        $migration->down();
+
         $this->assertFalse(Schema::hasColumn('units', 'position'));
+        $this->assertFalse(Schema::hasColumn('lessons', 'position'));
+
+        // ตารางจาก migration อื่นต้องยังอยู่
+        $this->assertTrue(Schema::hasTable('question_vocabulary'));
 
         $now = now();
-        $languageId = DB::table('languages')->insertGetId(['name' => 'Chinese', 'created_at' => $now, 'updated_at' => $now]);
-        $courseA = DB::table('courses')->insertGetId(['language_id' => $languageId, 'title' => 'A', 'created_at' => $now, 'updated_at' => $now]);
-        $courseB = DB::table('courses')->insertGetId(['language_id' => $languageId, 'title' => 'B', 'created_at' => $now, 'updated_at' => $now]);
 
-        // Interleave inserts across courses so ids are not contiguous per parent.
-        $a1 = DB::table('units')->insertGetId(['course_id' => $courseA, 'title' => 'A1', 'created_at' => $now, 'updated_at' => $now]);
-        $b1 = DB::table('units')->insertGetId(['course_id' => $courseB, 'title' => 'B1', 'created_at' => $now, 'updated_at' => $now]);
-        $a2 = DB::table('units')->insertGetId(['course_id' => $courseA, 'title' => 'A2', 'created_at' => $now, 'updated_at' => $now]);
+        $languageId = DB::table('languages')->insertGetId([
+            'name' => 'Chinese',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
 
-        $l1 = DB::table('lessons')->insertGetId(['unit_id' => $a1, 'title' => 'L1', 'created_at' => $now, 'updated_at' => $now]);
-        $l2 = DB::table('lessons')->insertGetId(['unit_id' => $a1, 'title' => 'L2', 'created_at' => $now, 'updated_at' => $now]);
-        $l3 = DB::table('lessons')->insertGetId(['unit_id' => $a2, 'title' => 'L3', 'created_at' => $now, 'updated_at' => $now]);
+        $courseA = DB::table('courses')->insertGetId([
+            'language_id' => $languageId,
+            'title' => 'A',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
 
-        $this->artisan('migrate')->assertSuccessful();
+        $courseB = DB::table('courses')->insertGetId([
+            'language_id' => $languageId,
+            'title' => 'B',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
 
-        $unitPosition = fn ($id) => (int) DB::table('units')->where('id', $id)->value('position');
-        $lessonPosition = fn ($id) => (int) DB::table('lessons')->where('id', $id)->value('position');
+        // เพิ่มสลับ Course เพื่อพิสูจน์ว่าลำดับแยกตาม parent
+        $a1 = DB::table('units')->insertGetId([
+            'course_id' => $courseA,
+            'title' => 'A1',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $b1 = DB::table('units')->insertGetId([
+            'course_id' => $courseB,
+            'title' => 'B1',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $a2 = DB::table('units')->insertGetId([
+            'course_id' => $courseA,
+            'title' => 'A2',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $l1 = DB::table('lessons')->insertGetId([
+            'unit_id' => $a1,
+            'title' => 'L1',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $l2 = DB::table('lessons')->insertGetId([
+            'unit_id' => $a1,
+            'title' => 'L2',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $l3 = DB::table('lessons')->insertGetId([
+            'unit_id' => $a2,
+            'title' => 'L3',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        // เพิ่ม position และจัดลำดับให้ข้อมูลเดิม
+        $migration->up();
+
+        $this->assertTrue(Schema::hasColumn('units', 'position'));
+        $this->assertTrue(Schema::hasColumn('lessons', 'position'));
+
+        $unitPosition = fn ($id) =>
+            (int) DB::table('units')
+                ->where('id', $id)
+                ->value('position');
+
+        $lessonPosition = fn ($id) =>
+            (int) DB::table('lessons')
+                ->where('id', $id)
+                ->value('position');
 
         $this->assertSame(1, $unitPosition($a1));
         $this->assertSame(2, $unitPosition($a2));

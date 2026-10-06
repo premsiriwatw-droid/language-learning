@@ -3,280 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <meta name="theme-color" content="#101012">
     <title>เข้าสู่ระบบ | Language Learning</title>
-
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-        }
-
-        body {
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(135deg, #6c5ce7, #8e7dff);
-        }
-
-        .container {
-            width: 900px;
-            max-width: 95%;
-            min-height: 540px;
-            display: flex;
-            background: #ffffff;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
-        }
-
-        .left {
-            width: 50%;
-            padding: 55px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            background: linear-gradient(135deg, #5f4bd8, #7b68ee);
-            color: #ffffff;
-        }
-
-        .logo {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 35px;
-        }
-
-        .left h1 {
-            font-size: 42px;
-            line-height: 1.2;
-            margin-bottom: 18px;
-        }
-
-        .left p {
-            font-size: 16px;
-            line-height: 1.7;
-            opacity: 0.9;
-        }
-
-        .languages {
-            display: flex;
-            gap: 12px;
-            margin-top: 28px;
-        }
-
-        .language {
-            padding: 10px 16px;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .right {
-            width: 50%;
-            padding: 55px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .right h2 {
-            font-size: 30px;
-            margin-bottom: 8px;
-            color: #222;
-        }
-
-        .subtitle {
-            color: #777;
-            margin-bottom: 30px;
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 7px;
-            font-size: 14px;
-            font-weight: bold;
-            color: #444;
-        }
-
-        input[type="email"],
-        input[type="password"] {
-            width: 100%;
-            padding: 14px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            font-size: 15px;
-            outline: none;
-        }
-
-        input:focus {
-            border-color: #6c5ce7;
-            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
-        }
-
-        .remember {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            margin-bottom: 22px;
-            font-size: 14px;
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 10px;
-            background: #6c5ce7;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .login-btn:hover {
-            background: #5946d2;
-        }
-
-        .register-text {
-            text-align: center;
-            margin-top: 22px;
-            font-size: 14px;
-            color: #666;
-        }
-
-        .register-text a {
-            color: #6c5ce7;
-            font-weight: bold;
-            text-decoration: none;
-        }
-
-        .error-box {
-            padding: 12px;
-            margin-bottom: 18px;
-            border-radius: 10px;
-            background: #ffecec;
-            color: #d63031;
-            font-size: 14px;
-        }
-
-        @media (max-width: 760px) {
-            .left {
-                display: none;
-            }
-
-            .right {
-                width: 100%;
-                padding: 35px 25px;
-            }
-        }
-    </style>
+    <link rel="preload" href="{{ asset('fonts/alex-brush/AlexBrush-Regular.ttf') }}" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="{{ asset('css/login.css') }}">
+    <script src="{{ asset('js/login.js') }}" defer></script>
 </head>
-
-<body>
-
-<div class="container">
-
-    <div class="left">
-
-        <div class="logo">
-            🌍 Language Learning
+<body class="login-page" data-scene="default">
+    <a class="login-skip" href="#login-form">ข้ามไปเข้าสู่ระบบ</a>
+    <div class="login-atmosphere" aria-hidden="true">
+        <div class="city-scene city-scene-china">
+            <img class="scene-image" src="{{ asset('images/login/china-night.png') }}" alt="" decoding="async">
+            <div class="city-reflections"></div>
         </div>
-
-        <h1>
-            Learn languages.<br>
-            Open your world.
-        </h1>
-
-        <p>
-            เรียนภาษาอังกฤษและภาษาจีน
-            ผ่านบทเรียน คำศัพท์ แบบฝึกหัด
-            และติดตามความก้าวหน้าของคุณ
-        </p>
-
-        <div class="languages">
-            <div class="language">🇬🇧 English</div>
-            <div class="language">🇨🇳 中文</div>
+        <div class="city-scene city-scene-england">
+            <img class="scene-image" src="{{ asset('images/login/england-sunset.png') }}" alt="" decoding="async">
+            <div class="sunset-glow"></div>
         </div>
-
+        <div class="atmosphere-veil"></div>
+        <div class="atmosphere-grain"></div>
     </div>
 
-
-    <div class="right">
-
-        <h2>ยินดีต้อนรับกลับ 👋</h2>
-
-        <p class="subtitle">
-            เข้าสู่ระบบเพื่อเรียนภาษาต่อ
-        </p>
-
-        @if ($errors->any())
-            <div class="error-box">
-                @foreach ($errors->all() as $error)
-                    <div>{{ $error }}</div>
-                @endforeach
+    <div class="login-frame">
+        <header class="login-header">
+            <div class="login-brand">
+                <div class="book-stage" aria-hidden="true">
+                    <div class="book-shadow"></div>
+                    <div class="book" data-book>
+                        <div class="book-back"></div>
+                        <div class="book-pages"></div>
+                        <div class="book-spine"></div>
+                        <div class="book-leaf book-leaf-three"></div>
+                        <div class="book-leaf book-leaf-two"></div>
+                        <div class="book-leaf book-leaf-one"></div>
+                        <div class="book-cover">
+                            <div class="book-cover-face"><span class="book-monogram">Ll.</span><span class="book-cover-rule"></span><span class="book-volume">VOL. 01</span></div>
+                            <div class="book-cover-inside"></div>
+                        </div>
+                    </div>
+                </div>
+                <span class="brand-name">Language Learning</span>
             </div>
-        @endif
+            <span class="header-note"><span></span> A WORLD OF POSSIBILITIES</span>
+        </header>
 
-        <form action="{{ route('login.authenticate') }}" method="POST">
+        <main class="login-main">
+            <section class="login-story" aria-labelledby="story-heading">
+                <p class="story-eyebrow"><span class="eyebrow-line"></span> YOUR NEXT CHAPTER</p>
+                <h1 id="story-heading">Learn languages.<br><span>Open your world.</span></h1>
+                <p class="story-description">ฝึกภาษาหาเมียฝรั่ง เพื่อหาจุดหมายชีวิต พิชิต Global</p>
+                <div class="language-explorer">
+                    <p class="explorer-label" id="explorer-hint">เลือกบรรยากาศ แล้วออกเดินทาง</p>
+                    <div class="language-buttons" role="group" aria-label="เลือกฉากเมือง" aria-describedby="explorer-hint">
+                        <button class="language-button" type="button" data-scene-trigger="england" aria-pressed="false">
+                            <svg class="language-flag" viewBox="0 0 60 40" aria-hidden="true"><path fill="#253b72" d="M0 0h60v40H0z"></path><path stroke="#fff" stroke-width="9" d="m0 0 60 40M60 0 0 40"></path><path stroke="#d33d50" stroke-width="3" d="m0 0 60 40M60 0 0 40"></path><path stroke="#fff" stroke-width="13" d="M30 0v40M0 20h60"></path><path stroke="#d33d50" stroke-width="7" d="M30 0v40M0 20h60"></path></svg>
+                            English <span class="language-arrow" aria-hidden="true">↗</span>
+                        </button>
+                        <button class="language-button" type="button" data-scene-trigger="china" aria-pressed="false">
+                            <svg class="language-flag" viewBox="0 0 60 40" aria-hidden="true"><path fill="#df3545" d="M0 0h60v40H0z"></path><path fill="#ffe089" d="m12 5 2 6h6l-5 4 2 6-5-4-5 4 2-6-5-4h6zM25 4l1 2h2l-2 2 1 2-2-1-2 1 1-2-2-2h2zM31 10l1 2h2l-2 2 1 2-2-1-2 1 1-2-2-2h2zM31 20l1 2h2l-2 2 1 2-2-1-2 1 1-2-2-2h2zM25 26l1 2h2l-2 2 1 2-2-1-2 1 1-2-2-2h2z"></path></svg>
+                            <span lang="zh">中文</span> <span class="language-arrow" aria-hidden="true">↗</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="scene-caption" aria-hidden="true">
+                    <span class="scene-dot"></span><span data-scene-name>ONE WORD. ENDLESS POSSIBILITIES.</span>
+                </div>
+            </section>
 
-            @csrf
-
-            <div class="form-group">
-                <label for="email">อีเมล</label>
-
-                <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value="{{ old('email') }}"
-                    placeholder="example@email.com"
-                    required
-                >
-            </div>
-
-            <div class="form-group">
-                <label for="password">รหัสผ่าน</label>
-
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="กรอกรหัสผ่าน"
-                    required
-                >
-            </div>
-
-            <label class="remember">
-                <input
-                    type="checkbox"
-                    name="remember"
-                >
-
-                จดจำฉัน
-            </label>
-
-            <button type="submit" class="login-btn">
-                เข้าสู่ระบบ
-            </button>
-
-        </form>
-
-        <div class="register-text">
-            ยังไม่มีบัญชี?
-            <a href="{{ route('register') }}">
-                สมัครสมาชิก
-            </a>
-        </div>
-
+            <section class="login-card" aria-labelledby="login-heading">
+                <div class="card-accent" aria-hidden="true"></div>
+                <p class="card-eyebrow">LET'S BEGIN AGAIN</p>
+                <h2 id="login-heading">ยินดีต้อนรับกลับ<span class="heading-dot">.</span></h2>
+                <p class="login-subtitle">เข้าสู่ระบบเพื่อเรียนภาษาต่อ</p>
+                @if ($errors->any())
+                    <div class="error-box" id="login-errors" role="alert">
+                        @foreach ($errors->all() as $error)
+                            <p>{{ $error }}</p>
+                        @endforeach
+                    </div>
+                @endif
+                <form id="login-form" action="{{ route('login.authenticate') }}" method="POST">
+                    @csrf
+                    <div class="form-group">
+                        <label for="email">อีเมล</label>
+                        <div class="input-wrap">
+                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="m4 7 8 6 8-6"></path></svg>
+                            <input type="email" id="email" name="email" value="{{ old('email') }}" placeholder="example@email.com" autocomplete="username" required @error('email') aria-invalid="true" aria-describedby="login-errors" @enderror>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">รหัสผ่าน</label>
+                        <div class="input-wrap">
+                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="3"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"></path></svg>
+                            <input type="password" id="password" name="password" placeholder="กรอกรหัสผ่าน" autocomplete="current-password" required @error('password') aria-invalid="true" aria-describedby="login-errors" @enderror>
+                        </div>
+                    </div>
+                    <label class="remember"><input type="checkbox" name="remember" @checked(old('remember'))><span>จดจำฉัน</span></label>
+                    <button type="submit" class="login-button"><span>เข้าสู่ระบบ</span><span aria-hidden="true">↗</span></button>
+                </form>
+                <p class="register-text">ยังไม่มีบัญชี? <a href="{{ route('register') }}">สมัครสมาชิก <span aria-hidden="true">↗</span></a></p>
+                <div class="card-footer"><span class="card-footer-line"></span><span>THE WORLD IS WAITING FOR YOU</span><span class="card-footer-line"></span></div>
+            </section>
+        </main>
+        <footer class="login-footer">
+            <p>Every word is a new beginning.</p>
+            <button class="motion-toggle" type="button" data-motion-toggle aria-pressed="false" hidden><span data-motion-icon aria-hidden="true">Ⅱ</span><span data-motion-label>หยุดภาพเคลื่อนไหว</span></button>
+            <span class="footer-edition" aria-hidden="true">EN / 中文</span>
+        </footer>
     </div>
-
-</div>
-
 </body>
 </html>

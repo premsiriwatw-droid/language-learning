@@ -2,12 +2,23 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasOrderedPosition;
+use Database\Factories\LessonFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Lesson extends Model
 {
-    public function unit()
+    /** @use HasFactory<LessonFactory> */
+    use HasFactory;
+    use HasOrderedPosition;
+
+    protected $fillable = ['title', 'content'];
+
+    /** @return BelongsTo<Unit, $this> */
+    public function unit(): BelongsTo
     {
         return $this->belongsTo(Unit::class);
     }
@@ -22,5 +33,26 @@ class Lesson extends Model
     public function exercises(): HasMany
     {
         return $this->hasMany(Exercise::class);
+    }
+
+    protected function positionGroupColumn(): string
+    {
+        return 'unit_id';
+    }
+
+    /**
+     * The next Lesson in this Unit, in lesson-plan order.
+     */
+    public function nextLesson(): ?self
+    {
+        return $this->nextSibling();
+    }
+
+    /**
+     * The Lesson immediately before this one in the same Unit, if any.
+     */
+    public function previousLesson(): ?self
+    {
+        return $this->previousSibling();
     }
 }

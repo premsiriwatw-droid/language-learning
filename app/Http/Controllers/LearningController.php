@@ -107,6 +107,15 @@ class LearningController extends Controller
             ]);
         }
 
+        // เปิดได้เฉพาะขั้นปัจจุบันหรือขั้นที่ผ่านมาแล้ว
+        // ป้องกันเปิด URL ไปคำถามก่อนเรียนถึงขั้นนั้น
+        if ($step > $runtime['next_step']) {
+            return redirect()->route('lessons.learn.step', [
+                'lesson' => $lesson->id,
+                'step' => $runtime['next_step'],
+            ]);
+        }
+
         $current = $flow[$step - 1];
 
         $result = $current['type'] === 'review'
@@ -191,7 +200,6 @@ class LearningController extends Controller
 
         $submitted = $validated['answer'];
 
-        // ตัวเลือกต้องเป็นของคำถามปัจจุบัน
         if (
             $isChoice
             && !$question->answers->contains('id', (int) $submitted)
@@ -214,7 +222,6 @@ class LearningController extends Controller
             'selected_answer' => null,
         ];
 
-        // เก็บผลครั้งแรกไว้ แม้จะลองใหม่
         if ($result['attempts'] === 0) {
             $result['first_correct'] = $correct;
         }
@@ -235,7 +242,7 @@ class LearningController extends Controller
 
         $this->saveRuntime($request, $lesson, $runtime, $flow);
 
-        // กลับมาแสดง feedback ก่อนกดถัดไป
+        // แสดง feedback ก่อนกดถัดไป
         return redirect()->route('lessons.learn.step', [
             'lesson' => $lesson->id,
             'step' => $step,
@@ -273,8 +280,6 @@ class LearningController extends Controller
 
         $summary['calculated_xp'] = $rewards['xp'];
         $summary['calculated_stars'] = $rewards['stars'];
-
-        // รางวัลจริงอาจเป็นรางวัลจากการจบครั้งก่อน
         $summary['progress_saved'] = $runtime['progress_saved'] ?? false;
         $summary['saved_xp'] = $runtime['saved_xp'] ?? null;
         $summary['saved_stars'] = $runtime['saved_stars'] ?? null;
@@ -283,7 +288,6 @@ class LearningController extends Controller
         $courseId = $lesson->unit?->course_id;
 
         if ($courseId !== null) {
-            // เรียงตาม Unit และบทเรียนภายใน Course เดิม
             $lessonStates = app(LessonAccess::class)->forCourse(
                 (int) $courseId,
                 $request->user()
@@ -297,7 +301,6 @@ class LearningController extends Controller
                     continue;
                 }
 
-                // ข้ามบทก่อนหน้า บทว่าง และบทที่ยังล็อก
                 if (!$passedCurrentLesson || !$state['available']) {
                     continue;
                 }
@@ -310,7 +313,6 @@ class LearningController extends Controller
             }
         }
 
-        // เปิด Summary อย่างเดียวจะไม่บันทึกหรือให้รางวัลเพิ่ม
         return view('frontend.lesson-summary', [
             'lesson' => $lesson,
             'summary' => $summary,
@@ -464,7 +466,6 @@ class LearningController extends Controller
             $runtime['finished_at'] = now()->timestamp;
         }
 
-        // เรียกจาก POST ที่ผ่านการตรวจขั้นและคำตอบเท่านั้น
         if ($this->runtimeIsComplete($runtime, $flow)) {
             $user = $request->user();
 
@@ -480,7 +481,6 @@ class LearningController extends Controller
                     $summary['correct_count']
                 );
 
-                // Service เดิมป้องกันการให้รางวัลซ้ำ
                 $savedProgress = $this->progress->complete(
                     $user,
                     $lesson,
@@ -522,10 +522,16 @@ class LearningController extends Controller
 
         $flow = [];
 
-        $appendReviews = function (string $type) use (
-            &$flow,
-            $reviewsByType
-        ): void {
+        // เรียนคำศัพท์ทั้งหมดก่อนเริ่มคำถาม
+        foreach ($lesson->vocabularies->sortBy('id') as $vocabulary) {
+            $flow[] = [
+                'type' => 'vocabulary',
+                'vocabulary' => $vocabulary,
+            ];
+        }
+
+        // เล่นทุกคำถามของทุก Exercise ตามประเภท
+        foreach ($supportedTypes as $type) {
             foreach ($reviewsByType->get($type, collect()) as $exercise) {
                 foreach ($exercise->questions->sortBy('id') as $question) {
                     $flow[] = [
@@ -536,31 +542,6 @@ class LearningController extends Controller
                     ];
                 }
             }
-
-            $reviewsByType->forget($type);
-        };
-
-        $vocabularies = $lesson->vocabularies
-            ->sortBy('id')
-            ->values();
-
-        foreach ($vocabularies as $index => $vocabulary) {
-            $flow[] = [
-                'type' => 'vocabulary',
-                'vocabulary' => $vocabulary,
-            ];
-
-            if ($index === 1) {
-                $appendReviews('multiple_choice');
-            }
-
-            if ($index === 3) {
-                $appendReviews('fill_blank');
-            }
-        }
-
-        foreach ($supportedTypes as $type) {
-            $appendReviews($type);
         }
 
         return $flow;

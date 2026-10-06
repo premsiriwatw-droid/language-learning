@@ -9,7 +9,16 @@ class LessonProgress extends Model
 {
     protected $table = 'lesson_progress';
 
-    protected $fillable = ['user_id', 'lesson_id', 'last_step', 'last_visited_at', 'completed_at', 'xp', 'stars'];
+    protected $fillable = [
+        'user_id',
+        'lesson_id',
+        'last_step',
+        'last_visited_at',
+        'completed_at',
+        'xp',
+        'stars',
+        'runtime_state',
+    ];
 
     protected function casts(): array
     {
@@ -19,6 +28,7 @@ class LessonProgress extends Model
             'completed_at' => 'datetime',
             'xp' => 'integer',
             'stars' => 'integer',
+            'runtime_state' => 'array',
         ];
     }
 

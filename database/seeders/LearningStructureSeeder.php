@@ -97,5 +97,51 @@ class LearningStructureSeeder extends Seeder
                 'title' => $title,
             ]);
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Unit 4: Social & Activities
+        |--------------------------------------------------------------------------
+        */
+
+        $unit4 = $course->units()->firstOrCreate([
+            'title' => 'Unit 4: Social & Activities',
+        ]);
+
+        $unit4Lessons = [
+            'Weather',
+            'Daily Routine',
+            'School & Study',
+            'Friends & Social Life',
+        ];
+
+        foreach ($unit4Lessons as $title) {
+            $unit4->lessons()->firstOrCreate([
+                'title' => $title,
+            ]);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Unit 5: Practical Chinese
+        |--------------------------------------------------------------------------
+        */
+
+        $unit5 = $course->units()->firstOrCreate([
+            'title' => 'Unit 5: Practical Chinese',
+        ]);
+
+        $unit5Lessons = [
+            'Health & Body',
+            'Travel & Hotel',
+            'Asking for Help',
+            'Review & Daily Conversation',
+        ];
+
+        foreach ($unit5Lessons as $title) {
+            $unit5->lessons()->firstOrCreate([
+                'title' => $title,
+            ]);
+        }
     }
 }

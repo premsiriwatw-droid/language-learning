@@ -2,20 +2,23 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\ManagesLearningStructure;
 use App\Http\Controllers\Controller;
 use App\Models\Lesson;
 use App\Models\Unit;
+use App\Services\LearningStructure\DeletionImpact;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class LessonController extends Controller
 {
+    use ManagesLearningStructure;
+
     /**
      * แสดง Lesson ทั้งหมดของ Unit นี้ เรียงตามลำดับการเรียน
-     * พร้อมฟอร์มเพิ่ม/แก้ไข/ลบ และปุ่มจัดลำดับ
      */
     public function index(Unit $unit): View
     {
@@ -29,30 +32,38 @@ class LessonController extends Controller
     }
 
     /**
-     * เพิ่ม Lesson ใหม่ใน Unit นี้ (จะต่อท้ายลำดับปัจจุบันให้อัตโนมัติ)
+     * เพิ่ม Lesson ใหม่ต่อท้ายลำดับของ Unit นี้ (ชื่อห้ามซ้ำภายใน Unit เดียวกัน)
+     * unit_id มาจาก URL เท่านั้น ไม่รับจากฟอร์ม
      */
     public function store(Request $request, Unit $unit): RedirectResponse
     {
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'content' => ['nullable', 'string'],
-        ]);
+        $validated = $request->validate(
+            $this->lessonRules($unit->id),
+            $this->structureMessages(),
+            $this->structureAttributes(),
+        );
 
-        $unit->lessons()->create($validated);
+        DB::transaction(function () use ($unit, $validated) {
+            // ล็อก parent ไว้ให้การคำนวณ position ถัดไปไม่ชนกันเมื่อเพิ่มพร้อมกัน
+            Unit::whereKey($unit->id)->lockForUpdate()->first();
+
+            $unit->lessons()->create($validated);
+        });
 
         return back()->with('success', 'เพิ่ม Lesson เรียบร้อยแล้ว');
     }
 
     /**
-     * แก้ไข Lesson (ไม่แก้ไข Unit ที่สังกัด เพื่อไม่ให้โครงสร้างเพี้ยน
-     * และไม่แตะต้อง Vocabulary/Exercise ที่ผูกอยู่ ซึ่งเป็นงานของ Content)
+     * แก้ไข Lesson (ย้าย Unit หรือแก้ position ผ่านฟอร์มนี้ไม่ได้
+     * และไม่แตะ Vocabulary/Exercise ที่ผูกอยู่ ซึ่งเป็นงานของ Content)
      */
     public function update(Request $request, Lesson $lesson): RedirectResponse
     {
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'content' => ['nullable', 'string'],
-        ]);
+        $validated = $request->validate(
+            $this->lessonRules($lesson->unit_id, $lesson),
+            $this->structureMessages(),
+            $this->structureAttributes(),
+        );
 
         $lesson->update($validated);
 
@@ -60,56 +71,78 @@ class LessonController extends Controller
     }
 
     /**
-     * ลบ Lesson (Vocabulary/Exercise/Question/Answer ภายใต้ Lesson นี้
-     * จะถูกลบตามไปด้วย เพราะกำหนด cascade ไว้ที่ระดับฐานข้อมูลแล้ว)
-     * แล้วจัดลำดับ Lesson ที่เหลือใน Unit ใหม่ให้ต่อเนื่องกัน (ไม่มีช่องว่าง)
+     * หน้ายืนยันการลบ แสดงข้อมูลลูกทั้งหมดที่จะถูกลบตามไปด้วย
      */
-    public function destroy(Lesson $lesson): RedirectResponse
+    public function confirmDestroy(Lesson $lesson): View
     {
-        $unit = $lesson->unit;
+        return view('admin.confirm-delete', [
+            'kind' => 'Lesson',
+            'name' => $lesson->title,
+            'impact' => DeletionImpact::for($lesson),
+            'action' => route('admin.lessons.destroy', $lesson),
+            'cancelUrl' => route('admin.units.lessons.index', $lesson->unit_id),
+        ]);
+    }
+
+    /**
+     * ลบ Lesson (Vocabulary/Exercise/Question/Answer/ความคืบหน้า ถูกลบตาม
+     * cascade ของฐานข้อมูล) แล้วเรียงลำดับ Lesson ที่เหลือใหม่ให้ต่อเนื่อง 1..N
+     */
+    public function destroy(Request $request, Lesson $lesson): RedirectResponse
+    {
+        $this->ensureDeletionConfirmed($request, $lesson->title);
+
+        $unitId = $lesson->unit_id;
         $title = $lesson->title;
-        $vocabularyCount = $lesson->vocabularies()->count();
-        $exerciseCount = $lesson->exercises()->count();
 
-        $lesson->delete();
+        DB::transaction(function () use ($lesson, $unitId) {
+            Unit::whereKey($unitId)->lockForUpdate()->first();
 
-        Lesson::resequence($unit->id);
+            $lesson->delete();
+
+            Lesson::resequence($unitId);
+        });
 
         return redirect()
-            ->route('admin.units.lessons.index', $unit)
-            ->with('success', "ลบ Lesson \"{$title}\" เรียบร้อยแล้ว (รวม {$vocabularyCount} คำศัพท์ "
-                ."และ {$exerciseCount} แบบฝึกหัดที่อยู่ภายใต้ Lesson นี้)");
+            ->route('admin.units.lessons.index', $unitId)
+            ->with('success', "ลบ Lesson \"{$title}\" และเนื้อหาทั้งหมดภายใต้ Lesson นี้เรียบร้อยแล้ว");
     }
 
     /**
      * จัดลำดับ Lesson ใหม่ทั้งหมดใน Unit นี้ในครั้งเดียว
-     *
-     * รับ order เป็น array ของ Lesson id เรียงตามลำดับที่ต้องการ
-     * ต้องครบทุก Lesson ของ Unit นี้พอดี (ไม่ขาด ไม่เกิน ไม่ซ้ำ)
-     * เพื่อป้องกันไม่ให้ลำดับเพี้ยนจากการส่งข้อมูลไม่ครบ
+     * order ต้องเป็น id ของ Lesson ใน Unit นี้ครบทุกตัวพอดี
      */
     public function reorder(Request $request, Unit $unit): RedirectResponse
     {
-        $validated = $request->validate([
-            'order' => ['required', 'array'],
-            'order.*' => ['integer'],
-        ]);
+        DB::transaction(function () use ($request, $unit) {
+            Unit::whereKey($unit->id)->lockForUpdate()->first();
 
-        $existingIds = $unit->lessons()->pluck('id')->map(fn ($id) => (int) $id)->sort()->values()->all();
-        $submittedIds = collect($validated['order'])->map(fn ($id) => (int) $id)->sort()->values()->all();
+            $order = $this->validatedOrder($request, $unit->lessons()->pluck('id')->all(), 'Lesson');
 
-        if ($existingIds !== $submittedIds) {
-            throw ValidationException::withMessages([
-                'order' => 'รายการ Lesson ที่ส่งมาไม่ตรงกับ Lesson ทั้งหมดใน Unit นี้',
-            ]);
-        }
-
-        DB::transaction(function () use ($validated) {
-            foreach (array_values($validated['order']) as $index => $lessonId) {
-                Lesson::whereKey((int) $lessonId)->update(['position' => $index + 1]);
+            foreach ($order as $index => $lessonId) {
+                Lesson::whereKey($lessonId)
+                    ->where('unit_id', $unit->id)
+                    ->update(['position' => $index + 1]);
             }
         });
 
         return back()->with('success', 'จัดลำดับ Lesson เรียบร้อยแล้ว');
+    }
+
+    /**
+     * @return array<string, array<int, mixed>>
+     */
+    private function lessonRules(int $unitId, ?Lesson $ignore = null): array
+    {
+        $unique = Rule::unique('lessons', 'title')->where('unit_id', $unitId);
+
+        if ($ignore) {
+            $unique->ignore($ignore);
+        }
+
+        return [
+            'title' => ['required', 'string', 'max:255', $unique],
+            'content' => ['nullable', 'string', 'max:65000'],
+        ];
     }
 }

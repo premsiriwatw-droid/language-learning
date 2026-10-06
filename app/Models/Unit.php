@@ -31,7 +31,7 @@ class Unit extends Model
      */
     public function lessons(): HasMany
     {
-        return $this->hasMany(Lesson::class)->orderBy('position');
+        return $this->hasMany(Lesson::class)->orderBy('position')->orderBy('id');
     }
 
     protected function positionGroupColumn(): string
@@ -46,11 +46,7 @@ class Unit extends Model
      */
     public function nextUnit(): ?self
     {
-        return static::query()
-            ->where('course_id', $this->course_id)
-            ->where('position', '>', $this->position)
-            ->orderBy('position')
-            ->first();
+        return $this->nextSibling();
     }
 
     /**
@@ -58,10 +54,6 @@ class Unit extends Model
      */
     public function previousUnit(): ?self
     {
-        return static::query()
-            ->where('course_id', $this->course_id)
-            ->where('position', '<', $this->position)
-            ->orderByDesc('position')
-            ->first();
+        return $this->previousSibling();
     }
 }

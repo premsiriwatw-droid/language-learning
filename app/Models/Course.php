@@ -29,6 +29,6 @@ class Course extends Model
      */
     public function units(): HasMany
     {
-        return $this->hasMany(Unit::class)->orderBy('position');
+        return $this->hasMany(Unit::class)->orderBy('position')->orderBy('id');
     }
 }

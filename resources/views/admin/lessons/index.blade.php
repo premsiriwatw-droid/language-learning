@@ -81,7 +81,7 @@
             <input
                 type="text"
                 name="title"
-                value="{{ old('title') }}"
+                value="{{ old('_edit_id') ? '' : old('title') }}"
                 required
                 placeholder="เช่น Greetings"
                 class="w-full border-2 border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-400"
@@ -92,7 +92,7 @@
                 rows="2"
                 placeholder="คำอธิบาย/สรุปเนื้อหาของ Lesson นี้ (ไม่บังคับ)"
                 class="w-full border-2 border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-400"
-            >{{ old('content') }}</textarea>
+            >{{ old('_edit_id') ? '' : old('content') }}</textarea>
 
             <button
                 type="submit"
@@ -114,7 +114,7 @@
         @forelse ($lessons as $index => $lesson)
 
             <div
-                x-data="{ editing: false }"
+                x-data="{ editing: {{ (string) old('_edit_id') === (string) $lesson->id ? 'true' : 'false' }} }"
                 class="bg-white border-2 border-gray-200 rounded-2xl p-5"
             >
 
@@ -198,21 +198,12 @@
                             แก้ไข
                         </button>
 
-                        <form
-                            action="{{ route('admin.lessons.destroy', $lesson) }}"
-                            method="POST"
-                            onsubmit="return confirm('ลบ Lesson &quot;{{ $lesson->title }}&quot; พร้อมทั้ง {{ $lesson->vocabularies_count }} คำศัพท์ และ {{ $lesson->exercises_count }} แบบฝึกหัดที่อยู่ภายใต้ Lesson นี้? ย้อนกลับไม่ได้')"
+                        <a
+                            href="{{ route('admin.lessons.delete', $lesson) }}"
+                            class="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 font-bold hover:bg-red-100"
                         >
-                            @csrf
-                            @method('DELETE')
-
-                            <button
-                                type="submit"
-                                class="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 font-bold hover:bg-red-100"
-                            >
-                                ลบ
-                            </button>
-                        </form>
+                            ลบ
+                        </a>
 
                     </div>
 
@@ -229,11 +220,12 @@
                 >
                     @csrf
                     @method('PUT')
+                    <input type="hidden" name="_edit_id" value="{{ $lesson->id }}">
 
                     <input
                         type="text"
                         name="title"
-                        value="{{ $lesson->title }}"
+                        value="{{ (string) old('_edit_id') === (string) $lesson->id ? old('title') : $lesson->title }}"
                         required
                         class="w-full border-2 border-gray-200 rounded-xl px-3 py-2"
                     >
@@ -242,7 +234,7 @@
                         name="content"
                         rows="2"
                         class="w-full border-2 border-gray-200 rounded-xl px-3 py-2"
-                    >{{ $lesson->content }}</textarea>
+                    >{{ (string) old('_edit_id') === (string) $lesson->id ? old('content') : $lesson->content }}</textarea>
 
                     <div class="flex gap-2">
 

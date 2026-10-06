@@ -108,7 +108,6 @@ class LearningController extends Controller
         }
 
         // เปิดได้เฉพาะขั้นปัจจุบันหรือขั้นที่ผ่านมาแล้ว
-        // ป้องกันเปิด URL ไปคำถามก่อนเรียนถึงขั้นนั้น
         if ($step > $runtime['next_step']) {
             return redirect()->route('lessons.learn.step', [
                 'lesson' => $lesson->id,
@@ -408,13 +407,25 @@ class LearningController extends Controller
     ): array {
         $key = $this->runtimeKey($request, $lesson);
 
+        // รวมคำศัพท์ที่ผูกกับคำถามด้วย
+        // หากการผูกหรือรายการขั้นเปลี่ยน ให้เริ่มรอบใหม่
         $stepKeys = array_map(
-            static fn (array $item): string =>
-                $item['type'] === 'vocabulary'
-                    ? 'vocabulary:' . $item['vocabulary']->id
-                    : 'review:' . $item['exercise']->id
-                        . ':' . $item['question']->id
-                        . ':' . $item['exercise_type'],
+            static function (array $item): string {
+                if ($item['type'] === 'vocabulary') {
+                    return 'vocabulary:' . $item['vocabulary']->id;
+                }
+
+                $requiredIds = $item['question']->vocabularies
+                    ->pluck('id')
+                    ->sort()
+                    ->values()
+                    ->implode(',');
+
+                return 'review:' . $item['exercise']->id
+                    . ':' . $item['question']->id
+                    . ':' . $item['exercise_type']
+                    . ':requires:' . $requiredIds;
+            },
             $flow
         );
 
@@ -513,28 +524,43 @@ class LearningController extends Controller
             'image_choice',
         ];
 
-        $reviewsByType = Exercise::with('questions.answers')
+        $reviewsByType = Exercise::with([
+            'questions.answers',
+            'questions.vocabularies',
+        ])
             ->where('lesson_id', $lesson->id)
             ->whereIn('type', $supportedTypes)
             ->orderBy('id')
             ->get()
             ->groupBy('type');
 
-        $flow = [];
+        $vocabularies = $lesson->vocabularies
+            ->sortBy('id')
+            ->values();
 
-        // เรียนคำศัพท์ทั้งหมดก่อนเริ่มคำถาม
-        foreach ($lesson->vocabularies->sortBy('id') as $vocabulary) {
-            $flow[] = [
-                'type' => 'vocabulary',
-                'vocabulary' => $vocabulary,
-            ];
-        }
+        $lessonVocabularyIds = $vocabularies->pluck('id')->all();
 
-        // เล่นทุกคำถามของทุก Exercise ตามประเภท
+        $pendingReviews = [];
+
+        // เก็บทุกคำถามตามประเภท / Exercise / Question
         foreach ($supportedTypes as $type) {
             foreach ($reviewsByType->get($type, collect()) as $exercise) {
                 foreach ($exercise->questions->sortBy('id') as $question) {
-                    $flow[] = [
+                    $requiredIds = $question->vocabularies
+                        ->pluck('id')
+                        ->all();
+
+                    // ห้ามผูกคำศัพท์จากบทอื่น
+                    abort_if(
+                        count(array_diff(
+                            $requiredIds,
+                            $lessonVocabularyIds
+                        )) > 0,
+                        422,
+                        'คำถามผูกกับคำศัพท์นอกบท กรุณาให้ผู้ดูแลแก้ไข'
+                    );
+
+                    $pendingReviews[] = [
                         'type' => 'review',
                         'exercise_type' => $exercise->type,
                         'exercise' => $exercise,
@@ -542,6 +568,60 @@ class LearningController extends Controller
                     ];
                 }
             }
+        }
+
+        $flow = [];
+        $learnedVocabularyIds = [];
+
+        // แทรกเฉพาะข้อที่เรียนคำศัพท์ที่เกี่ยวข้องครบแล้ว
+        $appendReadyReviews = function () use (
+            &$flow,
+            &$pendingReviews,
+            &$learnedVocabularyIds
+        ): void {
+            $remaining = [];
+
+            foreach ($pendingReviews as $review) {
+                $requiredIds = $review['question']->vocabularies
+                    ->pluck('id')
+                    ->all();
+
+                // ข้อที่ยังไม่ได้ผูกคำศัพท์ รอไปท้ายบท
+                $ready = count($requiredIds) > 0
+                    && count(array_diff(
+                        $requiredIds,
+                        $learnedVocabularyIds
+                    )) === 0;
+
+                if ($ready) {
+                    $flow[] = $review;
+                } else {
+                    $remaining[] = $review;
+                }
+            }
+
+            // เอาข้อที่เพิ่มแล้วออก ป้องกันเล่นซ้ำ
+            $pendingReviews = $remaining;
+        };
+
+        // เรียนครั้งละ 2 คำ แล้วทำข้อที่พร้อม
+        foreach ($vocabularies->chunk(2) as $batch) {
+            foreach ($batch as $vocabulary) {
+                $flow[] = [
+                    'type' => 'vocabulary',
+                    'vocabulary' => $vocabulary,
+                ];
+
+                $learnedVocabularyIds[] = $vocabulary->id;
+            }
+
+            $appendReadyReviews();
+        }
+
+        // คำถามที่ไม่ผูกคำศัพท์อยู่ท้ายบท
+        // รองรับบทที่ไม่มีคำศัพท์ด้วย
+        foreach ($pendingReviews as $review) {
+            $flow[] = $review;
         }
 
         return $flow;

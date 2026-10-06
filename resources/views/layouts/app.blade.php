@@ -18,7 +18,25 @@
                 <a href="{{ url('/languages') }}" @if(request()->is('languages', 'courses/*', 'units/*', 'lessons/*')) aria-current="page" @endif>บทเรียน</a>
                 @auth
                     <a href="{{ route('profile') }}" @if(request()->is('profile')) aria-current="page" @endif>โปรไฟล์</a>
-                    <span class="nav-initial" aria-hidden="true">{{ mb_substr(auth()->user()->name, 0, 1) }}</span>
+                    <span class="nav-initial" aria-hidden="true">
+                    @if(\Illuminate\Support\Facades\Storage::disk('local')->exists('profile-photos/'.auth()->id().'/avatar'))
+                        <img
+                            src="{{ route('profile.photo') }}"
+                            alt=""
+                            width="34"
+                            height="34"
+                        >
+                    @else
+                        {{ mb_substr(auth()->user()->name, 0, 1) }}
+                    @endif
+                </span>
+
+                <form class="logout-form" action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button class="logout-button" type="submit">
+                        ออกจากระบบ
+                    </button>
+                </form>
                 @else
                     <a href="{{ route('login') }}">เข้าสู่ระบบ</a>
                 @endauth

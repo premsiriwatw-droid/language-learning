@@ -40,7 +40,8 @@
         <form class="photo-form" action="{{ route('profile.photo.upload') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <label for="profile-photo" class="field-label">เปลี่ยนรูปโปรไฟล์</label>
-            <p id="photo-help" class="field-hint">JPG, PNG หรือ WebP ไม่เกิน 2 MB</p>
+            <p id="photo-help" class="field-hint">JPG, PNG หรือ WebP ไม่เกิน 20 MB ระบบจะย่อรูปใหญ่ให้ก่อนบันทึก</p>
+            <noscript><p class="field-hint">หากปิด JavaScript กรุณาใช้รูปไม่เกิน 2 MB และ 4096 × 4096 พิกเซล</p></noscript>
             <input id="profile-photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" required
                 aria-describedby="photo-help photo-feedback{{ $errors->has('photo') ? ' photo-error' : '' }}"
                 @if($errors->has('photo')) aria-invalid="true" @endif>

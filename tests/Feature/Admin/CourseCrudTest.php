@@ -64,7 +64,7 @@ class CourseCrudTest extends TestCase
         $unit = $this->createCourseWithUnit();
         $course = $unit->course;
 
-        $response = $this->actingAs($admin)->delete(route('admin.courses.destroy', $course));
+        $response = $this->actingAs($admin)->delete(route('admin.courses.destroy', $course), ['confirm_name' => $course->title]);
 
         $response->assertRedirect(route('admin.languages.courses.index', $course->language));
         $this->assertModelMissing($course);

@@ -157,6 +157,9 @@ Route::middleware(['auth', 'admin'])
         Route::put('/languages/{language}', [AdminLanguageController::class, 'update'])
             ->name('languages.update');
 
+        Route::get('/languages/{language}/delete', [AdminLanguageController::class, 'confirmDestroy'])
+            ->name('languages.delete');
+
         Route::delete('/languages/{language}', [AdminLanguageController::class, 'destroy'])
             ->name('languages.destroy');
 
@@ -168,6 +171,9 @@ Route::middleware(['auth', 'admin'])
 
         Route::put('/courses/{course}', [AdminCourseController::class, 'update'])
             ->name('courses.update');
+
+        Route::get('/courses/{course}/delete', [AdminCourseController::class, 'confirmDestroy'])
+            ->name('courses.delete');
 
         Route::delete('/courses/{course}', [AdminCourseController::class, 'destroy'])
             ->name('courses.destroy');
@@ -184,6 +190,9 @@ Route::middleware(['auth', 'admin'])
         Route::put('/units/{unit}', [AdminUnitController::class, 'update'])
             ->name('units.update');
 
+        Route::get('/units/{unit}/delete', [AdminUnitController::class, 'confirmDestroy'])
+            ->name('units.delete');
+
         Route::delete('/units/{unit}', [AdminUnitController::class, 'destroy'])
             ->name('units.destroy');
 
@@ -198,6 +207,9 @@ Route::middleware(['auth', 'admin'])
 
         Route::put('/lessons/{lesson}', [AdminLessonController::class, 'update'])
             ->name('lessons.update');
+
+        Route::get('/lessons/{lesson}/delete', [AdminLessonController::class, 'confirmDestroy'])
+            ->name('lessons.delete');
 
         Route::delete('/lessons/{lesson}', [AdminLessonController::class, 'destroy'])
             ->name('lessons.destroy');

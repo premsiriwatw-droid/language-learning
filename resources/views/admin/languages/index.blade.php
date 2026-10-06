@@ -62,7 +62,7 @@
             <input
                 type="text"
                 name="name"
-                value="{{ old('name') }}"
+                value="{{ old('_edit_id') ? '' : old('name') }}"
                 required
                 placeholder="เช่น Chinese"
                 class="flex-1 border-2 border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-400"
@@ -84,7 +84,7 @@
         @forelse ($languages as $language)
 
             <div
-                x-data="{ editing: false }"
+                x-data="{ editing: {{ (string) old('_edit_id') === (string) $language->id ? 'true' : 'false' }} }"
                 class="bg-white border-2 border-gray-200 rounded-2xl p-5"
             >
 
@@ -117,21 +117,12 @@
                             แก้ไข
                         </button>
 
-                        <form
-                            action="{{ route('admin.languages.destroy', $language) }}"
-                            method="POST"
-                            onsubmit="return confirm('ลบภาษา &quot;{{ $language->name }}&quot; พร้อมทั้ง {{ $language->courses_count }} คอร์สที่อยู่ภายใต้ภาษานี้ (รวมถึง Unit, Lesson และเนื้อหาทั้งหมด)? ย้อนกลับไม่ได้')"
+                        <a
+                            href="{{ route('admin.languages.delete', $language) }}"
+                            class="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 font-bold hover:bg-red-100"
                         >
-                            @csrf
-                            @method('DELETE')
-
-                            <button
-                                type="submit"
-                                class="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 font-bold hover:bg-red-100"
-                            >
-                                ลบ
-                            </button>
-                        </form>
+                            ลบ
+                        </a>
 
                     </div>
 
@@ -148,11 +139,12 @@
                 >
                     @csrf
                     @method('PUT')
+                    <input type="hidden" name="_edit_id" value="{{ $language->id }}">
 
                     <input
                         type="text"
                         name="name"
-                        value="{{ $language->name }}"
+                        value="{{ (string) old('_edit_id') === (string) $language->id ? old('name') : $language->name }}"
                         required
                         class="flex-1 border-2 border-gray-200 rounded-xl px-3 py-2"
                     >

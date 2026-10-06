@@ -76,7 +76,7 @@
             <input
                 type="text"
                 name="title"
-                value="{{ old('title') }}"
+                value="{{ old('_edit_id') ? '' : old('title') }}"
                 required
                 placeholder="เช่น Unit 2: Family"
                 class="flex-1 border-2 border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-400"
@@ -102,7 +102,7 @@
         @forelse ($units as $index => $unit)
 
             <div
-                x-data="{ editing: false }"
+                x-data="{ editing: {{ (string) old('_edit_id') === (string) $unit->id ? 'true' : 'false' }} }"
                 class="bg-white border-2 border-gray-200 rounded-2xl p-5"
             >
 
@@ -186,21 +186,12 @@
                             แก้ไข
                         </button>
 
-                        <form
-                            action="{{ route('admin.units.destroy', $unit) }}"
-                            method="POST"
-                            onsubmit="return confirm('ลบ Unit &quot;{{ $unit->title }}&quot; พร้อมทั้ง {{ $unit->lessons_count }} Lesson ที่อยู่ภายใต้ Unit นี้ (รวมถึงคำศัพท์และแบบฝึกหัดทั้งหมด)? ย้อนกลับไม่ได้')"
+                        <a
+                            href="{{ route('admin.units.delete', $unit) }}"
+                            class="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 font-bold hover:bg-red-100"
                         >
-                            @csrf
-                            @method('DELETE')
-
-                            <button
-                                type="submit"
-                                class="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 font-bold hover:bg-red-100"
-                            >
-                                ลบ
-                            </button>
-                        </form>
+                            ลบ
+                        </a>
 
                     </div>
 
@@ -217,11 +208,12 @@
                 >
                     @csrf
                     @method('PUT')
+                    <input type="hidden" name="_edit_id" value="{{ $unit->id }}">
 
                     <input
                         type="text"
                         name="title"
-                        value="{{ $unit->title }}"
+                        value="{{ (string) old('_edit_id') === (string) $unit->id ? old('title') : $unit->title }}"
                         required
                         class="flex-1 border-2 border-gray-200 rounded-xl px-3 py-2"
                     >

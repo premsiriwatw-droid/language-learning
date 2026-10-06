@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\LanguageController as AdminLanguageController;
 use App\Http\Controllers\Admin\LessonController as AdminLessonController;
 use App\Http\Controllers\Admin\UnitController as AdminUnitController;
+use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\ContentManagementController;
 use App\Http\Controllers\LearningController;
@@ -11,8 +13,6 @@ use App\Http\Controllers\ProgressProfileController;
 use App\Http\Controllers\QuizController;
 use App\Http\Middleware\RememberLearningVisit;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\AdminDashboardController;
-use App\Http\Controllers\Admin\UserManagementController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -94,59 +94,54 @@ Route::middleware('auth')->group(function () {
     */
 
     Route::middleware(['admin'])
-    ->prefix('content')
-    ->name('content.')
-    ->group(function () {
-        Route::get('/lessons/{lesson}', [ContentManagementController::class, 'index'])
-            ->name('index');
+        ->prefix('content')
+        ->name('content.')
+        ->group(function () {
+            Route::get('/lessons/{lesson}', [ContentManagementController::class, 'index'])
+                ->name('index');
 
-        Route::post('/lessons/{lesson}/vocabularies', [ContentManagementController::class, 'storeVocabulary'])
-            ->name('vocabularies.store');
+            Route::post('/lessons/{lesson}/vocabularies', [ContentManagementController::class, 'storeVocabulary'])
+                ->name('vocabularies.store');
 
-        Route::put('/vocabularies/{vocabulary}', [ContentManagementController::class, 'updateVocabulary'])
-            ->name('vocabularies.update');
+            Route::put('/vocabularies/{vocabulary}', [ContentManagementController::class, 'updateVocabulary'])
+                ->name('vocabularies.update');
 
-        Route::delete('/vocabularies/{vocabulary}', [ContentManagementController::class, 'destroyVocabulary'])
-            ->name('vocabularies.destroy');
+            Route::delete('/vocabularies/{vocabulary}', [ContentManagementController::class, 'destroyVocabulary'])
+                ->name('vocabularies.destroy');
 
-        Route::post('/lessons/{lesson}/exercises', [ContentManagementController::class, 'storeExercise'])
-            ->name('exercises.store');
+            Route::post('/lessons/{lesson}/exercises', [ContentManagementController::class, 'storeExercise'])
+                ->name('exercises.store');
 
-        Route::put('/exercises/{exercise}', [ContentManagementController::class, 'updateExercise'])
-            ->name('exercises.update');
+            Route::put('/exercises/{exercise}', [ContentManagementController::class, 'updateExercise'])
+                ->name('exercises.update');
 
-        Route::delete('/exercises/{exercise}', [ContentManagementController::class, 'destroyExercise'])
-            ->name('exercises.destroy');
+            Route::delete('/exercises/{exercise}', [ContentManagementController::class, 'destroyExercise'])
+                ->name('exercises.destroy');
 
-        Route::post('/exercises/{exercise}/questions', [ContentManagementController::class, 'storeQuestion'])
-            ->name('questions.store');
+            Route::post('/exercises/{exercise}/questions', [ContentManagementController::class, 'storeQuestion'])
+                ->name('questions.store');
 
-        Route::put('/questions/{question}', [ContentManagementController::class, 'updateQuestion'])
-            ->name('questions.update');
+            Route::put('/questions/{question}', [ContentManagementController::class, 'updateQuestion'])
+                ->name('questions.update');
 
-        Route::delete('/questions/{question}', [ContentManagementController::class, 'destroyQuestion'])
-            ->name('questions.destroy');
+            Route::delete('/questions/{question}', [ContentManagementController::class, 'destroyQuestion'])
+                ->name('questions.destroy');
 
-        Route::post('/questions/{question}/answers', [ContentManagementController::class, 'storeAnswer'])
-            ->name('answers.store');
+            Route::post('/questions/{question}/answers', [ContentManagementController::class, 'storeAnswer'])
+                ->name('answers.store');
 
-        Route::put('/answers/{answer}', [ContentManagementController::class, 'updateAnswer'])
-            ->name('answers.update');
+            Route::put('/answers/{answer}', [ContentManagementController::class, 'updateAnswer'])
+                ->name('answers.update');
 
-        Route::delete('/answers/{answer}', [ContentManagementController::class, 'destroyAnswer'])
-            ->name('answers.destroy');
-    });
+            Route::delete('/answers/{answer}', [ContentManagementController::class, 'destroyAnswer'])
+                ->name('answers.destroy');
+        });
 });
 
 /*
 |--------------------------------------------------------------------------
-| Admin: Learning Structure (Language / Course / Unit / Lesson)
+| Admin: Learning Structure
 |--------------------------------------------------------------------------
-|
-| Owned by person 2. Admin-only CRUD for the structure tree itself.
-| Vocabulary/Exercise/Question/Answer stay in ContentManagementController
-| above - this group never touches them directly.
-|
 */
 
 Route::middleware(['auth', 'admin'])
@@ -162,6 +157,9 @@ Route::middleware(['auth', 'admin'])
         Route::put('/languages/{language}', [AdminLanguageController::class, 'update'])
             ->name('languages.update');
 
+        Route::get('/languages/{language}/delete', [AdminLanguageController::class, 'confirmDestroy'])
+            ->name('languages.delete');
+
         Route::delete('/languages/{language}', [AdminLanguageController::class, 'destroy'])
             ->name('languages.destroy');
 
@@ -173,6 +171,9 @@ Route::middleware(['auth', 'admin'])
 
         Route::put('/courses/{course}', [AdminCourseController::class, 'update'])
             ->name('courses.update');
+
+        Route::get('/courses/{course}/delete', [AdminCourseController::class, 'confirmDestroy'])
+            ->name('courses.delete');
 
         Route::delete('/courses/{course}', [AdminCourseController::class, 'destroy'])
             ->name('courses.destroy');
@@ -189,6 +190,9 @@ Route::middleware(['auth', 'admin'])
         Route::put('/units/{unit}', [AdminUnitController::class, 'update'])
             ->name('units.update');
 
+        Route::get('/units/{unit}/delete', [AdminUnitController::class, 'confirmDestroy'])
+            ->name('units.delete');
+
         Route::delete('/units/{unit}', [AdminUnitController::class, 'destroy'])
             ->name('units.destroy');
 
@@ -204,6 +208,9 @@ Route::middleware(['auth', 'admin'])
         Route::put('/lessons/{lesson}', [AdminLessonController::class, 'update'])
             ->name('lessons.update');
 
+        Route::get('/lessons/{lesson}/delete', [AdminLessonController::class, 'confirmDestroy'])
+            ->name('lessons.delete');
+
         Route::delete('/lessons/{lesson}', [AdminLessonController::class, 'destroy'])
             ->name('lessons.destroy');
     });
@@ -212,10 +219,6 @@ Route::middleware(['auth', 'admin'])
 |--------------------------------------------------------------------------
 | Quiz Routes
 |--------------------------------------------------------------------------
-|
-| Keep the existing Quiz System behavior.
-| Quiz routes remain outside the auth middleware.
-|
 */
 
 Route::get('/quiz/{exercise}', [QuizController::class, 'show'])
@@ -228,10 +231,6 @@ Route::post('/quiz/{exercise}', [QuizController::class, 'submit'])
 |--------------------------------------------------------------------------
 | Lesson Learning Flow
 |--------------------------------------------------------------------------
-|
-| Keep the existing learning flow behavior.
-| Learning routes remain outside the auth middleware.
-|
 */
 
 Route::get('/lessons/{lesson}/learn', [LearningController::class, 'learn'])
@@ -244,34 +243,37 @@ Route::get('/lessons/{lesson}/learn/{step}', [LearningController::class, 'learnS
 Route::post('/lessons/{lesson}/learn/{step}', [LearningController::class, 'submitLearnStep'])
     ->name('lessons.learn.submit');
 
-// ========================================
-// Admin Routes
-// ========================================
+// Summary ตรวจว่าเรียนครบจริงภายใน Controller
+Route::get('/lessons/{lesson}/summary', [LearningController::class, 'lessonSummary'])
+    ->name('lessons.learn.summary');
+
+/*
+|--------------------------------------------------------------------------
+| Admin Dashboard / User Management
+|--------------------------------------------------------------------------
+*/
 
 Route::middleware(['auth', 'admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-
-        // Dashboard
         Route::get('/dashboard', [
             AdminDashboardController::class,
-            'index'
+            'index',
         ])->name('dashboard');
 
-        // User Management
         Route::get('/users', [
             UserManagementController::class,
-            'index'
+            'index',
         ])->name('users.index');
 
         Route::get('/users/{user}/edit', [
             UserManagementController::class,
-            'edit'
+            'edit',
         ])->name('users.edit');
 
         Route::put('/users/{user}', [
             UserManagementController::class,
-            'update'
+            'update',
         ])->name('users.update');
     });

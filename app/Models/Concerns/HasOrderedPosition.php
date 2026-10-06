@@ -35,12 +35,57 @@ trait HasOrderedPosition
      */
     public function scopeOrdered($query)
     {
-        return $query->orderBy('position');
+        return $query->orderBy('position')->orderBy('id');
+    }
+
+    /**
+     * พี่น้องตัวถัดไปตามลำดับ (position, id) ภายใน parent เดียวกัน
+     * ใช้ id เป็นตัวตัดสินเมื่อ position ซ้ำ จึงไม่มีทางข้ามหรือวนซ้ำ
+     * แม้ข้อมูลจะมี position ชนกัน
+     */
+    protected function nextSibling(): ?static
+    {
+        $column = $this->positionGroupColumn();
+
+        return static::query()
+            ->where($column, $this->{$column})
+            ->where(function ($query) {
+                $query->where('position', '>', $this->position)
+                    ->orWhere(function ($query) {
+                        $query->where('position', $this->position)
+                            ->where('id', '>', $this->getKey());
+                    });
+            })
+            ->orderBy('position')
+            ->orderBy('id')
+            ->first();
+    }
+
+    /**
+     * พี่น้องตัวก่อนหน้าตามลำดับ (position, id) ภายใน parent เดียวกัน
+     */
+    protected function previousSibling(): ?static
+    {
+        $column = $this->positionGroupColumn();
+
+        return static::query()
+            ->where($column, $this->{$column})
+            ->where(function ($query) {
+                $query->where('position', '<', $this->position)
+                    ->orWhere(function ($query) {
+                        $query->where('position', $this->position)
+                            ->where('id', '<', $this->getKey());
+                    });
+            })
+            ->orderByDesc('position')
+            ->orderByDesc('id')
+            ->first();
     }
 
     /**
      * Re-number every sibling under $parentId to a clean 1..N sequence,
-     * in their current position order. Safe to call after a delete (which
+     * in their current (position, id) order - this also repairs duplicate
+     * positions if any ever slip in. Safe to call after a delete (which
      * leaves a gap) or after a manual reorder.
      *
      * Uses query-builder updates (not Eloquent's mass-assignment-guarded

@@ -51,7 +51,7 @@
             <section class="login-story" aria-labelledby="story-heading">
                 <p class="story-eyebrow"><span class="eyebrow-line"></span> YOUR NEXT CHAPTER</p>
                 <h1 id="story-heading">Learn languages.<br><span>Open your world.</span></h1>
-                <p class="story-description">ฝึกภาษาหาเมียฝรั่ง เพื่อหาจุดหมายชีวิต พิชิต Global</p>
+                <p class="story-description">เรียนรู้ภาษา เป็นเพื่อนกับทุกเชื้อชาติ</p>
                 <div class="language-explorer">
                     <p class="explorer-label" id="explorer-hint">เลือกบรรยากาศ แล้วออกเดินทาง</p>
                     <div class="language-buttons" role="group" aria-label="เลือกฉากเมือง" aria-describedby="explorer-hint">

@@ -143,5 +143,63 @@ class LearningStructureSeeder extends Seeder
                 'title' => $title,
             ]);
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | English Learning Structure
+        |--------------------------------------------------------------------------
+        */
+
+        $englishLanguage = Language::firstOrCreate([
+            'name' => 'English',
+        ]);
+
+        $englishCourse = $englishLanguage->courses()->firstOrCreate([
+            'title' => 'English Beginner',
+        ]);
+
+        $englishUnits = [
+            'Unit 1: Basics' => [
+                'Greetings',
+                'Self Introduction',
+                'Numbers',
+            ],
+            'Unit 2: Daily Life' => [
+                'Family',
+                'Age',
+                'Time',
+                'Food & Drinks',
+            ],
+            'Unit 3: Everyday Conversation' => [
+                'Shopping',
+                'Transportation',
+                'Places & Directions',
+                'Hobbies',
+            ],
+            'Unit 4: Social & Activities' => [
+                'Weather',
+                'Daily Routine',
+                'School & Study',
+                'Friends & Social Life',
+            ],
+            'Unit 5: Practical English' => [
+                'Health & Body',
+                'Travel & Hotel',
+                'Asking for Help',
+                'Review & Daily Conversation',
+            ],
+        ];
+
+        foreach ($englishUnits as $unitTitle => $lessonTitles) {
+            $englishUnit = $englishCourse->units()->firstOrCreate([
+                'title' => $unitTitle,
+            ]);
+
+            foreach ($lessonTitles as $lessonTitle) {
+                $englishUnit->lessons()->firstOrCreate([
+                    'title' => $lessonTitle,
+                ]);
+            }
+        }
     }
 }

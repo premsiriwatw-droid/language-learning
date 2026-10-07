@@ -11,38 +11,12 @@
 </head>
 <body class="login-page" data-scene="default">
     <a class="login-skip" href="#login-form">ข้ามไปเข้าสู่ระบบ</a>
-    <div class="login-atmosphere" aria-hidden="true">
-        <div class="city-scene city-scene-china">
-            <img class="scene-image" src="{{ asset('images/login/china-sunrise.png') }}" alt="" decoding="async">
-            <div class="sunrise-glow"></div>
-            <div class="city-reflections"></div>
-        </div>
-        <div class="city-scene city-scene-england">
-            <img class="scene-image" src="{{ asset('images/login/england-sunset.png') }}" alt="" decoding="async">
-            <div class="sunset-glow"></div>
-        </div>
-        <div class="atmosphere-veil"></div>
-        <div class="atmosphere-grain"></div>
-    </div>
+    @include('auth.partials.atmosphere')
 
     <div class="login-frame">
         <header class="login-header">
             <div class="login-brand">
-                <div class="book-stage" aria-hidden="true">
-                    <div class="book-shadow"></div>
-                    <div class="book" data-book>
-                        <div class="book-back"></div>
-                        <div class="book-pages"></div>
-                        <div class="book-spine"></div>
-                        <div class="book-leaf book-leaf-three"></div>
-                        <div class="book-leaf book-leaf-two"></div>
-                        <div class="book-leaf book-leaf-one"></div>
-                        <div class="book-cover">
-                            <div class="book-cover-face"><span class="book-monogram">Ll.</span><span class="book-cover-rule"></span><span class="book-volume">VOL. 01</span></div>
-                            <div class="book-cover-inside"></div>
-                        </div>
-                    </div>
-                </div>
+                @include('auth.partials.book')
                 <span class="brand-name">Language Learning</span>
             </div>
             <span class="header-note"><span></span> A WORLD OF POSSIBILITIES</span>
@@ -53,22 +27,7 @@
                 <p class="story-eyebrow"><span class="eyebrow-line"></span> YOUR NEXT CHAPTER</p>
                 <h1 id="story-heading">Learn languages.<br><span>Open your world.</span></h1>
                 <p class="story-description">เรียนรู้ภาษา เป็นเพื่อนกับทุกเชื้อชาติ</p>
-                <div class="language-explorer">
-                    <p class="explorer-label" id="explorer-hint">เลือกบรรยากาศ แล้วออกเดินทาง</p>
-                    <div class="language-buttons" role="group" aria-label="เลือกฉากเมือง" aria-describedby="explorer-hint">
-                        <button class="language-button" type="button" data-scene-trigger="england" aria-pressed="false">
-                            <svg class="language-flag" viewBox="0 0 60 40" aria-hidden="true"><path fill="#253b72" d="M0 0h60v40H0z"></path><path stroke="#fff" stroke-width="9" d="m0 0 60 40M60 0 0 40"></path><path stroke="#d33d50" stroke-width="3" d="m0 0 60 40M60 0 0 40"></path><path stroke="#fff" stroke-width="13" d="M30 0v40M0 20h60"></path><path stroke="#d33d50" stroke-width="7" d="M30 0v40M0 20h60"></path></svg>
-                            English <span class="language-arrow" aria-hidden="true">↗</span>
-                        </button>
-                        <button class="language-button" type="button" data-scene-trigger="china" aria-pressed="false">
-                            <svg class="language-flag" viewBox="0 0 60 40" aria-hidden="true"><path fill="#df3545" d="M0 0h60v40H0z"></path><path fill="#ffe089" d="m12 5 2 6h6l-5 4 2 6-5-4-5 4 2-6-5-4h6zM25 4l1 2h2l-2 2 1 2-2-1-2 1 1-2-2-2h2zM31 10l1 2h2l-2 2 1 2-2-1-2 1 1-2-2-2h2zM31 20l1 2h2l-2 2 1 2-2-1-2 1 1-2-2-2h2zM25 26l1 2h2l-2 2 1 2-2-1-2 1 1-2-2-2h2z"></path></svg>
-                            <span lang="zh">中文</span> <span class="language-arrow" aria-hidden="true">↗</span>
-                        </button>
-                    </div>
-                </div>
-                <div class="scene-caption" aria-hidden="true">
-                    <span class="scene-dot"></span><span data-scene-name>ONE WORD. ENDLESS POSSIBILITIES.</span>
-                </div>
+                @include('auth.partials.language-explorer')
             </section>
 
             <section class="login-card" aria-labelledby="login-heading">

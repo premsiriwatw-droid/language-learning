@@ -1,0 +1,190 @@
+@font-face {
+    font-family: 'Bebas Neue';
+    src: url('../fonts/bebas-neue/BebasNeue-Regular.ttf') format('truetype');
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+}
+
+/* Bebas Neue covers Latin; system fonts supply Thai and Chinese glyphs. */
+.register-page {
+    font-family: 'Bebas Neue', 'Leelawadee UI', Tahoma, sans-serif;
+    font-weight: 400;
+}
+
+.register-frame {
+    width: min(1240px, 100%);
+    padding: 28px 40px 22px;
+}
+
+.register-page .header-note { font-size: 13px; letter-spacing: 1.8px; }
+.register-page .login-brand { gap: 40px; }
+.register-page .brand-name { font-family: 'Alex Brush', cursive; }
+.register-page .book-monogram { font-family: inherit; }
+.register-page .book-volume { font-size: 5px; }
+
+.register-panels {
+    flex: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1cm;
+    align-items: stretch;
+    padding: 32px 0 38px;
+}
+
+.register-story,
+.register-card {
+    position: relative;
+    min-width: 0;
+    border: 1px solid #d9ba85;
+    border-radius: 28px;
+    box-shadow: 0 22px 65px #75502917, 0 3px 9px #94652108;
+    animation: register-float 12s ease-in-out infinite;
+    animation-play-state: paused;
+}
+
+.register-story {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 44px 30px;
+    overflow: hidden;
+    background: radial-gradient(ellipse at 100% 5%, #f0d29930, transparent 65%), #fffdf3cf;
+    backdrop-filter: blur(8px);
+}
+
+.register-card {
+    padding: 36px 40px 28px;
+    align-self: center;
+    animation-name: register-float-counter;
+    animation-duration: 14s;
+}
+
+.register-page.motion-ready .register-story,
+.register-page.motion-ready .register-card,
+.register-page.motion-ready .register-breeze path { animation-play-state: running; }
+
+/* Keep the controls still as soon as the user interacts with either card. */
+.register-page .register-story:focus-within,
+.register-page .register-card:focus-within { animation-play-state: paused; }
+@media (hover: hover) {
+    .register-page .register-story:hover,
+    .register-page .register-card:hover { animation-play-state: paused; }
+}
+
+.register-page .card-accent { left: 40px; width: 75px; }
+.register-page .story-eyebrow { margin-bottom: 23px; font-size: 14px; font-weight: 400; letter-spacing: 2.2px; }
+.register-page .login-story h1 { font-size: clamp(62px, 6.2vw, 87px); line-height: .97; font-weight: 400; letter-spacing: .2px; }
+.register-page .story-description { margin-top: 24px; font-size: 15px; line-height: 1.95; }
+.register-page .language-explorer { margin-top: 30px; }
+.register-page .language-button { font-size: 20px; min-height: 50px; padding: 10px 18px; }
+.register-page .language-button [lang="zh"] { font-size: 15px; }
+.register-page .language-arrow { font-family: 'Segoe UI', sans-serif; font-size: 18px; }
+.register-page .scene-caption { margin-top: 25px; font-size: 12px; letter-spacing: 1.3px; }
+.register-story-footer { display: flex; align-items: center; gap: 12px; margin-top: 37px; color: #896631; font-size: 11px; letter-spacing: 1px; }
+.story-footer-line { height: 1px; flex: 1; background: linear-gradient(90deg, #c9a36988, #c9a36920); }
+
+.register-page .card-eyebrow { font-size: 14px; font-weight: 400; letter-spacing: 2px; margin-bottom: 8px; }
+.register-page .login-card h2 { font-size: 31px; letter-spacing: -.5px; }
+.register-page .login-subtitle { margin-bottom: 24px; font-size: 13px; }
+.register-page .form-group { margin-bottom: 16px; }
+.register-page .form-group > label { font-size: 13px; }
+.register-page .input-wrap input { min-height: 49px; font-size: 16px; }
+.register-page .input-wrap input::placeholder { font-size: 14px; }
+.register-page .login-button { margin-top: 23px; }
+.register-page .login-button > span:last-child { font-family: 'Segoe UI', sans-serif; }
+.register-page .register-text { margin: 21px 0 22px; }
+.register-page .card-footer { font-size: 10px; letter-spacing: 1.2px; }
+.register-page .login-footer { font-size: 13px; letter-spacing: .5px; }
+.register-page .motion-toggle { font-size: 11px; letter-spacing: 0; }
+.register-page .motion-toggle [data-motion-icon] { font-family: 'Segoe UI', sans-serif; }
+.register-page .footer-edition { font-size: 12px; }
+
+.register-breeze {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+}
+.register-breeze svg { width: 100%; height: 100%; }
+.register-breeze path {
+    stroke: #bb8736;
+    stroke-width: 1;
+    stroke-linecap: round;
+    stroke-dasharray: 130 1600;
+    opacity: .22;
+    animation: register-breeze 20s linear infinite;
+    animation-play-state: paused;
+}
+.register-breeze path:nth-child(2) { animation-delay: -8s; animation-duration: 26s; opacity: .16; }
+.register-breeze path:nth-child(3) { animation-delay: -1.4s; opacity: .1; }
+.register-page .atmosphere-veil {
+    background: linear-gradient(180deg, #fffdf9bd, #fffdf93d 40%, #fffdf957 72%, #fffdf9db);
+}
+
+@keyframes register-float {
+    0%, 100% { transform: translateY(0) rotate(-.12deg); }
+    50% { transform: translateY(-6px) rotate(.12deg); }
+}
+@keyframes register-float-counter {
+    0%, 100% { transform: translateY(-3px) rotate(.1deg); }
+    50% { transform: translateY(3px) rotate(-.1deg); }
+}
+@keyframes register-breeze {
+    from { stroke-dashoffset: 1750; transform: translateY(0); }
+    to { stroke-dashoffset: 0; transform: translateY(-18px); }
+}
+
+@media (max-width: 1080px) {
+    .register-frame { padding: 25px 30px 22px; }
+    .register-story { padding: 34px 30px 28px; }
+    .register-card { padding: 32px 30px 26px; }
+    .register-page .card-accent { left: 30px; }
+    .register-page .login-story h1 { font-size: 68px; }
+    .register-page .card-footer { letter-spacing: .8px; font-size: 9px; }
+}
+
+@media (max-width: 800px) {
+    .register-frame { width: min(600px, 100%); padding: 24px 26px 22px; }
+    .register-panels { grid-template-columns: minmax(0, 1fr); gap: 1cm; padding: 30px 0 35px; }
+    .register-story { padding: 33px 30px 27px; }
+    .register-page .login-story h1 { font-size: 67px; }
+    .register-page .story-description { margin-top: 20px; font-size: 14px; }
+    .register-page .language-explorer { margin-top: 25px; }
+    .register-page .scene-caption { font-size: 11px; margin-top: 22px; }
+    .register-story-footer { margin-top: 27px; }
+    .register-card { padding: 32px 30px 27px; }
+    .register-page .login-card h2 { font-size: 30px; }
+    .register-page .login-subtitle { margin-bottom: 23px; }
+    .register-page .atmosphere-veil { background: linear-gradient(180deg, #fffdf9c9, #fffdf952 45%, #fffdf9db); }
+}
+
+@media (max-width: 480px) {
+    .register-page .login-brand { gap: 24px; }
+    .register-page .brand-name { font-size: clamp(30px, 9vw, 40px); }
+    .register-page .book-stage { flex-basis: 51px; height: 70px; transform: scale(.82); transform-origin: center; }
+}
+
+@media (max-width: 390px) {
+    .register-frame { padding: 20px 18px; }
+    .register-panels { padding-top: 25px; }
+    .register-story { padding: 29px 22px 25px; }
+    .register-card { padding: 30px 23px 26px; }
+    .register-story, .register-card { border-radius: 23px; }
+    .register-page .card-accent { left: 23px; }
+    .register-page .login-story h1 { font-size: clamp(54px, 16vw, 62px); }
+    .register-page .story-eyebrow { font-size: 12px; letter-spacing: 1.8px; }
+    .register-page .story-description { font-size: 13px; }
+    .register-page .language-buttons { gap: 10px; }
+    .register-page .language-button { padding: 9px 12px; gap: 7px; font-size: 19px; }
+    .register-page .language-arrow { margin-left: 3px; }
+    .register-page .scene-caption { font-size: 10px; letter-spacing: .8px; }
+    .register-story-footer { font-size: 10px; gap: 8px; }
+    .register-page .login-card h2 { font-size: 27px; }
+    .register-page .card-footer { font-size: 8px; letter-spacing: .6px; gap: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .register-story, .register-card, .register-breeze path { animation: none !important; transform: none; }
+}

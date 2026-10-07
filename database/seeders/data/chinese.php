@@ -127,6 +127,8 @@ return [
 
                 [
                     'question' => '谢谢 แปลว่าอะไร?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['谢谢'],
                     'explanation' => '谢谢 (xièxie) แปลว่า ขอบคุณ',
                     'answers' => [
                         ['สวัสดี', false],
@@ -138,6 +140,8 @@ return [
 
                 [
                     'question' => '对不起 แปลว่าอะไร?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['对不起'],
                     'explanation' => '对不起 (duìbuqǐ) แปลว่า ขอโทษ',
                     'answers' => [
                         ['ขอบคุณ', false],
@@ -149,6 +153,8 @@ return [
 
                 [
                     'question' => '晚安 ใช้พูดในความหมายใด?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['晚安'],
                     'explanation' => '晚安 (wǎn\'ān) ใช้กล่าวราตรีสวัสดิ์',
                     'answers' => [
                         ['สวัสดีตอนเช้า', false],
@@ -160,6 +166,8 @@ return [
 
                 [
                     'question' => 'ถ้ามีคนพูด 谢谢 ควรตอบว่าอะไร?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['谢谢', '不客气'],
                     'explanation' => '不客气 (bú kèqi) ใช้ตอบรับคำขอบคุณ หมายถึง ด้วยความยินดี',
                     'answers' => [
                         ['不客气', true],
@@ -174,6 +182,8 @@ return [
 
                 [
                     'question' => 'เติมคำทักทาย: 你___！',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['你好'],
                     'explanation' => '你好 (nǐ hǎo) ใช้กล่าวสวัสดี',
                     'answers' => [
                         ['好', true],
@@ -185,6 +195,8 @@ return [
 
                 [
                     'question' => 'เติมคำ: 明天___！',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['明天见'],
                     'explanation' => '明天见 (míngtiān jiàn) แปลว่า เจอกันพรุ่งนี้',
                     'answers' => [
                         ['见', true],
@@ -196,6 +208,8 @@ return [
 
                 [
                     'question' => 'เติมคำ: ___关系。',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['没关系'],
                     'explanation' => '没关系 (méi guānxi) แปลว่า ไม่เป็นไร',
                     'answers' => [
                         ['没', true],
@@ -207,6 +221,8 @@ return [
 
                 [
                     'question' => 'เติมคำ: ___上好！ ใช้ทักทายตอนเช้า',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['早上好'],
                     'explanation' => '早上好 (zǎoshang hǎo) แปลว่า สวัสดีตอนเช้า',
                     'answers' => [
                         ['早', true],
@@ -221,6 +237,8 @@ return [
 
                 [
                     'question' => 'คุณได้ยินคำว่าอะไร?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['你好'],
                     'explanation' => '你好 (nǐ hǎo) แปลว่า สวัสดี',
                     'audio_path' => 'audio/chinese/greetings/ni-hao.mp3',
                     'answers' => [
@@ -236,6 +254,8 @@ return [
 
                 [
                     'question' => 'เลือกคำที่ตรงกับภาพ',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['再见'],
                     'explanation' => '再见 (zàijiàn) ใช้กล่าวลา',
                     'image_path' => 'images/chinese/greetings/goodbye.jpg',
                     'answers' => [
@@ -375,6 +395,8 @@ return [
 
                 [
                     'question' => '我 แปลว่าอะไร?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['我'],
                     'explanation' => '我 (wǒ) แปลว่า ฉัน',
                     'answers' => [
                         ['ฉัน', true],
@@ -386,6 +408,8 @@ return [
 
                 [
                     'question' => '老师 แปลว่าอะไร?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['老师'],
                     'explanation' => '老师 (lǎoshī) แปลว่า ครู',
                     'answers' => [
                         ['นักเรียน', false],
@@ -397,6 +421,8 @@ return [
 
                 [
                     'question' => '名字 แปลว่าอะไร?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['名字'],
                     'explanation' => '名字 (míngzi) แปลว่า ชื่อ',
                     'answers' => [
                         ['ชื่อ', true],
@@ -408,6 +434,8 @@ return [
 
                 [
                     'question' => '泰国 หมายถึงประเทศใด?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['泰国'],
                     'explanation' => '泰国 (Tàiguó) หมายถึง ประเทศไทย',
                     'answers' => [
                         ['ประเทศจีน', false],
@@ -422,6 +450,8 @@ return [
 
                 [
                     'question' => 'เติมคำ: 我___学生。',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['我', '是', '学生'],
                     'explanation' => '我是学生。 แปลว่า ฉันเป็นนักเรียน',
                     'answers' => [
                         ['是', true],
@@ -433,6 +463,8 @@ return [
 
                 [
                     'question' => 'เติมคำ: 我___小明。',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['我', '叫'],
                     'explanation' => '我叫小明。 แปลว่า ฉันชื่อเสี่ยวหมิง',
                     'answers' => [
                         ['叫', true],
@@ -444,6 +476,8 @@ return [
 
                 [
                     'question' => 'เติมคำ: 你叫什么___？',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['你', '叫', '什么', '名字'],
                     'explanation' => '你叫什么名字？ แปลว่า คุณชื่ออะไร?',
                     'answers' => [
                         ['名字', true],
@@ -455,6 +489,8 @@ return [
 
                 [
                     'question' => 'เติมคำ: ___是老师。 เมื่อต้องการพูดว่า “เธอเป็นครู”',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['她', '是', '老师'],
                     'explanation' => '她是老师。 แปลว่า เธอเป็นครู',
                     'answers' => [
                         ['她', true],
@@ -469,6 +505,8 @@ return [
 
                 [
                     'question' => 'คุณได้ยินคำว่าอะไร?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['老师'],
                     'explanation' => '老师 (lǎoshī) แปลว่า ครู',
                     'audio_path' => 'audio/chinese/self-introduction/lao-shi.mp3',
                     'answers' => [
@@ -484,6 +522,8 @@ return [
 
                 [
                     'question' => 'เลือกคำที่ตรงกับภาพ',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['老师'],
                     'explanation' => '老师 (lǎoshī) แปลว่า ครู',
                     'image_path' => 'images/chinese/self-introduction/teacher.jpg',
                     'answers' => [
@@ -650,6 +690,8 @@ return [
 
                 [
                     'question' => '三 คือเลขอะไร?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['三'],
                     'explanation' => '三 (sān) คือเลข 3',
                     'answers' => [
                         ['1', false],
@@ -661,6 +703,8 @@ return [
 
                 [
                     'question' => '九 คือเลขอะไร?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['九'],
                     'explanation' => '九 (jiǔ) คือเลข 9',
                     'answers' => [
                         ['6', false],
@@ -672,6 +716,8 @@ return [
 
                 [
                     'question' => '十 คือเลขอะไร?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['十'],
                     'explanation' => '十 (shí) คือเลข 10',
                     'answers' => [
                         ['7', false],
@@ -683,6 +729,8 @@ return [
 
                 [
                     'question' => '零 คือเลขอะไร?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['零'],
                     'explanation' => '零 (líng) คือเลข 0',
                     'answers' => [
                         ['0', true],
@@ -697,6 +745,8 @@ return [
 
                 [
                     'question' => 'เติมตัวเลข: 一、二、___、四',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['一', '二', '三', '四'],
                     'explanation' => 'ลำดับคือ 一、二、三、四',
                     'answers' => [
                         ['三', true],
@@ -708,6 +758,8 @@ return [
 
                 [
                     'question' => 'เติมตัวเลข: 六、七、___、九',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['六', '七', '八', '九'],
                     'explanation' => 'ลำดับคือ 六、七、八、九',
                     'answers' => [
                         ['八', true],
@@ -719,6 +771,8 @@ return [
 
                 [
                     'question' => 'เติมตัวเลข: 七、八、九、___',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['七', '八', '九', '十'],
                     'explanation' => 'หลัง 九 (9) คือ 十 (10)',
                     'answers' => [
                         ['十', true],
@@ -730,6 +784,8 @@ return [
 
                 [
                     'question' => 'เติมคำ: ___个人。 หมายถึง “สองคน”',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['两', '个'],
                     'explanation' => '两个人 (liǎng ge rén) แปลว่า สองคน',
                     'answers' => [
                         ['两', true],
@@ -744,6 +800,8 @@ return [
 
                 [
                     'question' => 'คุณได้ยินตัวเลขอะไร?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['五'],
                     'explanation' => '五 (wǔ) คือเลข 5',
                     'audio_path' => 'audio/chinese/numbers/wu.mp3',
                     'answers' => [
@@ -759,6 +817,8 @@ return [
 
                 [
                     'question' => 'ในภาพมีแอปเปิลกี่ลูก?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['三'],
                     'explanation' => '三 (sān) คือเลข 3',
                     'image_path' => 'images/chinese/numbers/three-apples.jpg',
                     'answers' => [

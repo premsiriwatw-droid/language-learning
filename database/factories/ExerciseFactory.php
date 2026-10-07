@@ -10,17 +10,46 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ExerciseFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            'lesson_id' => fake()->numberBetween(1, 1000),
-            'type' => fake()->randomElement(['multiple_choice', 'fill_blank', 'translation', 'arrange_words']),
+            // Supply an existing Lesson with for($lesson) or lesson_id.
+            'lesson_id' => null,
+            'type' => fake()->randomElement([
+                'multiple_choice',
+                'fill_blank',
+                'translation',
+                'arrange_words',
+            ]),
             'title' => fake()->sentence(),
         ];
+    }
+
+    public function fillBlank(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'type' => 'fill_blank',
+        ]);
+    }
+
+    public function listening(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'type' => 'listening',
+        ]);
+    }
+
+    public function multipleChoice(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'type' => 'multiple_choice',
+        ]);
+    }
+
+    public function imageChoice(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'type' => 'image_choice',
+        ]);
     }
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#101012">
+    <meta name="theme-color" content="#fffdf9">
     <title>เข้าสู่ระบบ | Language Learning</title>
     <link rel="preload" href="{{ asset('fonts/alex-brush/AlexBrush-Regular.ttf') }}" as="font" type="font/ttf" crossorigin>
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
@@ -13,7 +13,8 @@
     <a class="login-skip" href="#login-form">ข้ามไปเข้าสู่ระบบ</a>
     <div class="login-atmosphere" aria-hidden="true">
         <div class="city-scene city-scene-china">
-            <img class="scene-image" src="{{ asset('images/login/china-night.png') }}" alt="" decoding="async">
+            <img class="scene-image" src="{{ asset('images/login/china-sunrise.png') }}" alt="" decoding="async">
+            <div class="sunrise-glow"></div>
             <div class="city-reflections"></div>
         </div>
         <div class="city-scene city-scene-england">

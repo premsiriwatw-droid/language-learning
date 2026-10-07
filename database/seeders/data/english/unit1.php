@@ -5,7 +5,7 @@ return [
         'vocabulary' => [
             [
                 'hello',
-                'həˈloʊ',
+                'เฮลโล',
                 'สวัสดี',
                 'Hello, how are you?',
                 'เฮลโล ฮาว อาร์ ยู',
@@ -13,7 +13,7 @@ return [
             ],
             [
                 'good morning',
-                'ɡʊd ˈmɔrnɪŋ',
+                'กูด มอร์นิง',
                 'สวัสดีตอนเช้า',
                 'Good morning, everyone.',
                 'กุด มอร์นิง เอวรีวัน',
@@ -21,7 +21,7 @@ return [
             ],
             [
                 'good afternoon',
-                'ɡʊd ˌæftɚˈnun',
+                'กูด แอฟเทอร์นูน',
                 'สวัสดีตอนบ่าย',
                 'Good afternoon, Anna.',
                 'กุด แอฟเทอร์นูน แอนนา',
@@ -29,7 +29,7 @@ return [
             ],
             [
                 'good night',
-                'ɡʊd naɪt',
+                'กูด ไนต์',
                 'ราตรีสวัสดิ์',
                 'Good night, Mom.',
                 'กุด ไนต์ มอม',
@@ -37,7 +37,7 @@ return [
             ],
             [
                 'goodbye',
-                'ɡʊdˈbaɪ',
+                'กูดบาย',
                 'ลาก่อน',
                 'Goodbye, see you tomorrow.',
                 'กุดบาย ซี ยู ทูมอร์โรว์',
@@ -45,7 +45,7 @@ return [
             ],
             [
                 'thank you',
-                'θæŋk ju',
+                'แธงก์ ยู',
                 'ขอบคุณ',
                 'Thank you for your help.',
                 'แธงก์ ยู ฟอร์ ยัวร์ เฮลป์',
@@ -53,7 +53,7 @@ return [
             ],
             [
                 'please',
-                'pliz',
+                'พลีซ',
                 'กรุณา; โปรด',
                 'Please sit down.',
                 'พลีซ ซิต ดาวน์',
@@ -61,7 +61,7 @@ return [
             ],
             [
                 'sorry',
-                'ˈsɑri',
+                'ซอรี',
                 'ขอโทษ; เสียใจ',
                 'Sorry, I am late.',
                 'ซอรี ไอ แอม เลท',
@@ -69,7 +69,7 @@ return [
             ],
             [
                 'excuse me',
-                'ɪkˈskjuz mi',
+                'อิกสคิวซ มี',
                 'ขอโทษนะ; ขอรบกวน',
                 'Excuse me, is this your bag?',
                 'อิกสคิวซ มี อิซ ดิส ยัวร์ แบ็ก',
@@ -77,7 +77,7 @@ return [
             ],
             [
                 'welcome',
-                'ˈwɛlkəm',
+                'เวลคัม',
                 'ยินดีต้อนรับ',
                 'Welcome to our school.',
                 'เวลคัม ทู เอาเออร์ สคูล',
@@ -85,7 +85,7 @@ return [
             ],
             [
                 'fine',
-                'faɪn',
+                'ไฟน์',
                 'สบายดี',
                 'I am fine, thank you.',
                 'ไอ แอม ไฟน์ แธงก์ ยู',
@@ -93,7 +93,7 @@ return [
             ],
             [
                 'nice to meet you',
-                'naɪs tə mit ju',
+                'ไนซ์ ทู มีต ยู',
                 'ยินดีที่ได้รู้จัก',
                 'Nice to meet you, Ben.',
                 'ไนซ์ ทู มีต ยู เบน',
@@ -519,7 +519,7 @@ return [
         'vocabulary' => [
             [
                 'name',
-                'neɪm',
+                'เนม',
                 'ชื่อ',
                 'My name is Anna.',
                 'มาย เนม อิซ แอนนา',
@@ -527,7 +527,7 @@ return [
             ],
             [
                 'my',
-                'maɪ',
+                'มาย',
                 'ของฉัน',
                 'This is my bag.',
                 'ดิส อิซ มาย แบ็ก',
@@ -535,7 +535,7 @@ return [
             ],
             [
                 'I',
-                'aɪ',
+                'ไอ',
                 'ฉัน',
                 'I am a student.',
                 'ไอ แอม อะ สตูเดนต์',
@@ -543,7 +543,7 @@ return [
             ],
             [
                 'you',
-                'ju',
+                'ยู',
                 'คุณ',
                 'Are you a teacher?',
                 'อาร์ ยู อะ ทีเชอร์',
@@ -551,7 +551,7 @@ return [
             ],
             [
                 'from',
-                'frəm',
+                'ฟรัม',
                 'จาก',
                 'I am from Thailand.',
                 'ไอ แอม ฟรอม ไทยแลนด์',
@@ -559,7 +559,7 @@ return [
             ],
             [
                 'live',
-                'lɪv',
+                'ลิฟ',
                 'อาศัยอยู่',
                 'I live in Bangkok.',
                 'ไอ ลิฟ อิน แบงค็อก',
@@ -567,7 +567,7 @@ return [
             ],
             [
                 'student',
-                'ˈstudənt',
+                'สตูเดนต์',
                 'นักเรียน; นักศึกษา',
                 'Ben is a student.',
                 'เบน อิซ อะ สตูเดนต์',
@@ -575,7 +575,7 @@ return [
             ],
             [
                 'teacher',
-                'ˈtitʃɚ',
+                'ทีเชอร์',
                 'ครู',
                 'My mother is a teacher.',
                 'มาย มาเธอร์ อิซ อะ ทีเชอร์',
@@ -583,7 +583,7 @@ return [
             ],
             [
                 'friend',
-                'frɛnd',
+                'เฟรนด์',
                 'เพื่อน',
                 'Anna is my friend.',
                 'แอนนา อิซ มาย เฟรนด์',
@@ -591,7 +591,7 @@ return [
             ],
             [
                 'country',
-                'ˈkʌntri',
+                'คันทรี',
                 'ประเทศ',
                 'Thailand is my country.',
                 'ไทยแลนด์ อิซ มาย คันทรี',
@@ -599,7 +599,7 @@ return [
             ],
             [
                 'Thailand',
-                'ˈtaɪlænd',
+                'ไทแลนด์',
                 'ประเทศไทย',
                 'I come from Thailand.',
                 'ไอ คัม ฟรอม ไทยแลนด์',
@@ -607,7 +607,7 @@ return [
             ],
             [
                 'introduce',
-                'ˌɪntrəˈdus',
+                'อินโทรดูซ',
                 'แนะนำตัว; แนะนำให้รู้จัก',
                 'Let me introduce myself.',
                 'เลต มี อินโทรดูซ มายเซลฟ์',
@@ -1029,7 +1029,7 @@ return [
         'vocabulary' => [
             [
                 'zero',
-                'ˈzɪroʊ',
+                'ซีโร',
                 'ศูนย์',
                 'There are zero apples in the box.',
                 'แดร์ อาร์ ซีโร แอปเปิลส์ อิน เดอะ บ็อกซ์',
@@ -1037,7 +1037,7 @@ return [
             ],
             [
                 'one',
-                'wʌn',
+                'วัน',
                 'หนึ่ง',
                 'I have one pen.',
                 'ไอ แฮฟ วัน เพน',
@@ -1045,7 +1045,7 @@ return [
             ],
             [
                 'two',
-                'tu',
+                'ทู',
                 'สอง',
                 'I have two books.',
                 'ไอ แฮฟ ทู บุคส์',
@@ -1053,7 +1053,7 @@ return [
             ],
             [
                 'three',
-                'θri',
+                'ธรี',
                 'สาม',
                 'There are three apples.',
                 'แดร์ อาร์ ธรี แอปเปิลส์',
@@ -1061,7 +1061,7 @@ return [
             ],
             [
                 'four',
-                'fɔr',
+                'ฟอร์',
                 'สี่',
                 'We need four chairs.',
                 'วี นีด ฟอร์ แชร์ส',
@@ -1069,7 +1069,7 @@ return [
             ],
             [
                 'five',
-                'faɪv',
+                'ไฟฟ์',
                 'ห้า',
                 'I have five coins.',
                 'ไอ แฮฟ ไฟฟ์ คอยน์ส',
@@ -1077,7 +1077,7 @@ return [
             ],
             [
                 'six',
-                'sɪks',
+                'ซิกส์',
                 'หก',
                 'There are six cups.',
                 'แดร์ อาร์ ซิกซ์ คัปส์',
@@ -1085,7 +1085,7 @@ return [
             ],
             [
                 'seven',
-                'ˈsɛvən',
+                'เซเวน',
                 'เจ็ด',
                 'I have seven apples.',
                 'ไอ แฮฟ เซเวน แอปเปิลส์',
@@ -1093,7 +1093,7 @@ return [
             ],
             [
                 'eight',
-                'eɪt',
+                'เอท',
                 'แปด',
                 'There are eight students.',
                 'แดร์ อาร์ เอท สตูเดนต์ส',
@@ -1101,7 +1101,7 @@ return [
             ],
             [
                 'nine',
-                'naɪn',
+                'ไนน์',
                 'เก้า',
                 'We have nine pencils.',
                 'วี แฮฟ ไนน์ เพนซิลส์',
@@ -1109,7 +1109,7 @@ return [
             ],
             [
                 'ten',
-                'tɛn',
+                'เทน',
                 'สิบ',
                 'There are ten books.',
                 'แดร์ อาร์ เทน บุคส์',
@@ -1117,7 +1117,7 @@ return [
             ],
             [
                 'eleven',
-                'ɪˈlɛvən',
+                'อิเลเวน',
                 'สิบเอ็ด',
                 'I have eleven cards.',
                 'ไอ แฮฟ อิเลเวน คาร์ดส์',
@@ -1125,7 +1125,7 @@ return [
             ],
             [
                 'twelve',
-                'twɛlv',
+                'ทเวลฟ์',
                 'สิบสอง',
                 'There are twelve months in a year.',
                 'แดร์ อาร์ ทเวลฟ์ มันธส์ อิน อะ เยียร์',
@@ -1133,7 +1133,7 @@ return [
             ],
             [
                 'number',
-                'ˈnʌmbɚ',
+                'นัมเบอร์',
                 'ตัวเลข; จำนวน',
                 'What is your phone number?',
                 'วอต อิซ ยัวร์ โฟน นัมเบอร์',
@@ -1141,7 +1141,7 @@ return [
             ],
             [
                 'count',
-                'kaʊnt',
+                'เคานต์',
                 'นับ',
                 'Please count the apples.',
                 'พลีซ เคานต์ ดิ แอปเปิลส์',

@@ -70,6 +70,25 @@ class ProgressProfileTest extends TestCase
         );
     }
 
+    public function test_logout_form_uses_existing_route_and_ends_the_session(): void
+    {
+        Storage::fake('local');
+        $user = User::factory()->create();
+        foreach (['/profile', '/languages'] as $page) {
+            $this->actingAs($user)->get($page)->assertOk()
+                ->assertSee('action="'.route('logout').'" method="POST"', false)
+                ->assertSee('name="_token"', false)
+                ->assertSee('ออกจากระบบ');
+        }
+
+        $this->withSession(['profile_test_state' => 'signed in'])->post(route('logout'))
+            ->assertRedirect(route('login'))->assertSessionMissing('profile_test_state');
+        $this->assertGuest();
+        $this->get('/profile')->assertRedirect(route('login'));
+        $this->get('/profile/photo')->assertRedirect(route('login'));
+        $this->get('/languages')->assertDontSee('ออกจากระบบ');
+    }
+
     public function test_upload_is_private_replaces_previous_photo_and_does_not_change_user_schema(): void
     {
         Storage::fake('local');
@@ -95,34 +114,17 @@ class ProgressProfileTest extends TestCase
             ->assertOk()
             ->assertHeader('content-type', 'image/png')
             ->assertHeader('X-Content-Type-Options', 'nosniff');
-
-        $this->get('/profile')
-            ->assertSee('src="' . route('profile.photo') . '"', false);
-
-        $this->post('/profile/upload', [
-            'photo' => $this->photo(),
-        ])->assertSessionHasNoErrors();
-
-        $this->assertCount(
-            1,
-            Storage::disk('local')->allFiles(
-                'profile-photos/' . $user->id
-            )
-        );
-
-        $this->assertArrayNotHasKey(
-            'profile_photo_path',
-            $user->fresh()->getAttributes()
-        );
+        $this->get('/profile')->assertSee('id="avatar-preview" src="'.route('profile.photo').'"', false);
+        $this->get('/languages')->assertSee('<img src="'.route('profile.photo').'"', false);
+        $this->post('/profile/upload', ['photo' => $this->photo()])
+            ->assertSessionHasNoErrors();
+        $this->assertCount(1, Storage::disk('local')->allFiles('profile-photos/'.$user->id));
+        $this->assertArrayNotHasKey('profile_photo_path', $user->fresh()->getAttributes());
 
         $other = User::factory()->create();
-
-        $this->actingAs($other)
-            ->get('/profile/photo')
-            ->assertNotFound();
-
-        $this->get('/profile')
-            ->assertDontSee('src="' . route('profile.photo') . '"', false);
+        $this->actingAs($other)->get('/profile/photo')->assertNotFound();
+        $this->get('/profile')->assertDontSee('src="'.route('profile.photo').'"', false);
+        $this->get('/languages')->assertDontSee('src="'.route('profile.photo').'"', false);
     }
 
     public function test_invalid_uploads_preserve_existing_photo(): void

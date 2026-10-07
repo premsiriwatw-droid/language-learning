@@ -2,487 +2,204 @@
 
 namespace Tests\Feature;
 
+use App\Models\Course;
 use App\Models\Lesson;
 use Database\Seeders\ChineseContentSeeder;
-use Database\Seeders\DatabaseSeeder;
+use Database\Seeders\LearningStructureSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class ChineseContentSeederTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_chinese_content_seeder_creates_expected_content(): void
+    private const PLAN = [
+        'Unit 1: Basics' => ['Greetings', 'Self Introduction', 'Numbers'],
+        'Unit 2: Daily Life' => ['Family', 'Age', 'Time', 'Food & Drinks'],
+        'Unit 3: Everyday Conversation' => ['Shopping', 'Transportation', 'Places & Directions', 'Hobbies'],
+        'Unit 4: Social & Activities' => ['Weather', 'Daily Routine', 'School & Study', 'Friends & Social Life'],
+        'Unit 5: Practical Chinese' => ['Health & Body', 'Travel & Hotel', 'Asking for Help', 'Review & Daily Conversation'],
+    ];
+
+    private function seedChineseCourse(): void
     {
-        $this->seed(DatabaseSeeder::class);
-
-        $lessons = Lesson::with([
-            'vocabularies',
-            'exercises.questions.answers',
-        ])
-            ->whereHas(
-                'unit.course.language',
-                fn ($query) => $query->where('name', 'Chinese')
-            )
-            ->get();
-
-        $this->assertCount(3, $lessons);
-
-        $greetings = $lessons->firstWhere('title', 'Greetings');
-        $selfIntroduction = $lessons->firstWhere('title', 'Self Introduction');
-        $numbers = $lessons->firstWhere('title', 'Numbers');
-
-        $this->assertNotNull($greetings);
-        $this->assertNotNull($selfIntroduction);
-        $this->assertNotNull($numbers);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Vocabulary
-        |--------------------------------------------------------------------------
-        */
-
-        $this->assertCount(12, $greetings->vocabularies);
-        $this->assertCount(12, $selfIntroduction->vocabularies);
-        $this->assertCount(15, $numbers->vocabularies);
-
-        $this->assertEquals(
-            39,
-            $lessons->sum(
-                fn ($lesson) => $lesson->vocabularies->count()
-            )
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | Exercises
-        |--------------------------------------------------------------------------
-        */
-
-        foreach ($lessons as $lesson) {
-            $this->assertCount(4, $lesson->exercises);
-
-            $this->assertEqualsCanonicalizing(
-                [
-                    'multiple_choice',
-                    'fill_blank',
-                    'listening',
-                    'image_choice',
-                ],
-                $lesson->exercises
-                    ->pluck('type')
-                    ->all()
-            );
-        }
-
-        $this->assertEquals(
-            12,
-            $lessons->sum(
-                fn ($lesson) => $lesson->exercises->count()
-            )
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | Questions
-        |--------------------------------------------------------------------------
-        */
-
-        $questions = $lessons
-            ->flatMap(
-                fn ($lesson) => $lesson->exercises
-            )
-            ->flatMap(
-                fn ($exercise) => $exercise->questions
-            );
-
-        $this->assertCount(30, $questions);
-
-        foreach ($lessons as $lesson) {
-            $lessonQuestions = $lesson->exercises
-                ->flatMap(
-                    fn ($exercise) => $exercise->questions
-                );
-
-            $this->assertCount(10, $lessonQuestions);
-
-            $multipleChoice = $lesson->exercises
-                ->firstWhere('type', 'multiple_choice');
-
-            $fillBlank = $lesson->exercises
-                ->firstWhere('type', 'fill_blank');
-
-            $listening = $lesson->exercises
-                ->firstWhere('type', 'listening');
-
-            $imageChoice = $lesson->exercises
-                ->firstWhere('type', 'image_choice');
-
-            $this->assertNotNull($multipleChoice);
-            $this->assertNotNull($fillBlank);
-            $this->assertNotNull($listening);
-            $this->assertNotNull($imageChoice);
-
-            $this->assertCount(4, $multipleChoice->questions);
-            $this->assertCount(4, $fillBlank->questions);
-            $this->assertCount(1, $listening->questions);
-            $this->assertCount(1, $imageChoice->questions);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Answers
-        |--------------------------------------------------------------------------
-        */
-
-        $answers = $questions
-            ->flatMap(
-                fn ($question) => $question->answers
-            );
-
-        $this->assertCount(120, $answers);
-
-        foreach ($questions as $question) {
-            $this->assertCount(
-                4,
-                $question->answers
-            );
-
-            $this->assertCount(
-                1,
-                $question->answers
-                    ->where('is_correct', true)
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Greetings
-        |--------------------------------------------------------------------------
-        */
-
-        $this->assertTrue(
-            $greetings->vocabularies
-                ->contains(
-                    fn ($vocabulary) =>
-                        $vocabulary->word === '你好' &&
-                        $vocabulary->pinyin === 'nǐ hǎo' &&
-                        $vocabulary->meaning === 'สวัสดี'
-                )
-        );
-
-        $this->assertTrue(
-            $greetings->vocabularies
-                ->contains(
-                    fn ($vocabulary) =>
-                        $vocabulary->word === '晚安' &&
-                        $vocabulary->pinyin === 'wǎn\'ān' &&
-                        $vocabulary->meaning === 'ราตรีสวัสดิ์'
-                )
-        );
-
-        $this->assertTrue(
-            $greetings->vocabularies
-                ->contains(
-                    fn ($vocabulary) =>
-                        $vocabulary->word === '欢迎' &&
-                        $vocabulary->pinyin === 'huānyíng' &&
-                        $vocabulary->meaning === 'ยินดีต้อนรับ'
-                )
-        );
-
-        $greetingsListening = $greetings->exercises
-            ->firstWhere('type', 'listening');
-
-        $this->assertNotNull($greetingsListening);
-
-        $greetingsListeningQuestion =
-            $greetingsListening->questions->first();
-
-        $this->assertEquals(
-            'audio/chinese/greetings/ni-hao.mp3',
-            $greetingsListeningQuestion->audio_path
-        );
-
-        $this->assertTrue(
-            $greetingsListeningQuestion->answers
-                ->contains(
-                    fn ($answer) =>
-                        $answer->answer === '你好' &&
-                        (bool) $answer->is_correct === true
-                )
-        );
-
-        $greetingsImageChoice = $greetings->exercises
-            ->firstWhere('type', 'image_choice');
-
-        $this->assertNotNull($greetingsImageChoice);
-
-        $this->assertEquals(
-            'images/chinese/greetings/goodbye.jpg',
-            $greetingsImageChoice->questions->first()->image_path
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | Self Introduction
-        |--------------------------------------------------------------------------
-        */
-
-        $this->assertTrue(
-            $selfIntroduction->vocabularies
-                ->contains(
-                    fn ($vocabulary) =>
-                        $vocabulary->word === '老师' &&
-                        $vocabulary->pinyin === 'lǎoshī' &&
-                        $vocabulary->meaning === 'ครู'
-                )
-        );
-
-        $this->assertTrue(
-            $selfIntroduction->vocabularies
-                ->contains(
-                    fn ($vocabulary) =>
-                        $vocabulary->word === '名字' &&
-                        $vocabulary->pinyin === 'míngzi' &&
-                        $vocabulary->meaning === 'ชื่อ'
-                )
-        );
-
-        $this->assertTrue(
-            $selfIntroduction->vocabularies
-                ->contains(
-                    fn ($vocabulary) =>
-                        $vocabulary->word === '泰国' &&
-                        $vocabulary->pinyin === 'Tàiguó' &&
-                        $vocabulary->meaning === 'ประเทศไทย'
-                )
-        );
-
-        $selfIntroductionListening =
-            $selfIntroduction->exercises
-                ->firstWhere('type', 'listening');
-
-        $this->assertNotNull(
-            $selfIntroductionListening
-        );
-
-        $selfIntroductionListeningQuestion =
-            $selfIntroductionListening
-                ->questions
-                ->first();
-
-        $this->assertEquals(
-            'audio/chinese/self-introduction/lao-shi.mp3',
-            $selfIntroductionListeningQuestion->audio_path
-        );
-
-        $this->assertTrue(
-            $selfIntroductionListeningQuestion
-                ->answers
-                ->contains(
-                    fn ($answer) =>
-                        $answer->answer === '老师' &&
-                        (bool) $answer->is_correct === true
-                )
-        );
-
-        $selfIntroductionImageChoice =
-            $selfIntroduction->exercises
-                ->firstWhere('type', 'image_choice');
-
-        $this->assertNotNull($selfIntroductionImageChoice);
-
-        $this->assertEquals(
-            'images/chinese/self-introduction/teacher.jpg',
-            $selfIntroductionImageChoice->questions->first()->image_path
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | Numbers
-        |--------------------------------------------------------------------------
-        */
-
-        $this->assertTrue(
-            $numbers->vocabularies
-                ->contains(
-                    fn ($vocabulary) =>
-                        $vocabulary->word === '五' &&
-                        $vocabulary->pinyin === 'wǔ' &&
-                        $vocabulary->meaning === '5'
-                )
-        );
-
-        $this->assertTrue(
-            $numbers->vocabularies
-                ->contains(
-                    fn ($vocabulary) =>
-                        $vocabulary->word === '十' &&
-                        $vocabulary->pinyin === 'shí' &&
-                        $vocabulary->meaning === '10'
-                )
-        );
-
-        $this->assertTrue(
-            $numbers->vocabularies
-                ->contains(
-                    fn ($vocabulary) =>
-                        $vocabulary->word === '两' &&
-                        $vocabulary->pinyin === 'liǎng' &&
-                        $vocabulary->meaning === 'สอง (ใช้หน้าลักษณนาม)'
-                )
-        );
-
-        $numbersListening = $numbers->exercises
-            ->firstWhere('type', 'listening');
-
-        $this->assertNotNull($numbersListening);
-
-        $numbersListeningQuestion =
-            $numbersListening->questions->first();
-
-        $this->assertEquals(
-            'audio/chinese/numbers/wu.mp3',
-            $numbersListeningQuestion->audio_path
-        );
-
-        $this->assertTrue(
-            $numbersListeningQuestion->answers
-                ->contains(
-                    fn ($answer) =>
-                        $answer->answer === '五' &&
-                        (bool) $answer->is_correct === true
-                )
-        );
-
-        $numbersImageChoice = $numbers->exercises
-            ->firstWhere('type', 'image_choice');
-
-        $this->assertNotNull($numbersImageChoice);
-
-        $this->assertEquals(
-            'images/chinese/numbers/three-apples.jpg',
-            $numbersImageChoice->questions->first()->image_path
-        );
+        $this->seed([LearningStructureSeeder::class, ChineseContentSeeder::class]);
     }
 
-    public function test_chinese_content_seeder_is_idempotent(): void
+    public function test_chinese_course_has_five_units_and_nineteen_lessons_in_plan_order(): void
     {
-        /*
-         * Seed โครงสร้างและข้อมูลทั้งหมดก่อน 1 รอบ
-         */
-        $this->seed(DatabaseSeeder::class);
+        $this->seedChineseCourse();
 
-        /*
-         * จากนั้นรันเฉพาะ ChineseContentSeeder ซ้ำ
-         *
-         * ถ้า Seeder เป็น idempotent:
-         * จำนวน Vocabulary / Exercise / Question / Answer
-         * ต้องไม่เพิ่มขึ้น
-         */
+        $course = Course::with('units.lessons')
+            ->where('title', 'Chinese Beginner')
+            ->whereHas('language', fn ($query) => $query->where('name', 'Chinese'))
+            ->sole();
+
+        $this->assertCount(5, $course->units);
+        $this->assertSame(array_keys(self::PLAN), $course->units->pluck('title')->all());
+        $this->assertSame(range(1, 5), $course->units->pluck('position')->all());
+
+        foreach ($course->units as $unit) {
+            $titles = self::PLAN[$unit->title];
+            $this->assertSame($titles, $unit->lessons->pluck('title')->all());
+            $this->assertSame(range(1, count($titles)), $unit->lessons->pluck('position')->all());
+        }
+
+        $titles = array_merge(...array_values(self::PLAN));
+        $this->assertCount(19, $this->getChineseLessons());
+        $this->assertSame($titles, array_keys(require database_path('seeders/data/chinese.php')));
+    }
+
+    public function test_every_lesson_seeds_complete_vocabulary_questions_and_supported_media(): void
+    {
+        $this->seedChineseCourse();
+        $source = require database_path('seeders/data/chinese.php');
+        $lessons = $this->getChineseLessons()->keyBy('title');
+        $listeningCount = 0;
+        $imageCount = 0;
+
+        foreach ($source as $title => $content) {
+            $lesson = $lessons->get($title);
+            $this->assertNotNull($lesson, $title);
+            $this->assertGreaterThanOrEqual(12, $lesson->vocabularies->count(), $title);
+            $this->assertLessThanOrEqual(18, $lesson->vocabularies->count(), $title);
+            $this->assertCount(count($content['vocabulary']), $lesson->vocabularies, $title);
+            $this->assertCount(4, $lesson->exercises, $title);
+            $this->assertEqualsCanonicalizing(
+                ['multiple_choice', 'fill_blank', 'listening', 'image_choice'],
+                $lesson->exercises->pluck('type')->all(),
+                $title
+            );
+
+            $corpus = [];
+            foreach ($lesson->exercises as $exercise) {
+                $items = $content['exercises'][$exercise->type];
+                $items = isset($items['question']) ? [$items] : $items;
+                $this->assertCount(count($items), $exercise->questions, $title.' '.$exercise->type);
+                $this->assertCount($exercise->questions->count(), $exercise->questions->unique('question'));
+                $this->assertGreaterThan(0, $exercise->questions->count(), $title);
+
+                if (in_array($exercise->type, ['listening', 'image_choice'], true)) {
+                    $this->assertGreaterThanOrEqual(2, $exercise->questions->count(), $title.' '.$exercise->type);
+                }
+
+                foreach ($exercise->questions as $question) {
+                    $this->assertNotEmpty(trim($question->question));
+                    $this->assertNotEmpty(trim($question->explanation ?? ''), $title.' '.$question->question);
+                    $this->assertCount(4, $question->answers, $title.' '.$question->question);
+                    $this->assertCount(4, $question->answers->unique('answer'));
+                    $this->assertCount(1, $question->answers->where('is_correct', true));
+                    $corpus[] = $question->question;
+                    foreach ($question->answers as $answer) {
+                        $this->assertNotSame('', trim($answer->answer));
+                        $corpus[] = $answer->answer;
+                    }
+
+                    $item = collect($items)->firstWhere('question', $question->question);
+                    $this->assertNotNull($item);
+                    $this->assertSame($item['explanation'], $question->explanation);
+                    $this->assertSame($item['answers'], $question->answers->sortBy('id')
+                        ->map(fn ($answer) => [$answer->answer, $answer->is_correct])->values()->all());
+
+                    if ($exercise->type === 'listening') {
+                        $listeningCount++;
+                        $this->assertMatchesRegularExpression('#^audio/chinese/[a-z0-9-]+/[a-z0-9-]+\.mp3$#', $question->audio_path ?? '');
+                        $this->assertSame($item['audio_path'], $question->audio_path);
+                    } elseif ($exercise->type === 'image_choice') {
+                        $imageCount++;
+                        $this->assertMatchesRegularExpression('#^images/chinese/[a-z0-9-]+/[a-z0-9-]+\.jpg$#', $question->image_path ?? '');
+                        $this->assertSame($item['image_path'], $question->image_path);
+                    }
+                }
+            }
+
+            $questionText = implode(' ', $corpus);
+            foreach ($content['vocabulary'] as $row) {
+                $this->assertCount(6, $row);
+                $vocabulary = $lesson->vocabularies->firstWhere('word', $row[0]);
+                $this->assertNotNull($vocabulary);
+                foreach (['word', 'pinyin', 'meaning', 'example_sentence', 'example_pinyin', 'example_meaning'] as $index => $field) {
+                    $this->assertNotSame('', trim($vocabulary->{$field}), $title.' '.$field);
+                    $this->assertSame($row[$index], $vocabulary->{$field});
+                }
+                $this->assertStringContainsString($row[0], $questionText, $title.' unused vocabulary '.$row[0]);
+            }
+        }
+
+        $this->assertGreaterThanOrEqual(38, $listeningCount);
+        $this->assertGreaterThanOrEqual(38, $imageCount);
+    }
+
+    public function test_existing_and_locked_media_paths_are_preserved(): void
+    {
+        $this->seedChineseCourse();
+        $questions = $this->getChineseLessons()->flatMap->exercises->flatMap->questions;
+        foreach ([
+            'audio/chinese/greetings/ni-hao.mp3',
+            'audio/chinese/self-introduction/lao-shi.mp3',
+            'audio/chinese/numbers/wu.mp3',
+            'audio/chinese/family/wo-you-yi-ge-gege.mp3',
+            'audio/chinese/family/ta-shi-wo-de-mama.mp3',
+            'audio/chinese/age/wo-jinnian-shiba-sui.mp3',
+            'audio/chinese/age/mingnian-ershiyi-sui.mp3',
+            'audio/chinese/time/xianzai-badianban.mp3',
+            'audio/chinese/time/xiawu-sandian-shangke.mp3',
+        ] as $path) {
+            $this->assertContains($path, $questions->pluck('audio_path')->all());
+        }
+        foreach ([
+            'images/chinese/greetings/goodbye.jpg',
+            'images/chinese/self-introduction/teacher.jpg',
+            'images/chinese/numbers/three-apples.jpg',
+            'images/chinese/family/family-mother.jpg',
+            'images/chinese/family/family-group.jpg',
+            'images/chinese/age/age-birthday-cake.jpg',
+            'images/chinese/age/age-child-and-adult.jpg',
+            'images/chinese/time/time-wall-clock.jpg',
+            'images/chinese/time/time-morning-breakfast.jpg',
+        ] as $path) {
+            $this->assertContains($path, $questions->pluck('image_path')->all());
+        }
+    }
+
+    public function test_chinese_content_seeder_is_idempotent_for_the_whole_course(): void
+    {
+        $this->seedChineseCourse();
+        $before = $this->contentSnapshot();
         $this->seed(ChineseContentSeeder::class);
+        $this->assertSame($before, $this->contentSnapshot());
+        $this->seed(ChineseContentSeeder::class);
+        $this->assertSame($before, $this->contentSnapshot());
+    }
 
-        $lessons = Lesson::with([
-            'vocabularies',
-            'exercises.questions.answers',
-        ])
-            ->whereHas(
-                'unit.course.language',
-                fn ($query) => $query->where('name', 'Chinese')
-            )
-            ->get();
+    private function getChineseLessons()
+    {
+        return Lesson::with(['vocabularies', 'exercises.questions.answers'])
+            ->whereHas('unit.course.language', fn ($query) => $query->where('name', 'Chinese'))
+            ->orderBy('id')->get();
+    }
 
-        $this->assertCount(3, $lessons);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Vocabulary
-        |--------------------------------------------------------------------------
-        */
-
-        $this->assertEquals(
-            39,
-            $lessons->sum(
-                fn ($lesson) => $lesson->vocabularies->count()
-            )
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | Exercises
-        |--------------------------------------------------------------------------
-        */
-
-        $this->assertEquals(
-            12,
-            $lessons->sum(
-                fn ($lesson) => $lesson->exercises->count()
-            )
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | Questions
-        |--------------------------------------------------------------------------
-        */
-
-        $questions = $lessons
-            ->flatMap(
-                fn ($lesson) => $lesson->exercises
-            )
-            ->flatMap(
-                fn ($exercise) => $exercise->questions
-            );
-
-        $this->assertCount(
-            30,
-            $questions
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | Answers
-        |--------------------------------------------------------------------------
-        */
-
-        $answers = $questions
-            ->flatMap(
-                fn ($question) => $question->answers
-            );
-
-        $this->assertCount(
-            120,
-            $answers
-        );
-
-        /*
-         * ตรวจว่าแต่ละ Lesson ยังมี Question 10 ข้อ
-         * และแต่ละ Question มี 4 Answers พร้อมคำตอบถูกเพียง 1 ตัว
-         */
-        foreach ($lessons as $lesson) {
-            $lessonQuestions = $lesson->exercises
-                ->flatMap(
-                    fn ($exercise) => $exercise->questions
-                );
-
-            $this->assertCount(
-                10,
-                $lessonQuestions
-            );
+    private function contentSnapshot(): array
+    {
+        $lessonIds = $this->getChineseLessons()->pluck('id');
+        $exerciseIds = DB::table('exercises')->whereIn('lesson_id', $lessonIds)->pluck('id');
+        $questionIds = DB::table('questions')->whereIn('exercise_id', $exerciseIds)->pluck('id');
+        $snapshot = [];
+        foreach ([
+            'vocabularies' => ['lesson_id', $lessonIds],
+            'exercises' => ['lesson_id', $lessonIds],
+            'questions' => ['exercise_id', $exerciseIds],
+            'answers' => ['question_id', $questionIds],
+        ] as $table => [$column, $ids]) {
+            $snapshot[$table] = DB::table($table)->whereIn($column, $ids)->orderBy('id')->get()
+                ->map(function ($record) {
+                    $fields = (array) $record;
+                    unset($fields['created_at'], $fields['updated_at']);
+                    return $fields;
+                })->all();
         }
 
-        foreach ($questions as $question) {
-            $this->assertCount(
-                4,
-                $question->answers
-            );
-
-            $this->assertCount(
-                1,
-                $question->answers
-                    ->where('is_correct', true)
-            );
-        }
+        return $snapshot;
     }
 }

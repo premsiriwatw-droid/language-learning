@@ -39,6 +39,7 @@ class ProgressProfileController extends Controller
             'photo.image' => 'กรุณาเลือกไฟล์รูปภาพที่ถูกต้อง',
             'photo.mimes' => 'รองรับเฉพาะไฟล์ JPG, PNG และ WebP',
             'photo.max' => 'รูปภาพต้องมีขนาดไม่เกิน 2 MB',
+            'photo.uploaded' => 'อัปโหลดรูปไม่สำเร็จ กรุณาเปิด JavaScript เพื่อย่อรูป หรือใช้รูปไม่เกิน 2 MB',
             'photo.dimensions' => 'รูปภาพต้องกว้างและสูงไม่เกิน 4096 พิกเซล',
         ]);
 

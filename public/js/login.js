@@ -9,7 +9,7 @@
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const sceneNames = {
         default: 'ONE WORD. ENDLESS POSSIBILITIES.',
-        china: 'SHANGHAI, CHINA / AFTER DARK',
+        china: 'SHANGHAI, CHINA / SUNRISE',
         england: 'LONDON, ENGLAND / GOLDEN HOUR',
     };
     let selectedScene = 'default';

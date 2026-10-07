@@ -22,7 +22,7 @@ class LessonAccess
             ->orderBy('id')
             ->with([
                 'lessons' => function ($query) {
-                    $query->orderBy('id')
+                    $query->orderBy('position')->orderBy('id')
                         ->withExists([
                             'vocabularies',
                             'exercises as playable_questions_exist' => function ($query) {
@@ -54,6 +54,7 @@ class LessonAccess
                 ->all();
         }
 
+        $unitStates = app(UnitAccess::class)->forCourse($courseId, $user);
         $states = [];
         $previousPlayableLesson = null;
 
@@ -73,13 +74,15 @@ class LessonAccess
                 continue;
             }
 
-            $available = $completed
+            $available = ($unitStates[$lesson->unit_id]['available'] ?? false) && ($completed
                 || $previousPlayableLesson === null
-                || isset($completedIds[$previousPlayableLesson->id]);
+                || isset($completedIds[$previousPlayableLesson->id]));
 
             $reason = null;
 
-            if (!$available) {
+            if (!($unitStates[$lesson->unit_id]['available'] ?? false)) {
+                $reason = $unitStates[$lesson->unit_id]['reason'] ?? 'Unit นี้ยังไม่เปิดให้เรียน';
+            } elseif (!$available) {
                 $reason = $user
                     ? 'เรียนบท "' . $previousPlayableLesson->title . '" ให้จบก่อน'
                     : 'เข้าสู่ระบบและเรียนบทก่อนหน้าให้จบก่อน';

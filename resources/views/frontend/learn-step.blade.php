@@ -257,7 +257,7 @@
                     ? 'grid grid-cols-2 gap-3'
                     : 'grid grid-cols-1 gap-3' }}">
 
-                    @foreach($question->answers as $answer)
+                    @foreach($answerChoices as $answer)
 
                         @php
                             // Fill Blank / Listening ส่งข้อความ

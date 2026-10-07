@@ -63,17 +63,22 @@ class ChineseQuestionVocabularySeederTest extends TestCase
                     );
 
                     if (!$hasMetadata) {
-                        // ไม่มี metadata ต้องรอจัดจริง ไม่เดา mapping
+                        $resolved = app(\App\Services\Content\QuestionVocabularyResolver::class)->resolve(
+                            $item,
+                            $lesson->vocabularies()->orderBy('id')->pluck('word')->all()
+                        );
+
                         $this->assertSame(
-                            'pending',
+                            $resolved === [] ? 'pending' : 'after_vocabulary',
                             $question->vocabulary_mode
                         );
-
-                        $this->assertCount(
-                            0,
-                            $question->vocabularies
+                        $this->assertEqualsCanonicalizing(
+                            $resolved,
+                            $question->vocabularies->pluck('word')->all()
                         );
-
+                        foreach ($question->vocabularies as $word) {
+                            $this->assertSame((int) $lesson->id, (int) $word->lesson_id);
+                        }
                         continue;
                     }
 

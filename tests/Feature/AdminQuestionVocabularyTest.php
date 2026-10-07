@@ -26,13 +26,13 @@ class AdminQuestionVocabularyTest extends TestCase
 
     public function test_admin_created_question_appears_after_its_vocabulary_batch(): void
     {
-        $lesson = $this->createContentLesson();
+        config()->set('learning.vocabulary_batch_size', 5);
+        config()->set('learning.group_related_vocabulary', true);
 
-        $words = Vocabulary::factory()
-            ->count(4)
+        $lesson = $this->createContentLesson();
+        $words = Vocabulary::factory()->count(10)
             ->create(['lesson_id' => $lesson->id])
-            ->sortBy('id')
-            ->values();
+            ->sortBy('id')->values();
 
         $exercise = Exercise::factory()->create([
             'lesson_id' => $lesson->id,
@@ -43,55 +43,72 @@ class AdminQuestionVocabularyTest extends TestCase
             'question' => 'คำถามจาก Admin',
             'vocabulary_mode' => 'after_vocabulary',
             'vocabulary_ids' => [$words[1]->id],
-        ])
-            ->assertRedirect()
-            ->assertSessionHasNoErrors();
+        ])->assertRedirect()->assertSessionHasNoErrors();
 
         $question = $exercise->questions()->sole();
-
         $this->assertSame('after_vocabulary', $question->vocabulary_mode);
-
         $this->assertSame(
             [$words[1]->id],
             $question->vocabularies()->pluck('vocabularies.id')->all()
         );
 
-        $question->answers()->create([
+        $right = $question->answers()->create([
             'answer' => 'คำตอบถูก',
             'is_correct' => true,
         ]);
+        $question->answers()->create([
+            'answer' => 'คำตอบผิด',
+            'is_correct' => false,
+        ]);
 
-        $this->get(route('lessons.learn', $lesson))
-            ->assertRedirect();
+        $this->get(route('lessons.learn', $lesson))->assertRedirect();
+        $learned = [];
 
-        foreach ([1, 2] as $step) {
-            $this->get(route('lessons.learn.step', [
+        // เรียน 5 คำแรก: ลำดับอาจเปลี่ยนตามความสัมพันธ์ของคำถาม
+        for ($step = 1; $step <= 5; $step++) {
+            $response = $this->get(route('lessons.learn.step', [
                 'lesson' => $lesson->id,
                 'step' => $step,
-            ]))
-                ->assertOk()
-                ->assertViewHas('current', fn ($current) =>
-                    $current['type'] === 'vocabulary'
-                    && $current['vocabulary']->is($words[$step - 1])
-                );
+            ]))->assertOk()->assertViewHas('total', 11);
+
+            $current = $response->viewData('current');
+            $this->assertSame('vocabulary', $current['type']);
+            $this->assertContains($current['vocabulary']->id, $words->modelKeys());
+            $this->assertNotContains($current['vocabulary']->id, $learned);
+            $learned[] = $current['vocabulary']->id;
 
             $this->post(route('lessons.learn.submit', [
                 'lesson' => $lesson->id,
                 'step' => $step,
-            ]))->assertRedirect();
+            ]))->assertRedirect()->assertSessionHasNoErrors();
         }
 
-        // ต้องพบคำถามหลังศัพท์สองคำแรก ไม่ไปรวมท้ายบท
+        // ต้องเรียนศัพท์ที่ Admin ผูกไว้แล้ว ก่อนคำถามออก
+        $this->assertContains($words[1]->id, $learned);
+
         $this->get(route('lessons.learn.step', [
             'lesson' => $lesson->id,
-            'step' => 3,
-        ]))
-            ->assertOk()
-            ->assertViewHas('total', 5)
-            ->assertViewHas('current', fn ($current) =>
-                $current['type'] === 'review'
-                && $current['question']->is($question)
-            );
+            'step' => 6,
+        ]))->assertOk()->assertViewHas('current', fn ($current) =>
+            $current['type'] === 'review'
+            && $current['question']->is($question)
+        );
+
+        $this->post(route('lessons.learn.submit', [
+            'lesson' => $lesson->id,
+            'step' => 6,
+        ]), ['answer' => $right->id])
+            ->assertRedirect()->assertSessionHasNoErrors();
+
+        // หลังทำแบบฝึก ต้องกลับไปเรียนศัพท์ชุดถัดไป
+        $response = $this->get(route('lessons.learn.step', [
+            'lesson' => $lesson->id,
+            'step' => 7,
+        ]))->assertOk();
+
+        $current = $response->viewData('current');
+        $this->assertSame('vocabulary', $current['type']);
+        $this->assertNotContains($current['vocabulary']->id, $learned);
     }
 
     public function test_admin_can_replace_mapping_and_move_question_to_lesson_end(): void

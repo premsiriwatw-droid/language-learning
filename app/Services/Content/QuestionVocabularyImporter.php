@@ -74,13 +74,24 @@ class QuestionVocabularyImporter
             // Content ของเพื่อนยังไม่มี metadata:
             // นำเข้าได้ แต่ยังไม่ถือว่าจัด mapping เสร็จ
             if (!$hasMode && !$hasWords) {
-                if ($stored->vocabulary_mode !== 'pending') {
-                    $stored->update([
-                        'vocabulary_mode' => 'pending',
-                    ]);
+                $resolved = app(QuestionVocabularyResolver::class)->resolve(
+                    $item,
+                    $lesson->vocabularies()->orderBy('id')->pluck('word')->all()
+                );
+
+                if ($resolved === []) {
+                    // รายงานให้ตรวจ ไม่เดาคำศัพท์และไม่ประกาศเป็นท้ายบทเอง
+                    if ($stored->vocabulary_mode !== 'pending') {
+                        $stored->update(['vocabulary_mode' => 'pending']);
+                    }
+
+                    return false;
                 }
 
-                return false;
+                $item['vocabulary_mode'] = 'after_vocabulary';
+                $item['required_vocabulary_words'] = $resolved;
+                $hasMode = true;
+                $hasWords = true;
             }
 
             // ถ้าระบุ metadata ต้องระบุให้ครบทั้งสองช่อง

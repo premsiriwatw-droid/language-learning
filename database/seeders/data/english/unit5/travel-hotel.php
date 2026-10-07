@@ -189,6 +189,8 @@ return [
                 [
                     'audio_path' => 'audio/english/travel-hotel/book-single-room-two-nights.mp3',
                     'question' => 'จากเสียง ผู้พูดต้องการพักกี่คืน?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['night'],
                     'explanation' => 'เสียงบอกว่า for two nights. จึงต้องการพักสองคืน',
                     'answers' => [
                         ['หนึ่งคืน', false],
@@ -200,6 +202,8 @@ return [
                 [
                     'audio_path' => 'audio/english/travel-hotel/check-out-ten-then-airport.mp3',
                     'question' => 'จากเสียง หลังคืนห้องพักแล้ว ผู้พูดจะไปที่ไหน?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['airport'],
                     'explanation' => 'ผู้พูดบอกว่า Then we go to the airport. จึงจะไปสนามบิน',
                     'answers' => [
                         ['โรงเรียน', false],

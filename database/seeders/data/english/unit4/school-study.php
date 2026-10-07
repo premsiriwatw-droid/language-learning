@@ -199,6 +199,8 @@ return [
                 ],
                 [
                     'question' => 'ผู้พูดทำการบ้านที่ไหน',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['homework'],
                     'explanation' => 'ผู้พูดบอกว่า I do my homework at home. จึงทำการบ้านที่บ้าน',
                     'answers' => [
                         ['In a restaurant.', false],

@@ -189,6 +189,8 @@ return [
                 [
                     'audio_path' => 'audio/english/health-body/my-head-hurts-need-rest.mp3',
                     'question' => 'จากเสียง ผู้พูดปวดส่วนใด?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['head'],
                     'explanation' => 'ผู้พูดบอกว่า My head hurts. จึงปวดศีรษะ',
                     'answers' => [
                         ['แขน', false],
@@ -200,6 +202,8 @@ return [
                 [
                     'audio_path' => 'audio/english/health-body/fever-going-to-hospital.mp3',
                     'question' => 'จากเสียง ผู้พูดกำลังจะไปที่ไหน?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['hospital'],
                     'explanation' => 'เสียงบอกว่า I am going to the hospital. จึงกำลังจะไปโรงพยาบาล',
                     'answers' => [
                         ['โรงพยาบาล', true],
@@ -224,6 +228,8 @@ return [
                 [
                     'image_path' => 'images/english/health-body/person-coughing-into-elbow.jpg',
                     'question' => 'ประโยคใดตรงกับการกระทำของบุคคลในภาพ?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['cough'],
                     'explanation' => 'ภาพแสดงคนกำลังไอ ประโยค She is coughing. หมายถึงเธอกำลังไอ',
                     'answers' => [
                         ['She is cooking.', false],

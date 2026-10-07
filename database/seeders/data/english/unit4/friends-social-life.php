@@ -199,6 +199,8 @@ return [
                 ],
                 [
                     'question' => 'ผู้พูดจะติดต่อเพื่อนอย่างไรคืนนี้',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['call'],
                     'explanation' => 'ผู้พูดบอกว่า can call you tonight คือสามารถโทรหาคุณคืนนี้ได้',
                     'answers' => [
                         ['By sending a letter.', false],
@@ -223,6 +225,8 @@ return [
                 ],
                 [
                     'question' => 'What are the young people doing?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['help'],
                     'explanation' => 'คนหนุ่มสาวในภาพกำลังช่วยถือถุงให้คนอีกคน จึงตรงกับ Helping someone carry bags.',
                     'answers' => [
                         ['Helping someone carry bags.', true],

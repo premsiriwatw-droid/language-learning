@@ -212,6 +212,8 @@ return [
             'image_choice' => [
                 [
                     'question' => 'What is the person doing?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['brush'],
                     'explanation' => 'คนในภาพกำลังใช้แปรงสีฟันแปรงฟัน จึงตรงกับ Brushing their teeth.',
                     'answers' => [
                         ['Cooking dinner.', false],
@@ -223,6 +225,8 @@ return [
                 ],
                 [
                     'question' => 'เลือกวลีที่ตรงกับการกระทำในภาพ',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['cook'],
                     'explanation' => 'คนในภาพกำลังปรุงอาหารในกระทะ คำว่า cooking food จึงตรงกับภาพ',
                     'answers' => [
                         ['Washing a face.', false],

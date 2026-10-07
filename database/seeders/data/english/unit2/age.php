@@ -727,6 +727,8 @@ return [
                 [
                     'audio_path' => 'audio/english/age/anna-is-twelve.mp3',
                     'question' => 'จากเสียง แอนนาอายุเท่าไร?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['years'],
                     'explanation' => 'แอนนาพูดว่า I am twelve years old. จึงอายุสิบสองปี',
                     'answers' => [
                         [

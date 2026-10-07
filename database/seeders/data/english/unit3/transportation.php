@@ -200,6 +200,8 @@ return [
                 [
                     'audio_path' => 'audio/english/transportation/train-leaves-at-nine.mp3',
                     'question' => 'ฟังเสียงแล้วตอบว่ารถไฟออกกี่โมง',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['train'],
                     'explanation' => 'เสียงพูดว่า The train leaves at nine o’clock. จึงตอบว่าเก้าโมง',
                     'answers' => [
                         ['At eight o’clock.', false],
@@ -224,6 +226,8 @@ return [
                 [
                     'image_path' => 'images/english/transportation/person-walking-on-sidewalk.jpg',
                     'question' => 'คนในภาพกำลังทำอะไร',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['walk'],
                     'explanation' => 'คนในภาพกำลังเดินบนทางเท้า จึงเลือก walking',
                     'answers' => [
                         ['flying a plane', false],

@@ -189,6 +189,8 @@ return [
                 [
                     'audio_path' => 'audio/english/hobbies/reading-books-in-free-time.mp3',
                     'question' => 'ฟังเสียงแล้วตอบว่าผู้พูดชอบทำอะไรในเวลาว่าง',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['read'],
                     'explanation' => 'ผู้พูดบอกว่า I like reading books in my free time. จึงชอบอ่านหนังสือ',
                     'answers' => [
                         ['Reading books.', true],
@@ -213,6 +215,8 @@ return [
                 [
                     'image_path' => 'images/english/hobbies/person-drawing-with-pencil.jpg',
                     'question' => 'คนในภาพกำลังทำกิจกรรมใด',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['draw'],
                     'explanation' => 'คนในภาพใช้ดินสอวาดรูปบนกระดาษ จึงเป็น drawing with a pencil',
                     'answers' => [
                         ['reading a book', false],
@@ -224,6 +228,8 @@ return [
                 [
                     'image_path' => 'images/english/hobbies/person-swimming-in-pool.jpg',
                     'question' => 'กิจกรรมในภาพเรียกว่าอะไร',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['swim'],
                     'explanation' => 'คนในภาพกำลังว่ายน้ำในสระ จึงเลือก swimming',
                     'answers' => [
                         ['singing', false],

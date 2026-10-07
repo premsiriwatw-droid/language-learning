@@ -417,6 +417,8 @@ return [
                 [
                     'audio_path' => 'audio/english/greetings/hello-how-are-you.mp3',
                     'question' => 'จากเสียง ผู้ตอบรู้สึกอย่างไร?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['fine'],
                     'explanation' => 'ผู้ตอบพูดว่า I am fine, thank you. หมายถึง สบายดี ขอบคุณ',
                     'answers' => [
                         [
@@ -440,6 +442,8 @@ return [
                 [
                     'audio_path' => 'audio/english/greetings/good-morning-nice-to-meet-you.mp3',
                     'question' => 'จากเสียง ผู้พูดทักทายในช่วงใด?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['good morning'],
                     'explanation' => 'เสียงใช้คำว่า Good morning ซึ่งเป็นคำทักทายตอนเช้า',
                     'answers' => [
                         [

@@ -189,6 +189,8 @@ return [
                 [
                     'audio_path' => 'audio/english/shopping/shirt-is-ten-dollars.mp3',
                     'question' => 'ฟังเสียงแล้วตอบว่าเสื้อเชิ้ตราคาเท่าไร',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['shirt'],
                     'explanation' => 'เสียงพูดว่า The shirt is ten dollars. จึงตอบว่าเสื้อเชิ้ตราคา 10 ดอลลาร์',
                     'answers' => [
                         ['Ten dollars.', true],

@@ -493,6 +493,8 @@ return [
                 [
                     'audio_path' => 'audio/english/time/eight-thirty-in-morning.mp3',
                     'question' => 'จากเสียง ตอนนี้กี่โมง?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['morning'],
                     'explanation' => 'eight thirty in the morning หมายถึง แปดโมงครึ่งตอนเช้า',
                     'answers' => [
                         [
@@ -516,6 +518,8 @@ return [
                 [
                     'audio_path' => 'audio/english/time/class-at-two-fifteen.mp3',
                     'question' => 'จากเสียง เริ่มเรียนกี่โมง?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['afternoon'],
                     'explanation' => 'two fifteen in the afternoon หมายถึง บ่ายสองโมงสิบห้านาที',
                     'answers' => [
                         [

@@ -189,6 +189,8 @@ return [
                 [
                     'audio_path' => 'audio/english/asking-for-help/cannot-find-wallet-phone-in-bag.mp3',
                     'question' => 'จากเสียง ผู้พูดหาอะไรไม่เจอ?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['wallet'],
                     'explanation' => 'ผู้พูดบอกว่า I cannot find my wallet. ส่วนโทรศัพท์ยังอยู่ในกระเป๋า จึงหากระเป๋าสตางค์ไม่เจอ',
                     'answers' => [
                         ['โทรศัพท์', false],
@@ -200,6 +202,8 @@ return [
                 [
                     'audio_path' => 'audio/english/asking-for-help/speak-slowly-write-address.mp3',
                     'question' => 'จากเสียง ผู้พูดขอให้ผู้ฟังเขียนอะไร?',
+                    'vocabulary_mode' => 'after_vocabulary',
+                    'required_vocabulary_words' => ['address'],
                     'explanation' => 'Can you write the address? เป็นการขอให้เขียนที่อยู่',
                     'answers' => [
                         ['ชื่อเพื่อน', false],

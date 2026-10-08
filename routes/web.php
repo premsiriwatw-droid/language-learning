@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\ContentManagementController;
 use App\Http\Controllers\LearningController;
+use App\Http\Controllers\LearningHistoryController;
 use App\Http\Controllers\ProgressProfileController;
 use App\Http\Controllers\QuizController;
 use App\Http\Middleware\RememberLearningVisit;
@@ -45,6 +46,10 @@ Route::middleware('guest')->group(function () {
 */
 
 Route::middleware('auth')->group(function () {
+    Route::get('/learning-history', [LearningHistoryController::class, 'index'])->name('learning-history.index');
+    Route::get('/learning-history/{attempt}', [LearningHistoryController::class, 'show'])->name('learning-history.show');
+    Route::get('/learning-history/{attempt}/review', [LearningHistoryController::class, 'review'])->name('learning-history.review');
+    Route::post('/learning-history/{attempt}/review', [LearningHistoryController::class, 'submitReview'])->name('learning-history.review.submit');
     /*
     |--------------------------------------------------------------------------
     | Profile

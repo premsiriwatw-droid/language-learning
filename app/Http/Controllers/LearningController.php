@@ -151,6 +151,16 @@ class LearningController extends Controller
                 ->values();
         }
 
+        // Read-only review: include only vocabulary completed before this page.
+        $learnedVocabularies = collect(array_slice(
+            $flow,
+            0,
+            min($step - 1, $runtime['next_step'] - 1)
+        ))
+            ->filter(fn ($item) => $item['type'] === 'vocabulary')
+            ->map(fn ($item) => $item['vocabulary'])
+            ->values();
+
         return view('frontend.learn-step', [
             'lesson' => $lesson,
             'current' => $current,
@@ -159,6 +169,8 @@ class LearningController extends Controller
             'reviewResult' => $reviewResult,
             'selectedAnswer' => $result['selected_answer'] ?? null,
             'answerChoices' => $answerChoices,
+            'learnedVocabularies' => $learnedVocabularies,
+            'isCompletedStep' => $step < $runtime['next_step'],
         ]);
     }
 

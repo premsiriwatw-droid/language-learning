@@ -20,7 +20,7 @@
     let closeTimeout;
 
     const renderScene = () => {
-        const scene = hoveredScene || focusedScene || selectedScene;
+        const scene = page.dataset.curriculumScene || hoveredScene || focusedScene || selectedScene;
         page.dataset.scene = scene;
         caption.textContent = sceneNames[scene];
         triggers.forEach(trigger => {
@@ -52,6 +52,16 @@
             selectedScene = selectedScene === scene ? 'default' : scene;
             renderScene();
         });
+    });
+
+    // A registration outline keeps its city's backdrop until the learner returns.
+    page.addEventListener('auth:scene-select', event => {
+        const scene = event.detail?.scene;
+        if (!Object.hasOwn(sceneNames, scene)) return;
+        selectedScene = scene;
+        hoveredScene = null;
+        focusedScene = null;
+        renderScene();
     });
 
     const stopBook = () => {

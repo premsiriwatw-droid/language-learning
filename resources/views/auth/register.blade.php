@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
     <link rel="stylesheet" href="{{ asset('css/register.css') }}">
     <script src="{{ asset('js/login.js') }}" defer></script>
+    <script src="{{ asset('js/register.js') }}" defer></script>
 </head>
 <body class="login-page register-page" data-scene="default">
     <a class="login-skip" href="#register-form">ข้ามไปสมัครสมาชิก</a>
@@ -34,13 +35,17 @@
         <main class="register-panels">
             <section class="login-story register-story" aria-labelledby="story-heading">
                 <div class="card-accent" aria-hidden="true"></div>
-                <p class="story-eyebrow"><span class="eyebrow-line"></span> YOUR FIRST CHAPTER</p>
-                <h1 id="story-heading">Start learning.<br><span>Build your<br>future.</span></h1>
-                <p class="story-description">เริ่มต้นเรียนภาษาอังกฤษและภาษาจีน<br>ฝึกคำศัพท์ ทำแบบฝึกหัด<br>และพัฒนาทักษะภาษาของคุณทุกวัน</p>
-                @include('auth.partials.language-explorer')
-                <div class="register-story-footer" aria-hidden="true">
-                    <span>01 / THE BEGINNING</span><span class="story-footer-line"></span><span>EN + 中文</span>
+                <div class="register-intro" data-register-intro>
+                    <p class="story-eyebrow"><span class="eyebrow-line"></span> YOUR FIRST CHAPTER</p>
+                    <h1 id="story-heading">Start learning.<br><span>Build your<br>future.</span></h1>
+                    <p class="story-description">เริ่มต้นเรียนภาษาอังกฤษและภาษาจีน<br>ฝึกคำศัพท์ ทำแบบฝึกหัด<br>และพัฒนาทักษะภาษาของคุณทุกวัน</p>
+                    @include('auth.partials.language-explorer', ['previewLessons' => true])
+                    <div class="register-story-footer" aria-hidden="true">
+                        <span>01 / THE BEGINNING</span><span class="story-footer-line"></span><span>EN + 中文</span>
+                    </div>
                 </div>
+                <x-registration-curriculum />
+                <div class="curriculum-gust" aria-hidden="true"><span></span><span></span><span></span></div>
             </section>
 
             <section class="login-card register-card" aria-labelledby="register-heading">

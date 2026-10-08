@@ -15,12 +15,6 @@
     <div class="language-scenery" aria-hidden="true">
         <img class="flags-backdrop" src="{{ asset('images/languages/flags-backdrop.png') }}" alt="" width="1672" height="941" fetchpriority="high">
         <div class="scenery-wash"></div>
-        <div class="character-position character-position-china">
-            <img class="language-character character-china" src="{{ asset('images/languages/china-character.png') }}" alt="" width="1024" height="1536" decoding="async">
-        </div>
-        <div class="character-position character-position-england">
-            <img class="language-character character-england" src="{{ asset('images/languages/england-character.png') }}" alt="" width="1024" height="1536" decoding="async">
-        </div>
         <span class="scene-word scene-word-china">你好</span>
         <span class="scene-word scene-word-england">Hello.</span>
     </div>

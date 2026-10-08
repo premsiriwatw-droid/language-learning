@@ -91,6 +91,14 @@
                 </a>
             @endif
 
+            @if($isCompletedStep)
+                <a
+                    href="{{ route('lessons.learn.step', ['lesson' => $lesson->id, 'step' => $step + 1]) }}"
+                    class="flex-1 text-center py-3 rounded-xl bg-emerald-500 text-white font-bold border-b-4 border-emerald-600 hover:bg-emerald-600"
+                >
+                    {{ $step >= $total ? 'จบบทเรียน 🎉' : 'ถัดไป →' }}
+                </a>
+            @else
             {{-- ส่ง POST เพื่อยืนยันว่าเรียนคำศัพท์ step นี้แล้ว --}}
             <form
                 method="POST"
@@ -109,6 +117,8 @@
                     {{ $step >= $total ? 'จบบทเรียน 🎉' : 'ถัดไป →' }}
                 </button>
             </form>
+
+            @endif
 
         </div>
 
@@ -235,7 +245,7 @@
                     class="mb-5 bg-emerald-50 border-2 border-emerald-200 text-emerald-600 rounded-xl p-4 text-center font-bold"
                     role="status"
                 >
-                    ✅ ถูกต้อง!
+                    ✅ ผ่านแล้ว — ไม่ต้องทำข้อนี้ซ้ำ
                 </div>
             @endif
 
@@ -338,29 +348,35 @@
                 </div>
 
                 {{-- Review Navigation --}}
-                @if($reviewResult === 'correct')
+                <div class="mt-6 flex items-stretch gap-3">
+                    @if($step > 1 && in_array($reviewResult, ['wrong', 'correct'], true))
+                        <a
+                            href="{{ route('lessons.learn.step', ['lesson' => $lesson->id, 'step' => $step - 1]) }}"
+                            class="flex-1 min-w-0 rounded-xl border-2 border-emerald-500 px-3 py-3 text-sm font-bold text-emerald-600 hover:bg-emerald-50"
+                        >
+                            ← ย้อนกลับ
+                        </a>
+                    @endif
 
-                    <a
-                        href="{{ route('lessons.learn.step', [
-                            'lesson' => $lesson->id,
-                            'step' => $step + 1
-                        ]) }}"
-                        class="mt-6 block w-full text-center py-3 rounded-xl bg-emerald-500 text-white font-bold border-b-4 border-emerald-600 hover:bg-emerald-600 active:border-b-0"
-                    >
-                        {{ $step >= $total ? 'จบบทเรียน 🎉' : 'ถัดไป →' }}
-                    </a>
-
-                @else
-
-                    <button
-                        type="submit"
-                        class="mt-6 w-full py-3 rounded-xl bg-emerald-500 text-white font-bold border-b-4 border-emerald-600 hover:bg-emerald-600 active:border-b-0"
-                    >
-                        ตรวจคำตอบ
-                    </button>
-
-                @endif
-
+                    @if($reviewResult === 'correct')
+                        <a
+                            href="{{ route('lessons.learn.step', [
+                                'lesson' => $lesson->id,
+                                'step' => $step + 1
+                            ]) }}"
+                            class="flex-1 min-w-0 text-center rounded-xl bg-emerald-500 px-3 py-3 font-bold text-white border-b-4 border-emerald-600 hover:bg-emerald-600 active:border-b-0"
+                        >
+                            {{ $step >= $total ? 'จบบทเรียน 🎉' : 'ถัดไป →' }}
+                        </a>
+                    @else
+                        <button
+                            type="submit"
+                            class="flex-1 min-w-0 rounded-xl bg-emerald-500 px-3 py-3 font-bold text-white border-b-4 border-emerald-600 hover:bg-emerald-600 active:border-b-0"
+                        >
+                            ตรวจคำตอบ
+                        </button>
+                    @endif
+                </div>
             </form>
 
         </div>

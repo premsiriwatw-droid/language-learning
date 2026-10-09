@@ -14,6 +14,14 @@ class LearningBatchTest extends TestCase
     use RefreshDatabase;
     use CreatesContentLesson;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // รักษา regression ของโหมดเดิม 2 คำ; โหมดใหม่ 5 คำมี test แยก
+        config()->set('learning.vocabulary_batch_size', 2);
+        config()->set('learning.group_related_vocabulary', false);
+    }
+
     public function test_reviews_follow_learned_batches_and_wait_for_all_required_words(): void
     {
         $lesson = $this->createContentLesson();

@@ -71,6 +71,12 @@
         </section>
     </div>
 
+    <div class="mb-6 flex justify-end">
+        <a href="{{ route('learning-history.index') }}" class="profile-button secondary-button">
+            ประวัติการเรียน / ทบทวนข้อผิด <span aria-hidden="true">→</span>
+        </a>
+    </div>
+
     <section class="profile-card learning-card" aria-labelledby="learning-title">
         <div class="section-heading">
             <div>

@@ -303,7 +303,7 @@ class ProgressProfileTest extends TestCase
             ->assertSee('50%')
             ->assertSee('1 / 2 บทเรียน')
             ->assertSee('บทเรียนที่สอง')
-            ->assertDontSee('500');
+            ->assertDontSeeText('500');
 
         $progress->visit($user, $lesson, 1);
 

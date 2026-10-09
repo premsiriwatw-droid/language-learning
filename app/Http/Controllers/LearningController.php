@@ -3,14 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Services\Content\VocabularyBatchPlanner;
 use App\Models\Exercise;
 use App\Models\Language;
 use App\Models\Lesson;
 use App\Models\LessonProgress;
 use App\Models\Unit;
 use App\Services\Progress\LearningProgress;
+use App\Services\Progress\LearningHistoryRecorder;
 use App\Services\Progress\LearningRewardCalculator;
 use App\Services\Progress\LessonAccess;
+use App\Services\Progress\UnitAccess;
 use App\Services\Quiz\QuizAnswerChecker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -31,30 +34,34 @@ class LearningController extends Controller
         return view('frontend.languages', compact('languages'));
     }
 
-    public function showUnits(Course $course)
+    public function showUnits(Request $request, Course $course)
     {
-        $course->load('units');
+        $course->load(['units' => fn ($query) => $query->orderBy('position')->orderBy('id')]);
 
-        return view('frontend.units', compact('course'));
+        $unitStates = app(UnitAccess::class)->forCourse((int) $course->id, $request->user());
+
+        return view('frontend.units', compact('course', 'unitStates'));
     }
 
     public function showLessons(Request $request, Unit $unit)
     {
-        $unit->load('lessons');
-
-        $lessonStates = app(LessonAccess::class)->forCourse(
-            (int) $unit->course_id,
-            $request->user()
+        abort_unless(
+            app(UnitAccess::class)->canOpen($request->user(), $unit),
+            403,
+            'เรียนบทที่มีเนื้อหาใน Unit ก่อนหน้าให้ครบก่อน'
         );
 
-        return view('frontend.lessons', [
-            'unit' => $unit,
-            'lessonStates' => $lessonStates,
-        ]);
+        $unit->load(['lessons' => fn ($query) => $query->orderBy('position')->orderBy('id')]);
+
+        $lessonStates = app(LessonAccess::class)->forCourse((int) $unit->course_id, $request->user());
+
+        return view('frontend.lessons', compact('unit', 'lessonStates'));
     }
 
-    public function showLessonContent(Lesson $lesson)
+    public function showLessonContent(Request $request, Lesson $lesson)
     {
+        $this->ensureLessonAccessible($request, $lesson);
+
         $lesson->load(['vocabularies', 'exercises']);
 
         return view('frontend.lesson-content', compact('lesson'));
@@ -127,6 +134,34 @@ class LearningController extends Controller
             ? ($result['solved'] ? 'correct' : 'wrong')
             : null;
 
+        $answerChoices = collect();
+
+        if ($current['type'] === 'review') {
+            $question = $current['question'];
+
+            // รอบใหม่มี seed ใหม่; refresh, retry และเรียนต่อใช้ seed เดิม
+            $choiceSeed = $runtime['choice_seed']
+                ?? hash('sha256', $runtime['signature'] . ':' . $runtime['started_at']);
+
+            $answerChoices = $question->answers
+                ->sortBy(fn ($answer) => hash_hmac(
+                    'sha256',
+                    $question->id . ':' . $answer->id,
+                    $choiceSeed
+                ))
+                ->values();
+        }
+
+        // Read-only review: include only vocabulary completed before this page.
+        $learnedVocabularies = collect(array_slice(
+            $flow,
+            0,
+            min($step - 1, $runtime['next_step'] - 1)
+        ))
+            ->filter(fn ($item) => $item['type'] === 'vocabulary')
+            ->map(fn ($item) => $item['vocabulary'])
+            ->values();
+
         return view('frontend.learn-step', [
             'lesson' => $lesson,
             'current' => $current,
@@ -134,6 +169,9 @@ class LearningController extends Controller
             'total' => $total,
             'reviewResult' => $reviewResult,
             'selectedAnswer' => $result['selected_answer'] ?? null,
+            'answerChoices' => $answerChoices,
+            'learnedVocabularies' => $learnedVocabularies,
+            'isCompletedStep' => $step < $runtime['next_step'],
         ]);
     }
 
@@ -224,6 +262,7 @@ class LearningController extends Controller
 
         if ($result['attempts'] === 0) {
             $result['first_correct'] = $correct;
+            $result['first_selected_answer'] = $submitted;
         }
 
         $result['attempts']++;
@@ -502,6 +541,8 @@ class LearningController extends Controller
         ) {
             $runtime = [
                 'signature' => $signature,
+                'history_run_id' => (string) \Illuminate\Support\Str::uuid(),
+                'choice_seed' => bin2hex(random_bytes(16)),
                 'started_at' => now()->timestamp,
                 'finished_at' => null,
                 'next_step' => 1,
@@ -576,6 +617,13 @@ class LearningController extends Controller
 
                     $runtime['saved_xp'] = (int) $savedProgress->xp;
                     $runtime['saved_stars'] = (int) $savedProgress->stars;
+                }
+
+                if ($this->runtimeIsComplete($runtime, $flow)) {
+                    app(LearningHistoryRecorder::class)->record(
+                        $user, $lesson, $runtime, $flow,
+                        $this->buildLessonSummary($runtime)
+                    );
                 }
 
                 if ($this->runtimeStorageAvailable()) {
@@ -688,8 +736,25 @@ class LearningController extends Controller
             $pendingReviews = $remaining;
         };
 
-        foreach ($vocabularies->chunk(2) as $batch) {
-            foreach ($batch as $vocabulary) {
+        $batchSize = max(1, min(10, (int) config('learning.vocabulary_batch_size', 5)));
+        $requirements = array_map(
+            fn ($review) => $review['question']->vocabularies->pluck('id')->all(),
+            $pendingReviews
+        );
+
+        $batches = config('learning.group_related_vocabulary', true)
+            ? app(VocabularyBatchPlanner::class)->plan(
+                $lessonVocabularyIds,
+                $requirements,
+                $batchSize
+            )
+            : array_chunk($lessonVocabularyIds, $batchSize);
+
+        $vocabularyById = $vocabularies->keyBy('id');
+
+        foreach ($batches as $batch) {
+            foreach ($batch as $vocabularyId) {
+                $vocabulary = $vocabularyById->get($vocabularyId);
                 $flow[] = [
                     'type' => 'vocabulary',
                     'vocabulary' => $vocabulary,

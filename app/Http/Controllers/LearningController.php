@@ -10,6 +10,7 @@ use App\Models\Lesson;
 use App\Models\LessonProgress;
 use App\Models\Unit;
 use App\Services\Progress\LearningProgress;
+use App\Services\Progress\PlayerLevelCalculator;
 use App\Services\Progress\LearningHistoryRecorder;
 use App\Services\Progress\LearningRewardCalculator;
 use App\Services\Progress\LessonAccess;
@@ -322,6 +323,10 @@ class LearningController extends Controller
         $summary['progress_saved'] = $runtime['progress_saved'] ?? false;
         $summary['saved_xp'] = $runtime['saved_xp'] ?? null;
         $summary['saved_stars'] = $runtime['saved_stars'] ?? null;
+        $summary['player_level'] = $request->user()
+            ? app(PlayerLevelCalculator::class)->calculate($this->progress->summary($request->user())['xp'])
+            : null;
+        $summary['level_change'] = $runtime['level_change'] ?? null;
 
         $nextLesson = null;
         $courseId = $lesson->unit?->course_id;
@@ -542,6 +547,7 @@ class LearningController extends Controller
             $runtime = [
                 'signature' => $signature,
                 'history_run_id' => (string) \Illuminate\Support\Str::uuid(),
+                'level_change' => null,
                 'choice_seed' => bin2hex(random_bytes(16)),
                 'started_at' => now()->timestamp,
                 'finished_at' => null,
@@ -605,6 +611,9 @@ class LearningController extends Controller
                         $summary['correct_count']
                     );
 
+                    $calculator = app(PlayerLevelCalculator::class);
+                    $beforeLevel = $calculator->calculate($this->progress->summary($user)['xp']);
+
                     $savedProgress = $this->progress->complete(
                         $user,
                         $lesson,
@@ -617,6 +626,10 @@ class LearningController extends Controller
 
                     $runtime['saved_xp'] = (int) $savedProgress->xp;
                     $runtime['saved_stars'] = (int) $savedProgress->stars;
+                    $afterLevel = $calculator->calculate($this->progress->summary($user)['xp']);
+                    $runtime['level_change'] = $afterLevel['level'] > $beforeLevel['level']
+                        ? ['from' => $beforeLevel['level'], 'to' => $afterLevel['level']]
+                        : null;
                 }
 
                 if ($this->runtimeIsComplete($runtime, $flow)) {

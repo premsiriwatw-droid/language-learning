@@ -4,6 +4,10 @@ return [
     'vocabulary_batch_size' => 5,
     'group_related_vocabulary' => true,
 
+    'levels' => [
+        'xp_per_level' => 200,
+    ],
+
     'rewards' => [
         'completion_xp' => 20,
         'xp_per_first_correct' => 10,

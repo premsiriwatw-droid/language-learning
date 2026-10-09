@@ -68,6 +68,13 @@
             <p id="xp-label" class="stat-label">ประสบการณ์</p>
             <p class="stat-value">{{ number_format($progress['xp']) }} <span>XP</span></p>
             <p class="field-hint">สะสมจากผลการเรียนของคุณ</p>
+            <p class="mt-3 font-bold text-emerald-700">Level {{ $playerLevel['level'] }}</p>
+            <progress class="profile-progress mt-2" aria-label="XP สำหรับเพิ่มเลเวล"
+                value="{{ $playerLevel['current_xp'] }}" max="{{ $playerLevel['required_xp'] }}">
+                {{ $playerLevel['percent'] }}%
+            </progress>
+            <p class="field-hint mt-2">{{ $playerLevel['current_xp'] }} / {{ $playerLevel['required_xp'] }} XP</p>
+            <p class="field-hint">อีก {{ $playerLevel['remaining_xp'] }} XP ถึง Level {{ $playerLevel['level'] + 1 }}</p>
         </section>
     </div>
 

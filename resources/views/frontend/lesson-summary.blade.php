@@ -45,6 +45,21 @@
             @endif
         </div>
 
+        @if($summary['player_level'] ?? null)
+            <div class="mb-6 rounded-2xl border-2 border-emerald-200 bg-emerald-50 p-5 text-center">
+                @if($summary['level_change'] ?? null)
+                    <p class="font-bold text-emerald-700 mb-2">🎉 รอบนี้เลเวลเพิ่มจาก {{ $summary['level_change']['from'] }} เป็น {{ $summary['level_change']['to'] }}!</p>
+                @endif
+                <p class="text-xl font-bold text-emerald-700">Level {{ $summary['player_level']['level'] }}</p>
+                <p class="mt-2 text-gray-600">XP สะสม {{ $summary['player_level']['total_xp'] }}</p>
+                <progress class="w-full mt-3" aria-label="XP สำหรับเพิ่มเลเวล"
+                    value="{{ $summary['player_level']['current_xp'] }}" max="{{ $summary['player_level']['required_xp'] }}">
+                    {{ $summary['player_level']['percent'] }}%
+                </progress>
+                <p class="mt-2 text-sm text-gray-600">อีก {{ $summary['player_level']['remaining_xp'] }} XP ถึง Level {{ $summary['player_level']['level'] + 1 }}</p>
+            </div>
+        @endif
+
         @if($summary['progress_saved'] ?? false)
             <div class="mb-6 rounded-2xl border-2 border-amber-200 bg-amber-50 p-5 text-center">
                 <h2 class="font-extrabold text-amber-800">

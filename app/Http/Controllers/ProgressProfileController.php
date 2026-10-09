@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\Progress\LearningProgress;
+use App\Services\Progress\PlayerLevelCalculator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -15,10 +16,12 @@ class ProgressProfileController extends Controller
     public function show(Request $request, LearningProgress $progress): View
     {
         $user = $request->user();
+        $summary = $progress->summary($user);
 
         return view('frontend.profile', [
             'user' => $user,
-            'progress' => $progress->summary($user),
+            'progress' => $summary,
+            'playerLevel' => app(PlayerLevelCalculator::class)->calculate($summary['xp']),
             'hasPhoto' => Storage::disk('local')->exists($this->photoPath($request)),
             // Auth owns this attribute. No guessed HSK level or changes to User schema.
             'hskLevel' => $user->getAttribute('hsk_level'),

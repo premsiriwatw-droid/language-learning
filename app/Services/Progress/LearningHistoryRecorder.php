@@ -49,7 +49,7 @@ class LearningHistoryRecorder
         $runKey = hash('sha256', ($runtime['history_run_id'] ?? $runtime['choice_seed']
             ?? (string) $runtime['started_at']).':'.$runtime['signature']);
 
-        return LearningAttempt::firstOrCreate(
+        $attempt = LearningAttempt::firstOrCreate(
             ['user_id' => $user->id, 'run_key' => $runKey],
             [
                 'lesson_id' => $lesson->id,
@@ -67,5 +67,11 @@ class LearningHistoryRecorder
                 'results' => $results,
             ]
         );
+
+        if ($attempt->wasRecentlyCreated) {
+            app(LearnerActivityService::class)->completed($attempt);
+        }
+
+        return $attempt;
     }
 }

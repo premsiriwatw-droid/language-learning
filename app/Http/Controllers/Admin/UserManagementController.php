@@ -38,11 +38,23 @@ class UserManagementController extends Controller
 
             'role' => [
                 'required',
-                Rule::in(['user', 'admin']),
+                Rule::in(['user', 'admin', 'teacher']),
             ],
         ]);
 
-        $user->update($validated);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($user, $validated) {
+            $current = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+            if ($validated['role'] === 'teacher') {
+                // Eligibility is the approval record, not the current account role.
+                $application = $current->teacherApplication()->lockForUpdate()->first();
+                if (!$application || $application->status !== \App\Models\TeacherApplication::APPROVED || !$application->approved_at) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'role' => 'การให้สิทธิ์ครูต้องมีใบสมัครที่อนุมัติแล้ว',
+                    ]);
+                }
+            }
+            $current->update($validated);
+        });
 
         return redirect()
             ->route('admin.users.index')

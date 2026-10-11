@@ -5,6 +5,7 @@ namespace App\Services\Progress;
 use App\Models\Lesson;
 use App\Models\LessonProgress;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use InvalidArgumentException;
 
@@ -38,19 +39,27 @@ class LearningProgress
             throw new InvalidArgumentException('Rewards must be non-negative.');
         }
 
-        $progress = LessonProgress::firstOrCreate([
-            'user_id' => $user->id,
-            'lesson_id' => $lesson->id,
-        ]);
+        return DB::transaction(function () use ($user, $lesson, $xp, $stars): LessonProgress {
+            // Serialize this learner's completions so milestone counts cannot skip a reward.
+            User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $progress = LessonProgress::firstOrCreate([
+                'user_id' => $user->id,
+                'lesson_id' => $lesson->id,
+            ]);
 
-        // One conditional update prevents replayed completion from awarding twice.
-        LessonProgress::whereKey($progress->id)->whereNull('completed_at')->update([
-            'completed_at' => now(),
-            'xp' => $xp,
-            'stars' => $stars,
-        ]);
+            // One conditional update prevents replayed completion from awarding twice.
+            $awarded = LessonProgress::whereKey($progress->id)->whereNull('completed_at')->update([
+                'completed_at' => now(),
+                'xp' => $xp,
+                'stars' => $stars,
+            ]);
 
-        return $progress->refresh();
+            if ($awarded && $user->isLearner()) {
+                app(StarRewardService::class)->milestone($user);
+            }
+
+            return $progress->refresh();
+        });
     }
 
     public function summary(User $user): array
@@ -74,7 +83,7 @@ class LearningProgress
             'completed' => $completed->count(),
             'percentage' => $total > 0 ? (int) round($completed->count() / $total * 100) : 0,
             'xp' => (int) $completed->sum('xp'),
-            'stars' => (int) $completed->sum('stars'),
+            'stars' => (int) $completed->sum('stars') + app(StarRewardService::class)->totalBonus($user),
             'latest' => $latest,
         ];
     }

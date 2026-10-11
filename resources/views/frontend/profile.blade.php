@@ -61,7 +61,7 @@
             <span class="stat-icon" aria-hidden="true">★</span>
             <p id="stars-label" class="stat-label">ดาวสะสม</p>
             <p class="stat-value">{{ number_format($progress['stars']) }} <span>ดวง</span></p>
-            <p class="field-hint">รางวัลจากบทเรียนที่ผ่านแล้ว</p>
+            <p class="field-hint">รางวัลจากบทเรียน milestone และภารกิจที่รับแล้ว</p>
         </section>
         <section class="profile-card stat-card xp-card" aria-labelledby="xp-label">
             <span class="stat-icon" aria-hidden="true">ϟ</span>
@@ -84,6 +84,44 @@
         </a>
     </div>
 
+    @if($user->isLearner())
+        <section class="profile-card learner-progression-card mb-6" aria-labelledby="proficiency-title">
+            <div class="section-heading">
+                <h2 id="proficiency-title">เส้นทางผู้เรียน</h2>
+            </div>
+            <div class="profile-stats learner-progression-stats">
+                <section class="learner-progression-stat hsk-card" aria-labelledby="learner-level-label">
+                    <span class="stat-icon" aria-hidden="true">✦</span>
+                    <div class="learner-progression-copy">
+                        <p id="learner-level-label" class="stat-label">ระดับผู้เรียน</p>
+                        <p class="stat-value">{{ $user->learner_proficiency?->label() ?? 'รอประเมินระดับ' }}</p>
+                        <p class="field-hint">ระดับความสามารถปัจจุบัน</p>
+                        @if($user->placement_required)
+                            <a class="profile-button secondary-button" href="{{ route('placement.show') }}">ทำแบบทดสอบวัดระดับ</a>
+                        @endif
+                    </div>
+                </section>
+                <section class="learner-progression-stat xp-card" aria-labelledby="learner-streak-label">
+                    <span class="stat-icon" aria-hidden="true">↗</span>
+                    <div class="learner-progression-copy">
+                        <p id="learner-streak-label" class="stat-label">เรียนต่อเนื่อง</p>
+                        <p class="stat-value">{{ $displayedCurrentStreak }} <span>วัน</span></p>
+                        <p class="field-hint">สถิติสูงสุด {{ $user->longest_streak }} วัน</p>
+                    </div>
+                </section>
+                <section class="learner-progression-stat stars-card" aria-labelledby="learner-quests-label">
+                    <span class="stat-icon" aria-hidden="true">★</span>
+                    <div class="learner-progression-copy">
+                        <p id="learner-quests-label" class="stat-label">ภารกิจวันนี้</p>
+                        <p class="stat-value">{{ $dailyQuests->whereNotNull('completed_at')->count() }} / {{ $dailyQuests->count() }}</p>
+                        <p class="field-hint">สำเร็จวันนี้</p>
+                        <a class="profile-button secondary-button" href="{{ route('daily-quests.index') }}">ดูภารกิจวันนี้</a>
+                    </div>
+                </section>
+            </div>
+        </section>
+    @endif
+
     <section class="profile-card learning-card" aria-labelledby="learning-title">
         <div class="section-heading">
             <div>
@@ -99,7 +137,9 @@
         <progress class="profile-progress" aria-label="ความคืบหน้าบทเรียนทั้งหมด"
             value="{{ $progress['percentage'] }}" max="100">{{ $progress['percentage'] }}%</progress>
         @if($progress['latest']?->lesson)
-            @php($latest = $progress['latest'])
+            @php
+                $latest = $progress['latest'];
+            @endphp
             <div class="resume-card">
                 <span class="resume-icon" aria-hidden="true">↗</span>
                 <div class="resume-copy">
@@ -126,6 +166,45 @@
             <p class="field-hint progress-note">ขณะนี้ยังบันทึกความคืบหน้าไม่ได้ กรุณาลองใหม่ภายหลัง</p>
         @endunless
     </section>
+    @if($user->isAdmin())
+        <section class="profile-card mt-6 p-6" aria-labelledby="admin-tools-title">
+            <h2 id="admin-tools-title" class="text-xl font-bold mb-3">จัดการระบบ</h2>
+            <div class="flex flex-wrap gap-3">
+                <a class="profile-button primary-button" href="{{ route('admin.teacher-applications.index') }}">ตรวจใบสมัครผู้สอน →</a>
+                <a class="profile-button secondary-button" href="{{ route('admin.dashboard') }}">แดชบอร์ดแอดมิน →</a>
+            </div>
+        </section>
+    @elseif(in_array($user->role, ['user', 'teacher'], true))
+        @php
+            $teacherStatusLabels = ['pending' => 'รอพิจารณา', 'approved' => 'อนุมัติแล้ว', 'rejected' => 'ไม่ผ่านการอนุมัติ', 'needs_more_info' => 'ต้องส่งข้อมูลเพิ่มเติม'];
+        @endphp
+        <section class="profile-card mt-6 p-6 space-y-4" aria-labelledby="teacher-status-title">
+            <h2 id="teacher-status-title" class="text-xl font-bold">สถานะผู้สอนของฉัน</h2>
+            @if($isApprovedTeacher)
+                <p class="font-bold text-emerald-700">✓ ผู้สอนที่ผ่านการยืนยันแล้ว</p>
+                <div class="flex flex-wrap gap-3">
+                    <a class="profile-button primary-button" href="{{ route('teacher.verified') }}">เข้าสู่หน้าผู้สอน →</a>
+                    <a class="profile-button secondary-button" href="{{ route('teacher.application.show') }}">ดูผลอนุมัติและใบสมัคร →</a>
+                </div>
+            @elseif($teacherApplication)
+                <p>สถานะใบสมัคร: <strong>{{ $teacherStatusLabels[$teacherApplication->status] ?? $teacherApplication->status }}</strong></p>
+                @if($teacherApplication->review_note)
+                    <p class="whitespace-pre-wrap">ผลพิจารณา: {{ $teacherApplication->review_note }}</p>
+                @endif
+                @if($teacherApplication->status === 'pending')
+                    <p class="field-hint">แอดมินกำลังตรวจใบสมัคร ระหว่างนี้คุณเรียนภาษาได้ตามปกติ</p>
+                @elseif($teacherApplication->status === 'approved')
+                    <p class="field-hint">ใบสมัครอนุมัติแล้ว แต่สิทธิ์บัญชีครูยังไม่พร้อม กรุณาติดต่อแอดมิน</p>
+                @endif
+                <a class="profile-button secondary-button" href="{{ route('teacher.application.show') }}">
+                    {{ in_array($teacherApplication->status, ['rejected', 'needs_more_info'], true) ? 'แก้ไขใบสมัคร / ส่งข้อมูลเพิ่มเติม' : 'ตรวจสถานะและดูใบสมัคร' }} →
+                </a>
+            @else
+                <p class="field-hint">สมัครเป็นผู้สอนโดยส่งประวัติและเอกสารให้แอดมินพิจารณา</p>
+                <a class="profile-button secondary-button" href="{{ route('teacher.application.show') }}">สมัครเป็นผู้สอน →</a>
+            @endif
+        </section>
+    @endif
     <p class="profile-footer"><span aria-hidden="true">✦</span> ทุกบทเรียนเล็ก ๆ คืออีกก้าวของคุณ</p>
 </div>
 @endsection

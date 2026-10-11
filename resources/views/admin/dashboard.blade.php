@@ -38,5 +38,5 @@
         กลับ Profile
     </a>
 
-</body>
+<p><a href="{{ route('admin.teacher-applications.index') }}">ตรวจใบสมัครผู้สอน</a></p></body>
 </html>

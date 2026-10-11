@@ -25,8 +25,13 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
-        // ตรวจสอบข้อมูลที่ผู้ใช้กรอก
         $validated = $request->validate([
+            'account_type' => [
+                'sometimes',
+                'required',
+                'in:learner,teacher_applicant',
+            ],
+
             'name' => [
                 'required',
                 'string',
@@ -48,33 +53,45 @@ class AuthController extends Controller
             'learner_proficiency' => [
                 'sometimes',
                 'required',
-                Rule::in([...array_column(LearnerProficiency::cases(), 'value'), 'not_sure']),
+                Rule::in([
+                    ...array_column(LearnerProficiency::cases(), 'value'),
+                    'not_sure',
+                ]),
             ],
         ]);
 
-        $selection = $validated['learner_proficiency'] ?? LearnerProficiency::Beginner->value;
-        $validated['learner_proficiency'] = $selection === 'not_sure' ? null : $selection;
-        $validated['placement_required'] = $selection === 'not_sure';
+        $selection = $validated['learner_proficiency']
+            ?? LearnerProficiency::Beginner->value;
 
-        // สร้าง User ใหม่
-        // User Model ของเรามี password => hashed อยู่แล้ว
-        // Laravel จึง hash password ให้อัตโนมัติ
-        $user = User::create($validated);
+        $learnerProficiency = $selection === 'not_sure'
+            ? null
+            : $selection;
 
+        $placementRequired = $selection === 'not_sure';
 
-        // Login ให้อัตโนมัติหลังสมัครสมาชิก
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => $validated['password'],
+            'role' => 'user',
+            'learner_proficiency' => $learnerProficiency,
+            'placement_required' => $placementRequired,
+        ]);
+
         Auth::login($user);
 
-
-        // สร้าง Session ID ใหม่เพื่อความปลอดภัย
         $request->session()->regenerate();
 
+        // Preserve Teacher Verification flow from PR #47.
+        if (($validated['account_type'] ?? 'learner') === 'teacher_applicant') {
+            return redirect()->route('teacher.application.show');
+        }
+
+        // Learners who are unsure of their level take placement first.
         if ($user->placement_required) {
             return redirect()->route('placement.show');
         }
 
-        // ตอนนี้ใช้ Profile เป็นหน้าหลัง Login ชั่วคราว
-        // เพื่อไม่ไปสร้าง Home/Dashboard ชนกับคนที่ 5
         return redirect('/languages');
     }
 

@@ -14,6 +14,7 @@ use App\Http\Controllers\LearningHistoryController;
 use App\Http\Controllers\ProgressProfileController;
 use App\Http\Controllers\PlacementController;
 use App\Http\Controllers\QuizController;
+use App\Http\Controllers\TeacherApplicationController;
 use App\Http\Middleware\RememberLearningVisit;
 use Illuminate\Support\Facades\Route;
 
@@ -50,8 +51,18 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/placement', [PlacementController::class, 'show'])->name('placement.show');
     Route::post('/placement', [PlacementController::class, 'submit'])->name('placement.submit');
+
     Route::get('/daily-quests', [DailyQuestController::class, 'index'])->name('daily-quests.index');
-    Route::post('/daily-quests/{questId}/claim', [DailyQuestController::class, 'claim'])->whereNumber('questId')->name('daily-quests.claim');
+    Route::post('/daily-quests/{questId}/claim', [DailyQuestController::class, 'claim'])
+        ->whereNumber('questId')
+        ->name('daily-quests.claim');
+
+    Route::get('/teacher/application', [TeacherApplicationController::class, 'show'])
+        ->name('teacher.application.show');
+    Route::post('/teacher/application', [TeacherApplicationController::class, 'store'])
+        ->name('teacher.application.store');
+    Route::get('/teacher/documents/{document}', [TeacherApplicationController::class, 'download'])
+        ->name('teacher.documents.download');
     Route::get('/learning-history', [LearningHistoryController::class, 'index'])->name('learning-history.index');
     Route::get('/learning-history/{attempt}', [LearningHistoryController::class, 'show'])->name('learning-history.show');
     Route::get('/learning-history/{attempt}/review', [LearningHistoryController::class, 'review'])->name('learning-history.review');
@@ -288,3 +299,11 @@ Route::middleware(['auth', 'admin'])
             'update',
         ])->name('users.update');
     });
+
+Route::middleware(['auth', 'admin'])->prefix('admin/teacher-applications')->name('admin.teacher-applications.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Admin\TeacherApplicationReviewController::class, 'index'])->name('index');
+    Route::get('/{application}', [\App\Http\Controllers\Admin\TeacherApplicationReviewController::class, 'show'])->name('show');
+    Route::post('/{application}/review', [\App\Http\Controllers\Admin\TeacherApplicationReviewController::class, 'review'])->name('review');
+});
+Route::get('/teacher/verified', fn () => view('teacher.verified'))
+    ->middleware(['auth', \App\Http\Middleware\ApprovedTeacherMiddleware::class])->name('teacher.verified');

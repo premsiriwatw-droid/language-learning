@@ -66,7 +66,7 @@ class TeacherApplicationController extends Controller
             }
         }
         $existing = $request->user()->teacherApplication()->first();
-        $requiresFiles = !$existing || !$existing->documents()->exists();
+
         $validated = $request->validate([
             'full_name' => ['required', 'string', 'max:255'],
             'bio' => ['required', 'string', 'max:3000'],
@@ -74,12 +74,15 @@ class TeacherApplicationController extends Controller
             'teaching_languages' => ['required', 'array', 'min:1', 'max:10'],
             'teaching_languages.*' => ['required', 'string', 'distinct', Rule::in(Language::pluck('name')->all())],
             'document_type' => ['required', 'in:qualification,certificate,experience,portfolio'],
-            'documents' => [$requiresFiles ? 'required' : 'nullable', 'array', 'min:1', 'max:3'],
+            'documents' => ['nullable', 'array', 'min:1', 'max:3'],
+            'remove_document_ids' => ['sometimes', 'array', 'max:10'],
+            'remove_document_ids.*' => ['required', 'integer', 'distinct'],
             'documents.*' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
         ]);
         $newPaths = [];
+        $removedPaths = [];
         try {
-            DB::transaction(function () use ($request, $validated, &$newPaths) {
+            DB::transaction(function () use ($request, $validated, &$newPaths, &$removedPaths) {
                 // Lock the applicant account to serialize duplicate submissions.
                 $user = User::whereKey($request->user()->id)->lockForUpdate()->firstOrFail();
                 abort_unless($user->role === 'user', 403);
@@ -87,9 +90,29 @@ class TeacherApplicationController extends Controller
                 if ($application && !in_array($application->status, [TeacherApplication::REJECTED, TeacherApplication::NEEDS_MORE_INFO], true)) {
                     throw ValidationException::withMessages(['application' => 'ใบสมัครนี้ส่งแล้ว กรุณารอผลพิจารณา']);
                 }
-                $files = $request->file('documents', []);
-                if (($application?->documents()->count() ?? 0) + count($files) > 10) {
-                    throw ValidationException::withMessages(['documents' => 'ใบสมัครแนบเอกสารรวมได้ไม่เกิน 10 ไฟล์']);
+                $files = $request->file('documents', []) ?? [];
+                $removeIds = array_map('intval', $validated['remove_document_ids'] ?? []);
+                $existingDocuments = $application ? $application->documents()->lockForUpdate()->get() : collect();
+                $ownedIds = $existingDocuments->pluck('id')->map(fn ($id) => (int) $id)->all();
+                if (array_diff($removeIds, $ownedIds) !== []) {
+                    throw ValidationException::withMessages(['remove_document_ids' => 'เลือกได้เฉพาะเอกสารในใบสมัครของคุณ']);
+                }
+                $keptDocuments = $existingDocuments->reject(fn ($document) => in_array((int) $document->id, $removeIds, true));
+                $total = $keptDocuments->count() + count($files);
+                if ($total === 0) {
+                    throw ValidationException::withMessages(['documents' => 'ต้องมีเอกสารประกอบอย่างน้อยหนึ่งไฟล์ กรุณาแนบไฟล์ทดแทน']);
+                }
+                if ($total > 10) {
+                    throw ValidationException::withMessages(['documents' => 'ใบสมัครแนบเอกสารรวมได้ไม่เกิน 10 ไฟล์ ให้เลือกนำเอกสารเดิมออกก่อนเพิ่ม']);
+                }
+                if ($keptDocuments->contains(fn ($document) => !Storage::disk('teacher_documents')->exists($document->file_path))) {
+                    throw ValidationException::withMessages(['documents' => 'มีเอกสารเดิมที่ไฟล์หาย กรุณาเลือกนำรายการนั้นออกและแนบไฟล์ทดแทน']);
+                }
+                foreach ($existingDocuments as $document) {
+                    if (in_array((int) $document->id, $removeIds, true)) {
+                        $removedPaths[] = $document->file_path;
+                        $document->delete();
+                    }
                 }
                 $fromStatus = $application?->status;
                 $application ??= new TeacherApplication;
@@ -118,7 +141,7 @@ class TeacherApplicationController extends Controller
                 if ($fromStatus !== null) {
                     $application->reviews()->create([
                         'reviewer_id' => null, 'from_status' => $fromStatus,
-                        'to_status' => TeacherApplication::PENDING, 'note' => 'ผู้สมัครแก้ไขและส่งพิจารณาใหม่',
+                        'to_status' => TeacherApplication::PENDING, 'note' => 'ผู้สมัครแก้ไขและส่งพิจารณาใหม่; นำเอกสารเดิมออก ' . count($removeIds) . ' ไฟล์; เพิ่มเอกสาร ' . count($files) . ' ไฟล์',
                     ]);
                 }
             });
@@ -127,6 +150,17 @@ class TeacherApplicationController extends Controller
                 Storage::disk('teacher_documents')->delete($newPaths);
             }
             throw $error;
+        }
+        // Remove physical files only after the database transaction succeeds.
+        // Cleanup failure must not roll back or delete newly committed uploads.
+        foreach ($removedPaths as $path) {
+            try {
+                if (!Storage::disk('teacher_documents')->delete($path)) {
+                    \Illuminate\Support\Facades\Log::warning('Teacher document cleanup deferred');
+                }
+            } catch (Throwable $error) {
+                \Illuminate\Support\Facades\Log::warning('Teacher document cleanup deferred', ['exception' => get_class($error)]);
+            }
         }
         return redirect()->route('teacher.application.show')->with('status', 'ส่งใบสมัครแล้ว ระหว่างรออนุมัติคุณยังเรียนภาษาได้');
     }

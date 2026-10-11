@@ -45,8 +45,8 @@
             <label>Role</label>
 
             <select name="role" required>
-                @if($user->role === 'teacher')
-                    <option value="teacher" @selected(old('role', $user->role) === 'teacher')>Teacher (คงบทบาทครู)</option>
+                @if($user->role === 'teacher' || $user->teacherApplication()->where('status', 'approved')->whereNotNull('approved_at')->exists())
+                    <option value="teacher" @selected(old('role', $user->role) === 'teacher')>Teacher (คงบทบาทครู / คืนสิทธิ์ครู)</option>
                 @endif
                 <option
                     value="user"

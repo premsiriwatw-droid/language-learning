@@ -47,6 +47,18 @@
     @if($canEdit)
         <form method="POST" action="{{ route('teacher.application.store') }}" enctype="multipart/form-data" class="rounded-2xl border-2 border-gray-200 bg-white p-6 space-y-5">
             @csrf
+            @if($application && $application->documents->isNotEmpty())
+                <fieldset class="border rounded-xl p-4">
+                    <legend class="font-bold">จัดการเอกสารเดิม</legend>
+                    <p class="text-sm text-gray-500">เลือกเอกสารที่จะนำออกเมื่อส่งใบสมัครใหม่ แล้วแนบไฟล์ทดแทนด้านล่าง ต้องเหลืออย่างน้อย 1 ไฟล์และรวมไม่เกิน 10 ไฟล์</p>
+                    @foreach($application->documents as $document)
+                        <label class="block mt-3">
+                            <input type="checkbox" name="remove_document_ids[]" value="{{ $document->id }}" @checked(in_array((string) $document->id, array_map('strval', old('remove_document_ids', [])), true))>
+                            นำออก: {{ $document->original_name }}
+                        </label>
+                    @endforeach
+                </fieldset>
+            @endif
             <div>
                 <label for="full_name" class="block font-bold mb-2">ชื่อ–นามสกุล</label>
                 <input id="full_name" name="full_name" value="{{ old('full_name', $application?->full_name ?? auth()->user()->name) }}" maxlength="255" required class="w-full rounded-xl border-2 border-gray-200 p-3">
@@ -79,7 +91,7 @@
                 <label for="documents" class="block font-bold mb-2">หลักฐานประกอบใบสมัคร</label>
                 <p id="document-help" class="text-sm text-gray-500 mb-2">PDF/JPG/PNG ไฟล์ละไม่เกิน 5 MB แนบครั้งละไม่เกิน 3 ไฟล์ เอกสารเปิดได้เฉพาะคุณและ Admin ไม่จำเป็นต้องแนบบัตรประชาชน</p>
                 <input id="documents" name="documents[]" type="file" multiple accept=".pdf,.jpg,.jpeg,.png" aria-describedby="document-help" {{ !$application || $application->documents->isEmpty() ? 'required' : '' }}>
-                @if($application)<p class="mt-2 text-sm text-gray-500">เอกสารเดิมยังอยู่ ส่งใหม่ได้โดยไม่ต้องแนบเพิ่มหากหลักฐานครบแล้ว</p>@endif
+                @if($application)<p class="mt-2 text-sm text-gray-500">เอกสารที่ไม่ได้เลือกนำออกจะคงอยู่ หากไฟล์เดิมหาย ให้เลือกรายการนั้นออกและแนบไฟล์ทดแทน</p>@endif
             </div>
             <button type="submit" class="w-full rounded-xl bg-emerald-600 p-3 font-bold text-white">{{ $application ? 'ส่งใบสมัครที่แก้ไขแล้ว' : 'ส่งใบสมัครผู้สอน' }}</button>
         </form>

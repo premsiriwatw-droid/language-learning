@@ -307,3 +307,43 @@ Route::middleware(['auth', 'admin'])->prefix('admin/teacher-applications')->name
 });
 Route::get('/teacher/verified', fn () => view('teacher.verified'))
     ->middleware(['auth', \App\Http\Middleware\ApprovedTeacherMiddleware::class])->name('teacher.verified');
+/*
+|--------------------------------------------------------------------------
+| Teacher Course Marketplace & Enrollment (owner: Nakin)
+|--------------------------------------------------------------------------
+|
+| Learner side lives under /teacher-courses, the teacher's own course
+| management under /teacher/courses (approved teachers only, using the
+| shared ApprovedTeacherMiddleware contract from teacher verification).
+|
+*/
+
+Route::middleware('auth')->group(function () {
+    Route::get('/teacher-courses', [\App\Http\Controllers\TeacherCourses\MarketplaceController::class, 'index'])
+        ->name('teacher-courses.index');
+    Route::get('/teacher-courses/my', [\App\Http\Controllers\TeacherCourses\MarketplaceController::class, 'mine'])
+        ->name('teacher-courses.mine');
+    Route::get('/teacher-courses/{teacherCourse}', [\App\Http\Controllers\TeacherCourses\MarketplaceController::class, 'show'])
+        ->whereNumber('teacherCourse')->name('teacher-courses.show');
+
+    Route::post('/teacher-courses/{teacherCourse}/enrollment', [\App\Http\Controllers\TeacherCourses\LearnerEnrollmentController::class, 'store'])
+        ->whereNumber('teacherCourse')->name('teacher-courses.enroll');
+    Route::delete('/teacher-courses/{teacherCourse}/enrollment', [\App\Http\Controllers\TeacherCourses\LearnerEnrollmentController::class, 'destroy'])
+        ->whereNumber('teacherCourse')->name('teacher-courses.enroll.cancel');
+    Route::post('/teacher-courses/{teacherCourse}/enrollment/payment', [\App\Http\Controllers\TeacherCourses\LearnerEnrollmentController::class, 'pay'])
+        ->whereNumber('teacherCourse')->name('teacher-courses.enroll.pay');
+});
+
+Route::middleware(['auth', \App\Http\Middleware\ApprovedTeacherMiddleware::class])
+    ->prefix('teacher/courses')
+    ->name('teacher.courses.')
+    ->group(function () {
+        Route::get('/', [\App\Http\Controllers\TeacherCourses\TeacherCourseManagementController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\TeacherCourses\TeacherCourseManagementController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\TeacherCourses\TeacherCourseManagementController::class, 'store'])->name('store');
+        Route::get('/{teacherCourse}/edit', [\App\Http\Controllers\TeacherCourses\TeacherCourseManagementController::class, 'edit'])->name('edit');
+        Route::put('/{teacherCourse}', [\App\Http\Controllers\TeacherCourses\TeacherCourseManagementController::class, 'update'])->name('update');
+        Route::patch('/{teacherCourse}/status', [\App\Http\Controllers\TeacherCourses\TeacherCourseManagementController::class, 'updateStatus'])->name('status');
+        Route::get('/{teacherCourse}/enrollments', [\App\Http\Controllers\TeacherCourses\EnrollmentRequestController::class, 'index'])->name('enrollments');
+        Route::patch('/enrollments/{enrollment}', [\App\Http\Controllers\TeacherCourses\EnrollmentRequestController::class, 'update'])->name('enrollments.update');
+    });

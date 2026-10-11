@@ -48,6 +48,10 @@
                 @endforelse
             </div>
             <p class="picker-note"><span aria-hidden="true">✦</span> เตรียมตัวออกเดินทางได้</p>
+            <a href="{{ route('teacher-courses.index') }}" class="teacher-courses-link mt-4 flex items-center justify-between gap-3 rounded-2xl border-2 border-emerald-200 bg-white/90 px-4 py-3 font-bold text-emerald-700 hover:border-emerald-400" data-teacher-courses-link>
+                <span>คอร์สจากผู้สอน <span class="block text-xs font-normal text-gray-500">คอร์สที่ผู้สอนซึ่งผ่านการยืนยันเปิดสอนเอง</span></span>
+                <span aria-hidden="true">↗</span>
+            </a>
         </div>
         <p class="language-signature">สองวัฒนธรรม <span aria-hidden="true">/</span> โลกแห่งการเรียนรู้ใบเดียวกัน</p>
     </div>

@@ -115,7 +115,12 @@ class LearningHistoryController extends Controller
             'selected_answer' => $answer,
             'solved' => $checker->check($question, $answer),
         ];
-        // Practice affects only its own session; original history and rewards are immutable.
+        if ($state['results'][$question->id]['solved']) {
+            app(\App\Services\Progress\DailyQuestService::class)->recordReview(
+                $request->user(), $question->id, now()
+            );
+        }
+        // Practice leaves original history and lesson rewards immutable.
         $request->session()->put($this->practiceKey($attempt), $state);
         return redirect($target);
     }

@@ -61,7 +61,7 @@
             <span class="stat-icon" aria-hidden="true">★</span>
             <p id="stars-label" class="stat-label">ดาวสะสม</p>
             <p class="stat-value">{{ number_format($progress['stars']) }} <span>ดวง</span></p>
-            <p class="field-hint">รางวัลจากบทเรียนที่ผ่านแล้ว</p>
+            <p class="field-hint">รางวัลจากบทเรียน milestone และภารกิจที่รับแล้ว</p>
         </section>
         <section class="profile-card stat-card xp-card" aria-labelledby="xp-label">
             <span class="stat-icon" aria-hidden="true">ϟ</span>
@@ -83,6 +83,44 @@
             ประวัติการเรียน / ทบทวนข้อผิด <span aria-hidden="true">→</span>
         </a>
     </div>
+
+    @if($user->isLearner())
+        <section class="profile-card learner-progression-card mb-6" aria-labelledby="proficiency-title">
+            <div class="section-heading">
+                <h2 id="proficiency-title">เส้นทางผู้เรียน</h2>
+            </div>
+            <div class="profile-stats learner-progression-stats">
+                <section class="learner-progression-stat hsk-card" aria-labelledby="learner-level-label">
+                    <span class="stat-icon" aria-hidden="true">✦</span>
+                    <div class="learner-progression-copy">
+                        <p id="learner-level-label" class="stat-label">ระดับผู้เรียน</p>
+                        <p class="stat-value">{{ $user->learner_proficiency?->label() ?? 'รอประเมินระดับ' }}</p>
+                        <p class="field-hint">ระดับความสามารถปัจจุบัน</p>
+                        @if($user->placement_required)
+                            <a class="profile-button secondary-button" href="{{ route('placement.show') }}">ทำแบบทดสอบวัดระดับ</a>
+                        @endif
+                    </div>
+                </section>
+                <section class="learner-progression-stat xp-card" aria-labelledby="learner-streak-label">
+                    <span class="stat-icon" aria-hidden="true">↗</span>
+                    <div class="learner-progression-copy">
+                        <p id="learner-streak-label" class="stat-label">เรียนต่อเนื่อง</p>
+                        <p class="stat-value">{{ $displayedCurrentStreak }} <span>วัน</span></p>
+                        <p class="field-hint">สถิติสูงสุด {{ $user->longest_streak }} วัน</p>
+                    </div>
+                </section>
+                <section class="learner-progression-stat stars-card" aria-labelledby="learner-quests-label">
+                    <span class="stat-icon" aria-hidden="true">★</span>
+                    <div class="learner-progression-copy">
+                        <p id="learner-quests-label" class="stat-label">ภารกิจวันนี้</p>
+                        <p class="stat-value">{{ $dailyQuests->whereNotNull('completed_at')->count() }} / {{ $dailyQuests->count() }}</p>
+                        <p class="field-hint">สำเร็จวันนี้</p>
+                        <a class="profile-button secondary-button" href="{{ route('daily-quests.index') }}">ดูภารกิจวันนี้</a>
+                    </div>
+                </section>
+            </div>
+        </section>
+    @endif
 
     <section class="profile-card learning-card" aria-labelledby="learning-title">
         <div class="section-heading">

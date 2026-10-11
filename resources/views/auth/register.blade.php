@@ -104,7 +104,7 @@
             color: #444;
         }
 
-        input {
+        input, select {
             width: 100%;
             padding: 13px;
             border: 1px solid #ddd;
@@ -113,7 +113,7 @@
             outline: none;
         }
 
-        input:focus {
+        input:focus, select:focus {
             border-color: #6c5ce7;
             box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
         }
@@ -285,6 +285,17 @@
                 >
             </div>
 
+
+            <div class="form-group">
+                <label for="learner_proficiency">Learner Proficiency Level</label>
+                <select id="learner_proficiency" name="learner_proficiency" required>
+                    @foreach (\App\Enums\LearnerProficiency::cases() as $level)
+                        <option value="{{ $level->value }}" @selected(old('learner_proficiency', 'beginner') === $level->value)>{{ $level->label() }}</option>
+                    @endforeach
+                    <option value="not_sure" @selected(old('learner_proficiency') === 'not_sure')>Not sure</option>
+                </select>
+                <p style="margin-top: 7px; font-size: 13px; color: #777;">เลือก Not sure เพื่อทำแบบทดสอบแนะนำระดับหลังสมัคร</p>
+            </div>
 
             <button type="submit" class="register-btn">
                 สมัครสมาชิก

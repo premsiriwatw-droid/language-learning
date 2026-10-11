@@ -90,3 +90,52 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #7562
         display: none;
     }
 }
+
+.learner-progression-card {
+    padding: 24px;
+}
+
+.learner-progression-card .section-heading {
+    margin-bottom: 20px;
+}
+
+.learner-progression-stats {
+    gap: 20px;
+    margin-bottom: 0;
+}
+
+.learner-progression-stat {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
+}
+
+.learner-progression-stat .stat-icon {
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.learner-progression-copy {
+    min-width: 0;
+}
+
+.learner-progression-card .stat-value {
+    font-size: clamp(20px, 2.5vw, 25px);
+}
+
+.learner-progression-card .profile-button {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+}
+
+@media (max-width: 700px) {
+    .learner-progression-card {
+        padding: 22px;
+    }
+
+    .learner-progression-stats {
+        grid-template-columns: 1fr;
+    }
+}

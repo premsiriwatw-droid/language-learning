@@ -115,7 +115,8 @@ class LearnerGamificationIntegrationTest extends TestCase
         $this->assertSame(15, $summary['stars']);
         $this->assertSame(1, app(PlayerLevelCalculator::class)->calculate($summary['xp'])['level']);
         $this->get(route('profile'))->assertOk()->assertSee('Beginner')
-            ->assertSee('Current Streak: 1')->assertSee('Daily Quests: 2 / 3');
+            ->assertSeeInOrder(['เรียนต่อเนื่อง', '1 <span>วัน</span>', 'สถิติสูงสุด 1 วัน'], false)
+            ->assertSeeInOrder(['ภารกิจวันนี้', '2 / 3', 'สำเร็จวันนี้', 'ดูภารกิจวันนี้']);
     }
 
     public function test_completed_attempt_can_promote_using_the_history_saved_in_the_same_transaction(): void

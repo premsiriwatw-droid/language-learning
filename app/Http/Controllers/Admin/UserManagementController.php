@@ -38,10 +38,15 @@ class UserManagementController extends Controller
 
             'role' => [
                 'required',
-                Rule::in(['user', 'admin']),
+                Rule::in(['user', 'admin', 'teacher']),
             ],
         ]);
 
+        if ($validated['role'] === 'teacher' && !$user->isApprovedTeacher()) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'role' => 'การให้สิทธิ์ครูต้องผ่านหน้าตรวจใบสมัครผู้สอน',
+            ]);
+        }
         $user->update($validated);
 
         return redirect()

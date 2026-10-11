@@ -25,6 +25,7 @@ class AuthController extends Controller
     {
         // ตรวจสอบข้อมูลที่ผู้ใช้กรอก
         $validated = $request->validate([
+            'account_type' => ['sometimes', 'required', 'in:learner,teacher_applicant'],
             'name' => [
                 'required',
                 'string',
@@ -48,7 +49,12 @@ class AuthController extends Controller
         // สร้าง User ใหม่
         // User Model ของเรามี password => hashed อยู่แล้ว
         // Laravel จึง hash password ให้อัตโนมัติ
-        $user = User::create($validated);
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => $validated['password'],
+            'role' => 'user',
+        ]);
 
 
         // Login ให้อัตโนมัติหลังสมัครสมาชิก
@@ -61,6 +67,10 @@ class AuthController extends Controller
 
         // ตอนนี้ใช้ Profile เป็นหน้าหลัง Login ชั่วคราว
         // เพื่อไม่ไปสร้าง Home/Dashboard ชนกับคนที่ 5
+        if (($validated['account_type'] ?? 'learner') === 'teacher_applicant') {
+            return redirect()->route('teacher.application.show');
+        }
+
         return redirect('/languages');
     }
 

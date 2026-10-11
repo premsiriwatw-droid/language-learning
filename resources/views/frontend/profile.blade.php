@@ -99,7 +99,9 @@
         <progress class="profile-progress" aria-label="ความคืบหน้าบทเรียนทั้งหมด"
             value="{{ $progress['percentage'] }}" max="100">{{ $progress['percentage'] }}%</progress>
         @if($progress['latest']?->lesson)
-            @php($latest = $progress['latest'])
+            @php
+                $latest = $progress['latest'];
+            @endphp
             <div class="resume-card">
                 <span class="resume-icon" aria-hidden="true">↗</span>
                 <div class="resume-copy">
@@ -126,6 +128,45 @@
             <p class="field-hint progress-note">ขณะนี้ยังบันทึกความคืบหน้าไม่ได้ กรุณาลองใหม่ภายหลัง</p>
         @endunless
     </section>
+    @if($user->isAdmin())
+        <section class="profile-card mt-6 p-6" aria-labelledby="admin-tools-title">
+            <h2 id="admin-tools-title" class="text-xl font-bold mb-3">จัดการระบบ</h2>
+            <div class="flex flex-wrap gap-3">
+                <a class="profile-button primary-button" href="{{ route('admin.teacher-applications.index') }}">ตรวจใบสมัครผู้สอน →</a>
+                <a class="profile-button secondary-button" href="{{ route('admin.dashboard') }}">แดชบอร์ดแอดมิน →</a>
+            </div>
+        </section>
+    @elseif(in_array($user->role, ['user', 'teacher'], true))
+        @php
+            $teacherStatusLabels = ['pending' => 'รอพิจารณา', 'approved' => 'อนุมัติแล้ว', 'rejected' => 'ไม่ผ่านการอนุมัติ', 'needs_more_info' => 'ต้องส่งข้อมูลเพิ่มเติม'];
+        @endphp
+        <section class="profile-card mt-6 p-6 space-y-4" aria-labelledby="teacher-status-title">
+            <h2 id="teacher-status-title" class="text-xl font-bold">สถานะผู้สอนของฉัน</h2>
+            @if($isApprovedTeacher)
+                <p class="font-bold text-emerald-700">✓ ผู้สอนที่ผ่านการยืนยันแล้ว</p>
+                <div class="flex flex-wrap gap-3">
+                    <a class="profile-button primary-button" href="{{ route('teacher.verified') }}">เข้าสู่หน้าผู้สอน →</a>
+                    <a class="profile-button secondary-button" href="{{ route('teacher.application.show') }}">ดูผลอนุมัติและใบสมัคร →</a>
+                </div>
+            @elseif($teacherApplication)
+                <p>สถานะใบสมัคร: <strong>{{ $teacherStatusLabels[$teacherApplication->status] ?? $teacherApplication->status }}</strong></p>
+                @if($teacherApplication->review_note)
+                    <p class="whitespace-pre-wrap">ผลพิจารณา: {{ $teacherApplication->review_note }}</p>
+                @endif
+                @if($teacherApplication->status === 'pending')
+                    <p class="field-hint">แอดมินกำลังตรวจใบสมัคร ระหว่างนี้คุณเรียนภาษาได้ตามปกติ</p>
+                @elseif($teacherApplication->status === 'approved')
+                    <p class="field-hint">ใบสมัครอนุมัติแล้ว แต่สิทธิ์บัญชีครูยังไม่พร้อม กรุณาติดต่อแอดมิน</p>
+                @endif
+                <a class="profile-button secondary-button" href="{{ route('teacher.application.show') }}">
+                    {{ in_array($teacherApplication->status, ['rejected', 'needs_more_info'], true) ? 'แก้ไขใบสมัคร / ส่งข้อมูลเพิ่มเติม' : 'ตรวจสถานะและดูใบสมัคร' }} →
+                </a>
+            @else
+                <p class="field-hint">สมัครเป็นผู้สอนโดยส่งประวัติและเอกสารให้แอดมินพิจารณา</p>
+                <a class="profile-button secondary-button" href="{{ route('teacher.application.show') }}">สมัครเป็นผู้สอน →</a>
+            @endif
+        </section>
+    @endif
     <p class="profile-footer"><span aria-hidden="true">✦</span> ทุกบทเรียนเล็ก ๆ คืออีกก้าวของคุณ</p>
 </div>
 @endsection

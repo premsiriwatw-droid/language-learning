@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -19,6 +20,21 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    public function teacherApplication(): HasOne
+    {
+        return $this->hasOne(TeacherApplication::class);
+    }
+
+    /** Shared contract for Marketplace and Teacher Dashboard permissions. */
+    public function isApprovedTeacher(): bool
+    {
+        return $this->role === 'teacher'
+            && $this->teacherApplication()
+                ->where('status', TeacherApplication::APPROVED)
+                ->whereNotNull('approved_at')
+                ->exists();
     }
 
     protected function casts(): array

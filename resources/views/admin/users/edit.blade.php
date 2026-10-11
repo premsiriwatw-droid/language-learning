@@ -45,6 +45,9 @@
             <label>Role</label>
 
             <select name="role" required>
+                @if($user->role === 'teacher')
+                    <option value="teacher" @selected(old('role', $user->role) === 'teacher')>Teacher (คงบทบาทครู)</option>
+                @endif
                 <option
                     value="user"
                     @selected(old('role', $user->role) === 'user')

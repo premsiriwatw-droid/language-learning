@@ -222,6 +222,15 @@
             @csrf
 
             <div class="form-group">
+                <label for="account_type">สมัครเพื่อ</label>
+                <select id="account_type" name="account_type" required style="width:100%;padding:13px;border:1px solid #ddd;border-radius:10px">
+                    <option value="learner" {{ old('account_type', 'learner') === 'learner' ? 'selected' : '' }}>เรียนภาษา</option>
+                    <option value="teacher_applicant" {{ old('account_type') === 'teacher_applicant' ? 'selected' : '' }}>ยื่นสมัครเป็นผู้สอน</option>
+                </select>
+                <p style="font-size:12px;color:#777;margin-top:7px">ผู้สมัครครูต้องส่งใบสมัครและรอ Admin อนุมัติ ระหว่างรอยังเรียนภาษาได้</p>
+            </div>
+
+            <div class="form-group">
                 <label for="name">ชื่อ</label>
 
                 <input

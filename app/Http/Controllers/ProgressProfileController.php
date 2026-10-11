@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\Progress\LearningProgress;
+use App\Services\Progress\DailyQuestService;
 use App\Services\Progress\PlayerLevelCalculator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,7 +16,7 @@ class ProgressProfileController extends Controller
 {
     public function show(Request $request, LearningProgress $progress): View
     {
-        $user = $request->user();
+        $user = $request->user()->refresh();
         $summary = $progress->summary($user);
 
         return view('frontend.profile', [
@@ -25,6 +26,7 @@ class ProgressProfileController extends Controller
             'hasPhoto' => Storage::disk('local')->exists($this->photoPath($request)),
             // Auth owns this attribute. No guessed HSK level or changes to User schema.
             'hskLevel' => $user->getAttribute('hsk_level'),
+            'dailyQuests' => $user->isLearner() ? app(DailyQuestService::class)->today($user) : collect(),
         ]);
     }
 

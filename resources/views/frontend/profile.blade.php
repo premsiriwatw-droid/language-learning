@@ -61,7 +61,7 @@
             <span class="stat-icon" aria-hidden="true">★</span>
             <p id="stars-label" class="stat-label">ดาวสะสม</p>
             <p class="stat-value">{{ number_format($progress['stars']) }} <span>ดวง</span></p>
-            <p class="field-hint">รางวัลจากบทเรียนที่ผ่านแล้ว</p>
+            <p class="field-hint">รางวัลจากบทเรียน milestone และภารกิจที่รับแล้ว</p>
         </section>
         <section class="profile-card stat-card xp-card" aria-labelledby="xp-label">
             <span class="stat-icon" aria-hidden="true">ϟ</span>
@@ -83,6 +83,20 @@
             ประวัติการเรียน / ทบทวนข้อผิด <span aria-hidden="true">→</span>
         </a>
     </div>
+
+    @if($user->isLearner())
+        <section class="profile-card mb-6" aria-labelledby="proficiency-title">
+            <h2 id="proficiency-title">Learner Proficiency Level</h2>
+            <p class="stat-value">{{ $user->learner_proficiency?->label() ?? 'Pending placement' }}</p>
+            @if($user->placement_required)
+                <a class="profile-button secondary-button" href="{{ route('placement.show') }}">ทำ Placement Test</a>
+            @endif
+            <p>Current Streak: {{ $user->current_streak }} วัน · Longest Streak: {{ $user->longest_streak }} วัน</p>
+            <p class="field-hint">นับเมื่อเรียนจบอย่างน้อยหนึ่งบทเรียนในวันนั้น</p>
+            <p>Daily Quests: {{ $dailyQuests->whereNotNull('completed_at')->count() }} / {{ $dailyQuests->count() }} สำเร็จวันนี้</p>
+            <a class="profile-button secondary-button" href="{{ route('daily-quests.index') }}">ดูภารกิจและรับดาว</a>
+        </section>
+    @endif
 
     <section class="profile-card learning-card" aria-labelledby="learning-title">
         <div class="section-heading">

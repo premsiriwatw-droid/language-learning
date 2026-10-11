@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\LearnerProficiency;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
@@ -42,8 +44,17 @@ class AuthController extends Controller
                 'min:6',
                 'confirmed',
             ],
+
+            'learner_proficiency' => [
+                'sometimes',
+                'required',
+                Rule::in([...array_column(LearnerProficiency::cases(), 'value'), 'not_sure']),
+            ],
         ]);
 
+        $selection = $validated['learner_proficiency'] ?? LearnerProficiency::Beginner->value;
+        $validated['learner_proficiency'] = $selection === 'not_sure' ? null : $selection;
+        $validated['placement_required'] = $selection === 'not_sure';
 
         // สร้าง User ใหม่
         // User Model ของเรามี password => hashed อยู่แล้ว
@@ -58,6 +69,9 @@ class AuthController extends Controller
         // สร้าง Session ID ใหม่เพื่อความปลอดภัย
         $request->session()->regenerate();
 
+        if ($user->placement_required) {
+            return redirect()->route('placement.show');
+        }
 
         // ตอนนี้ใช้ Profile เป็นหน้าหลัง Login ชั่วคราว
         // เพื่อไม่ไปสร้าง Home/Dashboard ชนกับคนที่ 5

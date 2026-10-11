@@ -76,6 +76,18 @@ class CourseEnrollment extends Model
         return self::PAYMENT_LABELS[$this->payment_status] ?? $this->payment_status;
     }
 
+    /** Amount owed for this enrollment, locked at request time (not the course's current price). */
+    public function amountLabel(): string
+    {
+        if ($this->price_at_request === null) {
+            return 'ฟรี';
+        }
+
+        $amount = (float) $this->price_at_request;
+
+        return '฿'.number_format($amount, $amount == (int) $amount ? 0 : 2);
+    }
+
     public function canStudy(): bool
     {
         return in_array($this->status, [self::ACTIVE, self::COMPLETED], true);

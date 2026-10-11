@@ -9,7 +9,7 @@
     <div>
         <a href="{{ route('teacher.courses.index') }}" class="text-sm font-bold text-emerald-600">← คอร์สของฉัน</a>
         <h1 class="mt-2 text-3xl font-extrabold text-gray-800">คำขอเข้าเรียน</h1>
-        <p class="mt-1 text-gray-500">{{ $course->title }} · {{ $course->priceLabel() }}</p>
+        <p class="mt-1 text-gray-500">{{ $course->title }} · ราคาปัจจุบัน {{ $course->priceLabel() }} <span class="text-xs">(ผู้สมัครแต่ละคนจ่ายตามราคาตอนสมัคร)</span></p>
     </div>
 
     @include('teacher-courses.partials.flash')
@@ -27,7 +27,7 @@
                             @if ($enrollment->payment_status !== CourseEnrollment::PAYMENT_NOT_REQUIRED)
                                 <p class="mt-1 text-sm {{ $enrollment->payment_status === CourseEnrollment::PAYMENT_SUBMITTED ? 'font-bold text-amber-700' : 'text-gray-500' }}">
                                     การชำระเงิน: {{ $enrollment->paymentLabel() }}
-                                    @if ($enrollment->price_at_request) (฿{{ number_format((float) $enrollment->price_at_request, 2) }}) @endif
+                                    ({{ $enrollment->amountLabel() }})
                                 </p>
                             @endif
                         </div>

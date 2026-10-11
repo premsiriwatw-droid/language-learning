@@ -178,4 +178,27 @@ class TeacherCourseManagementTest extends TestCase
         $this->actingAs($learner)->get(route('teacher-courses.index'))->assertDontSee('Soon hidden');
         $this->actingAs($learner)->post(route('teacher-courses.enroll', $course))->assertForbidden();
     }
+
+    public function test_published_or_closed_course_cannot_be_saved_without_lessons(): void
+    {
+        $teacher = $this->approvedTeacher();
+        [$language, $lessons] = $this->languageWithLessons();
+
+        foreach (['published' => null, 'closed' => fn ($f) => $f->closed()] as $label => $state) {
+            $course = $this->teacherCourse($teacher, $language, [], $state);
+
+            $this->actingAs($teacher)
+                ->put(route('teacher.courses.update', $course), $this->validPayload($language->id, []))
+                ->assertSessionHasErrors('lessons');
+
+            $this->assertSame(count($lessons), $course->lessons()->count(), $label.' course lost its lessons');
+        }
+
+        // A draft is not visible to learners yet, so it may be saved empty.
+        $draft = $this->teacherCourse($teacher, $language, [], fn ($f) => $f->draft());
+        $this->actingAs($teacher)
+            ->put(route('teacher.courses.update', $draft), $this->validPayload($language->id, []))
+            ->assertSessionHasNoErrors();
+        $this->assertSame(0, $draft->lessons()->count());
+    }
 }

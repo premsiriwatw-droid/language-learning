@@ -48,6 +48,17 @@ class TeacherCourseRequest extends FormRequest
     {
         return [
             function (Validator $validator) {
+                // A course learners can see or are studying must keep at least one lesson.
+                $course = $this->route('teacherCourse');
+                if (
+                    $course instanceof TeacherCourse
+                    && $course->status !== TeacherCourse::DRAFT
+                    && $this->input('lessons', []) === []
+                ) {
+                    $validator->errors()->add('lessons', 'คอร์สที่เปิดรับสมัครหรือมีผู้เรียนแล้วต้องมีบทเรียนอย่างน้อย 1 บท');
+                }
+            },
+            function (Validator $validator) {
                 $ids = collect($this->input('lessons', []))->map(fn ($id) => (int) $id)->unique();
 
                 if ($ids->isEmpty() || $validator->errors()->has('language_id')) {

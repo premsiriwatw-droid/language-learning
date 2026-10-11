@@ -8,9 +8,11 @@ use App\Http\Controllers\Admin\UnitController as AdminUnitController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\ContentManagementController;
+use App\Http\Controllers\DailyQuestController;
 use App\Http\Controllers\LearningController;
 use App\Http\Controllers\LearningHistoryController;
 use App\Http\Controllers\ProgressProfileController;
+use App\Http\Controllers\PlacementController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\TeacherApplicationController;
 use App\Http\Middleware\RememberLearningVisit;
@@ -47,9 +49,20 @@ Route::middleware('guest')->group(function () {
 */
 
 Route::middleware('auth')->group(function () {
-    Route::get('/teacher/application', [TeacherApplicationController::class, 'show'])->name('teacher.application.show');
-    Route::post('/teacher/application', [TeacherApplicationController::class, 'store'])->name('teacher.application.store');
-    Route::get('/teacher/documents/{document}', [TeacherApplicationController::class, 'download'])->name('teacher.documents.download');
+    Route::get('/placement', [PlacementController::class, 'show'])->name('placement.show');
+    Route::post('/placement', [PlacementController::class, 'submit'])->name('placement.submit');
+
+    Route::get('/daily-quests', [DailyQuestController::class, 'index'])->name('daily-quests.index');
+    Route::post('/daily-quests/{questId}/claim', [DailyQuestController::class, 'claim'])
+        ->whereNumber('questId')
+        ->name('daily-quests.claim');
+
+    Route::get('/teacher/application', [TeacherApplicationController::class, 'show'])
+        ->name('teacher.application.show');
+    Route::post('/teacher/application', [TeacherApplicationController::class, 'store'])
+        ->name('teacher.application.store');
+    Route::get('/teacher/documents/{document}', [TeacherApplicationController::class, 'download'])
+        ->name('teacher.documents.download');
     Route::get('/learning-history', [LearningHistoryController::class, 'index'])->name('learning-history.index');
     Route::get('/learning-history/{attempt}', [LearningHistoryController::class, 'show'])->name('learning-history.show');
     Route::get('/learning-history/{attempt}/review', [LearningHistoryController::class, 'review'])->name('learning-history.review');

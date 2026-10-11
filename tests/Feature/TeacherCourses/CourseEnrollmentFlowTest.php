@@ -258,4 +258,32 @@ class CourseEnrollmentFlowTest extends TestCase
             ->patch(route('teacher.courses.enrollments.update', $this->enrollment($course->id, $learner->id)), ['action' => 'delete_everything'])
             ->assertSessionHasErrors('action');
     }
+
+    public function test_payment_uses_price_at_request_after_teacher_changes_price(): void
+    {
+        $teacher = $this->approvedTeacher();
+        $course = $this->teacherCourse($teacher, null, [], fn ($f) => $f->paid(350));
+        $learner = $this->learner();
+
+        $this->actingAs($learner)->post(route('teacher-courses.enroll', $course))->assertSessionHasNoErrors();
+
+        $course->update(['price' => 500]);
+
+        $this->actingAs($learner)->get(route('teacher-courses.show', $course))
+            ->assertOk()
+            ->assertSee('ชำระเงิน (จำลอง) ฿350')
+            ->assertDontSee('ชำระเงิน (จำลอง) ฿500')
+            ->assertSee('ยอดของคุณ ฿350');
+
+        $this->actingAs($teacher)->get(route('teacher.courses.enrollments', $course))
+            ->assertOk()
+            ->assertSee('(฿350)')
+            ->assertDontSee('(฿500)');
+
+        // A new learner pays the new price.
+        $newcomer = $this->learner();
+        $this->actingAs($newcomer)->post(route('teacher-courses.enroll', $course));
+        $this->assertSame('500.00', $this->enrollment($course->id, $newcomer->id)->price_at_request);
+        $this->assertSame('350.00', $this->enrollment($course->id, $learner->id)->price_at_request);
+    }
 }

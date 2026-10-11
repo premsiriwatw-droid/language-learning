@@ -67,7 +67,7 @@
             @else
                 <p class="font-bold text-gray-800">สถานะของคุณ: {{ $enrollment->statusLabel() }}</p>
                 @if ($enrollment->payment_status !== CourseEnrollment::PAYMENT_NOT_REQUIRED)
-                    <p class="mt-1 text-sm text-gray-600">การชำระเงิน: {{ $enrollment->paymentLabel() }}</p>
+                    <p class="mt-1 text-sm text-gray-600">การชำระเงิน: {{ $enrollment->paymentLabel() }} · ยอดของคุณ {{ $enrollment->amountLabel() }}</p>
                 @endif
                 @if ($enrollment->teacher_note)
                     <p class="mt-1 text-sm text-gray-600">ข้อความจากผู้สอน: {{ $enrollment->teacher_note }}</p>
@@ -77,7 +77,7 @@
                     @if (in_array($enrollment->status, [CourseEnrollment::PENDING, CourseEnrollment::APPROVED], true) && $enrollment->payment_status === CourseEnrollment::PAYMENT_UNPAID)
                         <form method="POST" action="{{ route('teacher-courses.enroll.pay', $course) }}">
                             @csrf
-                            <button type="submit" class="rounded-xl bg-amber-500 px-4 py-2 font-bold text-white">ชำระเงิน (จำลอง) {{ $course->priceLabel() }}</button>
+                            <button type="submit" class="rounded-xl bg-amber-500 px-4 py-2 font-bold text-white">ชำระเงิน (จำลอง) {{ $enrollment->amountLabel() }}</button>
                         </form>
                     @endif
                     @if (in_array($enrollment->status, [CourseEnrollment::PENDING, CourseEnrollment::APPROVED], true) && $enrollment->payment_status !== CourseEnrollment::PAYMENT_CONFIRMED)

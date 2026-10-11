@@ -105,7 +105,7 @@
                     <span class="stat-icon" aria-hidden="true">↗</span>
                     <div class="learner-progression-copy">
                         <p id="learner-streak-label" class="stat-label">เรียนต่อเนื่อง</p>
-                        <p class="stat-value">{{ $user->current_streak }} <span>วัน</span></p>
+                        <p class="stat-value">{{ $displayedCurrentStreak }} <span>วัน</span></p>
                         <p class="field-hint">สถิติสูงสุด {{ $user->longest_streak }} วัน</p>
                     </div>
                 </section>

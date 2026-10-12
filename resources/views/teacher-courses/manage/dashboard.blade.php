@@ -47,6 +47,9 @@
 
     <p class="text-sm leading-relaxed text-gray-500">บทเรียนของคอร์สอ้างอิงบทเรียนเดียวกับระบบหลัก ข้อมูลจึงรวมการเรียนบทเหล่านี้ก่อนเข้าคอร์สด้วย หากบทเดียวกันอยู่ในหลายคอร์ส ความคืบหน้าและประวัติของบทนั้นจะใช้ร่วมกัน</p>
 
-    <a href="{{ route('teacher.courses.enrollments', $course) }}" class="inline-block rounded-lg bg-emerald-500 px-4 py-2 font-bold text-white hover:bg-emerald-600">จัดการคำขอเข้าเรียน</a>
+    <div class="flex flex-wrap gap-2">
+        <a href="{{ route('teacher.courses.students', $course) }}" class="inline-block rounded-lg bg-emerald-500 px-4 py-2 font-bold text-white hover:bg-emerald-600">รายชื่อนักเรียน</a>
+        <a href="{{ route('teacher.courses.enrollments', $course) }}" class="inline-block rounded-lg bg-emerald-500 px-4 py-2 font-bold text-white hover:bg-emerald-600">จัดการคำขอเข้าเรียน</a>
+    </div>
 </div>
 @endsection

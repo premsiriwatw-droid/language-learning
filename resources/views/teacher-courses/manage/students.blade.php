@@ -33,7 +33,17 @@
                 <tbody class="divide-y divide-gray-100">
                     @foreach ($students as $student)
                         <tr>
-                            <th scope="row" class="px-4 py-4 font-bold text-gray-800">{{ $student['name'] }}</th>
+                            <th scope="row" class="px-4 py-4 font-bold text-gray-800">
+                                <a
+                                    href="{{ route('teacher.courses.students.show', [
+                                        'teacherCourse' => $course->id,
+                                        'student' => $student['id'],
+                                    ]) }}"
+                                    class="text-emerald-700 hover:underline"
+                                >
+                                    {{ $student['name'] }}
+                                </a>
+                            </th>
                             <td class="px-4 py-4">
                                 @if ($student['progress_percent'] === null)
                                     —

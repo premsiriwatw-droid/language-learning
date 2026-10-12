@@ -49,6 +49,7 @@
 
     <div class="flex flex-wrap gap-2">
         <a href="{{ route('teacher.courses.students', $course) }}" class="inline-block rounded-lg bg-emerald-500 px-4 py-2 font-bold text-white hover:bg-emerald-600">รายชื่อนักเรียน</a>
+        <a href="{{ route('teacher.courses.weak-topics', $course) }}" class="inline-block rounded-lg bg-emerald-500 px-4 py-2 font-bold text-white hover:bg-emerald-600">จุดที่ควรทบทวน</a>
         <a href="{{ route('teacher.courses.enrollments', $course) }}" class="inline-block rounded-lg bg-emerald-500 px-4 py-2 font-bold text-white hover:bg-emerald-600">จัดการคำขอเข้าเรียน</a>
     </div>
 </div>

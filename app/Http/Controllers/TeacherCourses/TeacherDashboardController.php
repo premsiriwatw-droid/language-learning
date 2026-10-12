@@ -36,4 +36,38 @@ class TeacherDashboardController extends Controller
             'asOf' => $list['as_of'],
         ]);
     }
+    public function studentDetail(
+        TeacherCourse $teacherCourse,
+        string $student
+    ): View {
+        // ชั้นแรก: ผู้ที่เปิดหน้าต้องเป็นครูเจ้าของคอร์ส
+        Gate::authorize('update', $teacherCourse);
+
+        // ชั้นที่สอง: หา enrollment ของนักเรียนภายในคอร์สนี้เท่านั้น
+        $enrollment = $teacherCourse->enrollments()
+            ->learning()
+            ->where('user_id', $student)
+            ->with('user:id,name')
+            ->firstOrFail();
+
+        $learner = $enrollment->user;
+
+        abort_if($learner === null, 404);
+
+        return view('teacher-courses.manage.student-detail', [
+            'course' => $teacherCourse,
+            'student' => $learner,
+        ]);
+    }
+    public function weakTopics(
+        TeacherCourse $teacherCourse,
+        TeacherAnalyticsService $analytics
+    ): View {
+        Gate::authorize('update', $teacherCourse);
+
+        return view('teacher-courses.manage.weak-topics', [
+            'course' => $teacherCourse,
+            'report' => $analytics->weakTopics($teacherCourse),
+        ]);
+    }
 }

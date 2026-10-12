@@ -20,10 +20,13 @@ class EnrollmentStatusChanged implements ShouldDispatchAfterCommit
 {
     use Dispatchable, SerializesModels;
 
+    public readonly string $notificationEventId;
+
     public function __construct(
         public CourseEnrollment $enrollment,
         public ?string $fromStatus,
         public string $toStatus,
     ) {
+        $this->notificationEventId = (string) \Illuminate\Support\Str::uuid();
     }
 }

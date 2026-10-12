@@ -19,6 +19,8 @@ use App\Http\Controllers\TeacherCourses\TeacherDashboardController;
 use App\Http\Middleware\RememberLearningVisit;
 use Illuminate\Support\Facades\Route;
 
+require __DIR__.'/shop-notifications.php';
+
 Route::get('/', function () {
     return view('welcome');
 });

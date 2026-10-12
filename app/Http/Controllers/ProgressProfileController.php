@@ -52,6 +52,8 @@ class ProgressProfileController extends Controller
 
         return view('frontend.profile', [
             'user' => $user,
+            'cosmetics' => app(\App\Services\Shop\ShopService::class)->cosmetics($user),
+            'starWallet' => app(\App\Services\Shop\StarWallet::class)->summary($user),
 
             /*
             |--------------------------------------------------------------------------

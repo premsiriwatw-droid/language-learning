@@ -42,6 +42,8 @@ class LearningProgress
         return DB::transaction(function () use ($user, $lesson, $xp, $stars): LessonProgress {
             // Serialize this learner's completions so milestone counts cannot skip a reward.
             User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $previousXp = (int) LessonProgress::where('user_id', $user->id)
+                ->whereNotNull('completed_at')->sum('xp');
             $progress = LessonProgress::firstOrCreate([
                 'user_id' => $user->id,
                 'lesson_id' => $lesson->id,
@@ -56,6 +58,11 @@ class LearningProgress
 
             if ($awarded && $user->isLearner()) {
                 app(StarRewardService::class)->milestone($user);
+                $levels = app(PlayerLevelCalculator::class);
+                $level = $levels->calculate($previousXp + $xp)['level'];
+                if ($level > $levels->calculate($previousXp)['level']) {
+                    \App\Events\Progress\PlayerLeveledUp::dispatch($user->id, $level);
+                }
             }
 
             return $progress->refresh();

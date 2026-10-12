@@ -13,6 +13,7 @@
     </script>
 
     <link rel="stylesheet" href="{{ asset('css/learner-profile.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shop-notifications.css') }}">
 
     <style>
         body {
@@ -46,6 +47,7 @@
                 </a>
 
                 @auth
+                    @include('notifications.navigation')
                     @if(auth()->user()->isAdmin())
                         <a href="{{ route('admin.languages.index') }}"
                             @if(request()->is('admin/*')) aria-current="page" @endif>

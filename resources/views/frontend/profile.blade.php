@@ -21,9 +21,9 @@
         <div class="profile-notice error-notice" role="alert" id="photo-error">{{ $errors->first('photo') }}</div>
     @endif
 
-    <section class="profile-card identity-card" aria-labelledby="learner-name">
+    <section class="profile-card identity-card {{ $cosmetics['background'] ?? '' }}" aria-labelledby="learner-name">
         <div class="identity-main">
-            <div class="profile-avatar" id="profile-avatar">
+            <div class="profile-avatar {{ $cosmetics['frame'] ?? '' }}" id="profile-avatar">
                 @if($hasPhoto)
                     <img id="avatar-preview" src="{{ route('profile.photo') }}" alt="รูปโปรไฟล์ของ {{ $user->name }}" width="100" height="100">
                 @else
@@ -33,7 +33,9 @@
             </div>
             <div class="identity-copy">
                 <p class="eyebrow">ยินดีต้อนรับกลับมา</p>
-                <h2 id="learner-name">{{ $user->name }}</h2>
+                <h2 id="learner-name" class="{{ $cosmetics['name_color'] ?? '' }}">{{ $user->name }}</h2>
+                @if(!empty($cosmetics['sticker']))<span class="profile-sticker" aria-label="สติกเกอร์ที่เลือก">{{ $cosmetics['sticker'] }}</span>@endif
+                <a class="field-hint" href="{{ route('inventory.index') }}">แต่งโปรไฟล์</a>
                 <p class="muted user-email">{{ $user->email }}</p>
             </div>
         </div>
@@ -62,6 +64,8 @@
             <p id="stars-label" class="stat-label">ดาวสะสม</p>
             <p class="stat-value">{{ number_format($progress['stars']) }} <span>ดวง</span></p>
             <p class="field-hint">รางวัลจากบทเรียน milestone และภารกิจที่รับแล้ว</p>
+            <p class="field-hint" data-testid="profile-star-balance">พร้อมใช้ {{ number_format($starWallet['balance']) }} ดวง · ใช้ไป {{ number_format($starWallet['spent']) }}</p>
+            <a class="profile-button secondary-button" href="{{ route('shop.index') }}">ใช้ดาวที่ร้านค้า</a>
         </section>
         <section class="profile-card stat-card xp-card" aria-labelledby="xp-label">
             <span class="stat-icon" aria-hidden="true">ϟ</span>
@@ -101,7 +105,7 @@
                         @endif
                     </div>
                 </section>
-                <section class="learner-progression-stat xp-card" aria-labelledby="learner-streak-label">
+                <section class="learner-progression-stat xp-card {{ $cosmetics['streak_style'] ?? '' }}" aria-labelledby="learner-streak-label">
                     <span class="stat-icon" aria-hidden="true">↗</span>
                     <div class="learner-progression-copy">
                         <p id="learner-streak-label" class="stat-label">เรียนต่อเนื่อง</p>

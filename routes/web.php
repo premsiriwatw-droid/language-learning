@@ -15,6 +15,7 @@ use App\Http\Controllers\ProgressProfileController;
 use App\Http\Controllers\PlacementController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\TeacherApplicationController;
+use App\Http\Controllers\TeacherCourses\TeacherDashboardController;
 use App\Http\Middleware\RememberLearningVisit;
 use Illuminate\Support\Facades\Route;
 
@@ -341,6 +342,8 @@ Route::middleware(['auth', \App\Http\Middleware\ApprovedTeacherMiddleware::class
         Route::get('/', [\App\Http\Controllers\TeacherCourses\TeacherCourseManagementController::class, 'index'])->name('index');
         Route::get('/create', [\App\Http\Controllers\TeacherCourses\TeacherCourseManagementController::class, 'create'])->name('create');
         Route::post('/', [\App\Http\Controllers\TeacherCourses\TeacherCourseManagementController::class, 'store'])->name('store');
+        Route::get('/{teacherCourse}/dashboard', [TeacherDashboardController::class, 'show'])
+            ->whereNumber('teacherCourse')->name('dashboard');
         Route::get('/{teacherCourse}/edit', [\App\Http\Controllers\TeacherCourses\TeacherCourseManagementController::class, 'edit'])->name('edit');
         Route::put('/{teacherCourse}', [\App\Http\Controllers\TeacherCourses\TeacherCourseManagementController::class, 'update'])->name('update');
         Route::patch('/{teacherCourse}/status', [\App\Http\Controllers\TeacherCourses\TeacherCourseManagementController::class, 'updateStatus'])->name('status');

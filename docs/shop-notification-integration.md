@@ -32,7 +32,7 @@ Currently wired:
 | First lesson completion crossing a level | PlayerLeveledUp → LevelNotificationListener | /profile |
 | DailyQuest completed_at changes | NotificationQuestObserver | /daily-quests |
 | TeacherApplication status changes | NotificationTeacherApplicationObserver | /teacher/application |
-| EnrollmentStatusChanged | EnrollmentNotificationListener | /teacher-courses/{id} |
+| EnrollmentStatusChanged | EnrollmentNotificationListener | Learner: /teacher-courses/{id}; rejection: /teacher-courses/my with reason in notification. Owner: /teacher/courses/{id}/enrollments for null/rejected → pending requests. |
 
 Enrollment events now carry a generated notificationEventId. Re-dispatch the same event object/serialized ID for retries; new transitions, even within the same second after a rejection and re-request, get new IDs. The observer bridge deliberately lives in the notification module. Direct query-builder updates bypass Eloquent observers; future domain services should dispatch explicit events instead of adding notifications to controllers.
 

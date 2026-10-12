@@ -22,10 +22,25 @@ class EnrollmentNotificationListener
             return;
         }
         $course = $event->enrollment->course;
+        $rejected = $event->toStatus === CourseEnrollment::REJECTED;
+        $body = $course->title;
+        if ($rejected) {
+            $reason = trim($event->enrollment->teacher_note ?? '');
+            $body .= ' · เหตุผล: '.($reason !== '' ? $reason : 'ผู้สอนไม่ได้ระบุเหตุผล');
+        }
         UserNotificationRequested::dispatch(
             $event->enrollment->user_id, NotificationTopic::EnrollmentStatus, $event->notificationEventId,
-            $labels[$event->toStatus], $course->title,
-            '/teacher-courses/'.$course->id,
+            $labels[$event->toStatus], $body,
+            $rejected ? route('teacher-courses.mine', [], false) : '/teacher-courses/'.$course->id,
         );
+
+        if ($event->toStatus === CourseEnrollment::PENDING
+            && in_array($event->fromStatus, [null, CourseEnrollment::REJECTED], true)) {
+            UserNotificationRequested::dispatch(
+                $course->teacher_id, NotificationTopic::EnrollmentStatus, $event->notificationEventId,
+                'มีคำขอเข้าเรียนใหม่', $event->enrollment->user->name.' ส่งคำขอเข้าเรียน '.$course->title,
+                route('teacher.courses.enrollments', $course, false),
+            );
+        }
     }
 }

@@ -91,7 +91,7 @@ class CrossModuleNotificationTest extends TestCase
         $enrollment = $service->request($course, $user);
         $service->approve($enrollment);
         $this->assertSame(4, $this->countTopic($user, NotificationTopic::EnrollmentStatus));
-        $this->assertSame(0, $teacher->notifications()->count());
+        $this->assertSame(2, $teacher->notifications()->count());
         $this->actingAs($user)->get(route('notifications.index'))->assertSee('คำขอเข้าเรียนถูกปฏิเสธ')
             ->assertSee('เข้าเรียนคอร์สได้แล้ว');
         $event = new EnrollmentStatusChanged($enrollment->fresh(), 'active', 'completed');

@@ -16,25 +16,14 @@
         <a href="{{ route('teacher.courses.index') }}" class="text-sm font-bold text-emerald-600">← คอร์สของฉัน</a>
         <h1 class="mt-2 text-3xl font-extrabold text-gray-800">{{ $editing ? 'แก้ไขคอร์ส' : 'สร้างคอร์สใหม่' }}</h1>
         @if ($editing)
-            <p class="mt-1 text-gray-500">สถานะ: <strong>{{ TeacherCourse::STATUS_LABELS[$course->status] }}</strong></p>
+            <p class="mt-1 text-gray-500">สถานะ: <strong>{{ $course->statusLabel() }}</strong></p>
         @endif
     </div>
 
     @include('teacher-courses.partials.flash')
 
     @if ($editing)
-        <div class="flex flex-wrap gap-2 rounded-2xl border-2 border-gray-200 bg-white p-4">
-            @foreach ([TeacherCourse::PUBLISHED => 'เปิดรับสมัคร', TeacherCourse::CLOSED => 'ปิดคอร์ส', TeacherCourse::DRAFT => 'กลับเป็นฉบับร่าง'] as $status => $label)
-                @continue($course->status === $status)
-                <form method="POST" action="{{ route('teacher.courses.status', $course) }}">
-                    @csrf
-                    @method('PATCH')
-                    <input type="hidden" name="status" value="{{ $status }}">
-                    <button type="submit" class="rounded-xl px-4 py-2 font-bold {{ $status === TeacherCourse::PUBLISHED ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-700' }}">{{ $label }}</button>
-                </form>
-            @endforeach
-            <a href="{{ route('teacher.courses.enrollments', $course) }}" class="ml-auto rounded-xl border-2 border-indigo-200 px-4 py-2 font-bold text-indigo-700">คำขอเข้าเรียน →</a>
-        </div>
+        @include('teacher-courses.manage.partials.review-panel', ['course' => $course])
     @endif
 
     <form method="POST" action="{{ $editing ? route('teacher.courses.update', $course) : route('teacher.courses.store') }}" class="space-y-5 rounded-2xl border-2 border-gray-200 bg-white p-6">
@@ -88,8 +77,8 @@
         </fieldset>
 
         <fieldset>
-            <legend class="font-bold text-gray-700">บทเรียนในคอร์ส</legend>
-            <p class="text-sm text-gray-500">เลือกจากบทเรียนของภาษาที่สอน (ลำดับตามบทเรียนหลัก) ต้องมีอย่างน้อย 1 บทก่อนเปิดรับสมัคร</p>
+            <legend class="font-bold text-gray-700">แบบฝึกจากบทเรียนหลักของระบบ (ไม่บังคับ)</legend>
+            <p class="text-sm text-gray-500">เลือกบทเรียนพร้อมแบบทดสอบจากระบบมาใช้ในคอร์สได้ หรือเขียนบทเรียนของคุณเองในส่วน "บทเรียนของฉัน" ก็ได้ ต้องมีบทเรียนรวมอย่างน้อย 1 บทก่อนส่งตรวจ</p>
             <p x-show="!language" class="mt-3 rounded-xl bg-gray-50 p-3 text-sm text-gray-500">เลือกภาษาก่อน แล้วรายการบทเรียนจะแสดงที่นี่</p>
             @foreach ($languages as $language)
                 <div x-show="language === '{{ $language->id }}'" x-cloak class="mt-3 max-h-96 space-y-3 overflow-y-auto rounded-xl border border-gray-200 p-3">
@@ -117,6 +106,17 @@
         <button type="submit" class="w-full rounded-xl bg-emerald-500 py-3 font-extrabold text-white hover:bg-emerald-600">
             {{ $editing ? 'บันทึกการแก้ไข' : 'สร้างคอร์ส (ฉบับร่าง)' }}
         </button>
+        @if ($editing && $course->isPublished())
+            <p class="text-center text-xs text-amber-700">คอร์สนี้เผยแพร่อยู่ ถ้าบันทึกการแก้ไข คอร์สจะกลับไปรอแอดมินตรวจอีกครั้ง (ผู้เรียนเดิมยังเรียนต่อได้)</p>
+        @endif
     </form>
+
+    @if ($editing)
+        @include('teacher-courses.manage.partials.my-lessons', ['course' => $course, 'teacherLessons' => $teacherLessons])
+    @else
+        <p class="rounded-2xl border-2 border-dashed border-gray-300 bg-white p-4 text-center text-sm text-gray-500">
+            สร้างคอร์สก่อน แล้วจะเพิ่มบทเรียนของคุณเอง (ข้อความ เอกสาร วิดีโอ) ได้ในหน้านี้
+        </p>
+    @endif
 </div>
 @endsection

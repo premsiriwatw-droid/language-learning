@@ -367,3 +367,47 @@ Route::middleware(['auth', \App\Http\Middleware\ApprovedTeacherMiddleware::class
             ->whereNumber('teacherCourse')
             ->name('weak-topics');
     });
+
+/*
+|--------------------------------------------------------------------------
+| Teacher lessons, materials & admin course review (owner: Nakin)
+|--------------------------------------------------------------------------
+|
+| Teachers write their own lessons (text / document / video) inside a course
+| and send the course to an admin, who approves it before it is published.
+|
+*/
+
+Route::middleware(['auth', \App\Http\Middleware\ApprovedTeacherMiddleware::class])
+    ->prefix('teacher/courses/{teacherCourse}/teacher-lessons')
+    ->name('teacher.courses.teacher-lessons.')
+    ->whereNumber('teacherCourse')
+    ->scopeBindings()
+    ->group(function () {
+        Route::get('/create', [\App\Http\Controllers\TeacherCourses\TeacherLessonController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\TeacherCourses\TeacherLessonController::class, 'store'])->name('store');
+        Route::get('/{teacherLesson}/edit', [\App\Http\Controllers\TeacherCourses\TeacherLessonController::class, 'edit'])->whereNumber('teacherLesson')->name('edit');
+        Route::put('/{teacherLesson}', [\App\Http\Controllers\TeacherCourses\TeacherLessonController::class, 'update'])->whereNumber('teacherLesson')->name('update');
+        Route::delete('/{teacherLesson}', [\App\Http\Controllers\TeacherCourses\TeacherLessonController::class, 'destroy'])->whereNumber('teacherLesson')->name('destroy');
+        Route::patch('/{teacherLesson}/move', [\App\Http\Controllers\TeacherCourses\TeacherLessonController::class, 'move'])->whereNumber('teacherLesson')->name('move');
+    });
+
+Route::middleware('auth')
+    ->prefix('teacher-courses/{teacherCourse}/lessons/{teacherLesson}')
+    ->name('teacher-courses.lessons.')
+    ->whereNumber(['teacherCourse', 'teacherLesson'])
+    ->scopeBindings()
+    ->group(function () {
+        Route::get('/', [\App\Http\Controllers\TeacherCourses\TeacherLessonViewController::class, 'show'])->name('show');
+        Route::get('/document', [\App\Http\Controllers\TeacherCourses\TeacherLessonViewController::class, 'document'])->name('document');
+        Route::get('/video', [\App\Http\Controllers\TeacherCourses\TeacherLessonViewController::class, 'video'])->name('video');
+    });
+
+Route::middleware(['auth', 'admin'])
+    ->prefix('admin/teacher-courses')
+    ->name('admin.teacher-courses.')
+    ->group(function () {
+        Route::get('/', [\App\Http\Controllers\TeacherCourses\CourseReviewController::class, 'index'])->name('index');
+        Route::get('/{teacherCourse}', [\App\Http\Controllers\TeacherCourses\CourseReviewController::class, 'show'])->whereNumber('teacherCourse')->name('show');
+        Route::post('/{teacherCourse}/review', [\App\Http\Controllers\TeacherCourses\CourseReviewController::class, 'decide'])->whereNumber('teacherCourse')->name('review');
+    });

@@ -24,12 +24,21 @@ class TeacherCourseFactory extends Factory
             'status' => TeacherCourse::PUBLISHED,
             'enrollment_mode' => TeacherCourse::INSTANT,
             'published_at' => now(),
+            'approved_at' => now(),
         ];
     }
 
     public function draft(): static
     {
-        return $this->state(fn () => ['status' => TeacherCourse::DRAFT, 'published_at' => null]);
+        return $this->state(fn () => ['status' => TeacherCourse::DRAFT, 'published_at' => null, 'approved_at' => null]);
+    }
+
+    public function pendingReview(): static
+    {
+        return $this->state(fn () => [
+            'status' => TeacherCourse::PENDING_REVIEW, 'published_at' => null,
+            'approved_at' => null, 'submitted_at' => now(),
+        ]);
     }
 
     public function closed(): static

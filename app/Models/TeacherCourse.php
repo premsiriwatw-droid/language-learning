@@ -20,9 +20,10 @@ class TeacherCourse extends Model
     use HasFactory;
 
     public const DRAFT = 'draft';
+    public const PENDING_REVIEW = 'pending_review';
     public const PUBLISHED = 'published';
     public const CLOSED = 'closed';
-    public const STATUSES = [self::DRAFT, self::PUBLISHED, self::CLOSED];
+    public const STATUSES = [self::DRAFT, self::PENDING_REVIEW, self::PUBLISHED, self::CLOSED];
 
     public const FREE = 'free';
     public const PAID = 'paid';
@@ -43,11 +44,12 @@ class TeacherCourse extends Model
 
     public const STATUS_LABELS = [
         self::DRAFT => 'ฉบับร่าง',
+        self::PENDING_REVIEW => 'รอแอดมินตรวจ',
         self::PUBLISHED => 'เปิดรับสมัคร',
         self::CLOSED => 'ปิดคอร์ส',
     ];
 
-    // teacher_id, status and published_at are set by the controller, never by mass assignment.
+    // teacher_id, status and the review columns are set by the controller/CourseReviewService, never by mass assignment.
     protected $fillable = [
         'language_id', 'title', 'description', 'level',
         'price_type', 'price', 'enrollment_mode',
@@ -58,6 +60,9 @@ class TeacherCourse extends Model
         return [
             'price' => 'decimal:2',
             'published_at' => 'datetime',
+            'submitted_at' => 'datetime',
+            'approved_at' => 'datetime',
+            'reviewed_at' => 'datetime',
         ];
     }
 
@@ -80,6 +85,17 @@ class TeacherCourse extends Model
             ->orderBy('lessons.id');
     }
 
+    /** Lessons the teacher wrote inside this course (text, document, video). */
+    public function teacherLessons(): HasMany
+    {
+        return $this->hasMany(TeacherLesson::class)->orderBy('position')->orderBy('id');
+    }
+
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
     public function enrollments(): HasMany
     {
         return $this->hasMany(CourseEnrollment::class);
@@ -93,6 +109,34 @@ class TeacherCourse extends Model
     public function isPublished(): bool
     {
         return $this->status === self::PUBLISHED;
+    }
+
+    public function isPendingReview(): bool
+    {
+        return $this->status === self::PENDING_REVIEW;
+    }
+
+    /** Approved by an admin and not edited since; a closed course like this can reopen without review. */
+    public function isApproved(): bool
+    {
+        return $this->approved_at !== null;
+    }
+
+    /** A course needs at least one system lesson or one lesson written by the teacher. */
+    public function hasAnyLesson(): bool
+    {
+        return $this->lessons()->exists() || $this->teacherLessons()->exists();
+    }
+
+    /** Hold enrolled learners? Then it can no longer go back to being a draft. */
+    public function hasActiveEnrollments(): bool
+    {
+        return $this->enrollments()->where('status', '!=', CourseEnrollment::REJECTED)->exists();
+    }
+
+    public function statusLabel(): string
+    {
+        return self::STATUS_LABELS[$this->status] ?? $this->status;
     }
 
     public function isOwnedBy(?User $user): bool

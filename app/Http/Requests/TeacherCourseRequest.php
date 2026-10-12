@@ -48,14 +48,15 @@ class TeacherCourseRequest extends FormRequest
     {
         return [
             function (Validator $validator) {
-                // A course learners can see or are studying must keep at least one lesson.
+                // A course learners can see, are studying or an admin is reviewing must keep at least one lesson.
                 $course = $this->route('teacherCourse');
                 if (
                     $course instanceof TeacherCourse
                     && $course->status !== TeacherCourse::DRAFT
                     && $this->input('lessons', []) === []
+                    && $course->teacherLessons()->doesntExist()
                 ) {
-                    $validator->errors()->add('lessons', 'คอร์สที่เปิดรับสมัครหรือมีผู้เรียนแล้วต้องมีบทเรียนอย่างน้อย 1 บท');
+                    $validator->errors()->add('lessons', 'คอร์สที่ส่งตรวจ เปิดรับสมัคร หรือมีผู้เรียนแล้วต้องมีบทเรียนอย่างน้อย 1 บท');
                 }
             },
             function (Validator $validator) {

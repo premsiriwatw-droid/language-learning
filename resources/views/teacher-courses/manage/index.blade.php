@@ -8,7 +8,7 @@
         <div>
             <p class="text-sm font-bold uppercase tracking-wide text-emerald-600">Teacher · Course Management</p>
             <h1 class="mt-1 text-3xl font-extrabold text-gray-800">คอร์สของฉัน</h1>
-            <p class="mt-1 text-gray-500">เปิดได้หลายคอร์ส กำหนดฟรีหรือมีราคา และเลือกว่าจะอนุมัติผู้เรียนเองหรือไม่</p>
+            <p class="mt-1 text-gray-500">เปิดได้หลายคอร์ส เขียนบทเรียนเอง แล้วส่งให้แอดมินตรวจก่อนเผยแพร่</p>
         </div>
         <div class="flex gap-2">
             <a href="{{ route('teacher-courses.index') }}" class="rounded-xl border-2 border-gray-200 bg-white px-4 py-2 font-bold text-gray-700">ดูหน้าคอร์สจากผู้สอน</a>
@@ -26,8 +26,8 @@
                         @include('teacher-courses.partials.course-badges', ['course' => $course])
                         <h2 class="text-xl font-extrabold text-gray-800">{{ $course->title }}</h2>
                         <p class="text-sm text-gray-500">
-                            {{ \App\Models\TeacherCourse::STATUS_LABELS[$course->status] }} ·
-                            {{ $course->lessons_count }} บท · {{ $course->learner_count }} ผู้เรียน
+                            <span class="font-bold {{ $course->isPendingReview() ? 'text-amber-600' : ($course->isPublished() ? 'text-emerald-600' : 'text-gray-600') }}">{{ $course->statusLabel() }}</span> ·
+                            {{ $course->lessons_count + $course->teacher_lessons_count }} บท · {{ $course->learner_count }} ผู้เรียน
                             @if ($course->waiting_count > 0)
                                 · <span class="font-bold text-amber-600">{{ $course->waiting_count }} คำขอรอดำเนินการ</span>
                             @endif

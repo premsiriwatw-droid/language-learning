@@ -7,15 +7,15 @@ use App\Http\Requests\TeacherCourseRequest;
 use App\Models\CourseEnrollment;
 use App\Models\Language;
 use App\Models\TeacherCourse;
+use App\Services\TeacherCourses\CourseReviewService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
-/** Approved teacher: create / edit / publish / close own courses. */
+/** Approved teacher: create / edit own courses, send them for admin review, close / reopen them. */
 class TeacherCourseManagementController extends Controller
 {
     public function index(Request $request): View
@@ -25,6 +25,7 @@ class TeacherCourseManagementController extends Controller
             ->with('language')
             ->withCount([
                 'lessons',
+                'teacherLessons',
                 'enrollments as learner_count' => fn ($q) => $q->learning(),
                 'enrollments as waiting_count' => fn ($q) => $q->whereIn('status', [CourseEnrollment::PENDING, CourseEnrollment::APPROVED]),
             ])
@@ -63,7 +64,7 @@ class TeacherCourseManagementController extends Controller
 
         return redirect()
             ->route('teacher.courses.edit', $course)
-            ->with('success', 'สร้างคอร์สแล้ว (ฉบับร่าง) กด "เปิดรับสมัคร" เมื่อพร้อม');
+            ->with('success', 'สร้างคอร์สแล้ว (ฉบับร่าง) เพิ่มบทเรียนของคุณ แล้วกด "ส่งให้แอดมินตรวจ" เมื่อพร้อม');
     }
 
     public function edit(TeacherCourse $teacherCourse): View
@@ -73,59 +74,63 @@ class TeacherCourseManagementController extends Controller
         return view('teacher-courses.manage.form', [
             'course' => $teacherCourse,
             'selectedLessons' => $teacherCourse->lessons()->pluck('lessons.id')->all(),
+            'teacherLessons' => $teacherCourse->teacherLessons()->get(),
             'languages' => $this->languagesWithLessons(),
         ]);
     }
 
-    public function update(TeacherCourseRequest $request, TeacherCourse $teacherCourse): RedirectResponse
+    public function update(TeacherCourseRequest $request, TeacherCourse $teacherCourse, CourseReviewService $review): RedirectResponse
     {
-        DB::transaction(function () use ($request, $teacherCourse) {
-            $teacherCourse->fill($request->safe()->except('lessons'))->save();
-            $this->syncLessons($teacherCourse, $request->validated('lessons', []));
+        $changed = DB::transaction(function () use ($request, $teacherCourse) {
+            $teacherCourse->fill($request->safe()->except('lessons'));
+            $infoChanged = $teacherCourse->isDirty();
+            $teacherCourse->save();
+            $lessonsChanged = $this->syncLessons($teacherCourse, $request->validated('lessons', []));
+
+            return $infoChanged || $lessonsChanged;
         });
 
-        return back()->with('success', 'บันทึกการแก้ไขแล้ว');
+        if ($changed && $review->contentChanged($teacherCourse)) {
+            return back()->with('success', 'บันทึกแล้ว คอร์สกลับไปรอแอดมินตรวจอีกครั้ง (ผู้เรียนเดิมยังเรียนต่อได้)');
+        }
+
+        return back()->with('success', $changed ? 'บันทึกการแก้ไขแล้ว' : 'ไม่มีอะไรเปลี่ยนแปลง');
     }
 
-    public function updateStatus(Request $request, TeacherCourse $teacherCourse): RedirectResponse
+    /** submit → admin review, withdraw the request, close, or reopen a still-approved course. */
+    public function updateStatus(Request $request, TeacherCourse $teacherCourse, CourseReviewService $review): RedirectResponse
     {
         Gate::authorize('update', $teacherCourse);
 
-        $status = $request->validate([
-            'status' => ['required', Rule::in(TeacherCourse::STATUSES)],
-        ])['status'];
+        $action = $request->validate([
+            'action' => ['required', Rule::in(['submit', 'withdraw', 'close', 'reopen'])],
+        ], ['action.*' => 'คำสั่งไม่ถูกต้อง'])['action'];
 
-        if ($status === TeacherCourse::PUBLISHED && $teacherCourse->lessons()->doesntExist()) {
-            throw ValidationException::withMessages(['status' => 'เพิ่มบทเรียนอย่างน้อย 1 บทก่อนเปิดรับสมัคร']);
-        }
+        $review->{$action}($teacherCourse);
 
-        if ($status === TeacherCourse::PUBLISHED && $teacherCourse->language_id === null) {
-            throw ValidationException::withMessages(['status' => 'เลือกภาษาของคอร์สก่อนเปิดรับสมัคร']);
-        }
+        $message = [
+            'submit' => 'ส่งคอร์สให้แอดมินตรวจแล้ว คอร์สจะเผยแพร่เมื่อได้รับอนุมัติ',
+            'withdraw' => 'ถอนคำขอตรวจแล้ว แก้ไขต่อได้เลย',
+            'close' => 'ปิดคอร์สแล้ว ผู้เรียนเดิมยังเรียนต่อได้',
+            'reopen' => 'เปิดรับสมัครอีกครั้งแล้ว',
+        ][$action];
 
-        // A draft is invisible to learners, so it cannot hold anyone who already joined.
-        if (
-            $status === TeacherCourse::DRAFT
-            && $teacherCourse->enrollments()->where('status', '!=', CourseEnrollment::REJECTED)->exists()
-        ) {
-            throw ValidationException::withMessages(['status' => 'คอร์สมีผู้เรียนหรือคำขอแล้ว เปลี่ยนเป็นฉบับร่างไม่ได้ ใช้ "ปิดคอร์ส" แทน']);
-        }
-
-        $teacherCourse->status = $status;
-        if ($status === TeacherCourse::PUBLISHED && $teacherCourse->published_at === null) {
-            $teacherCourse->published_at = now();
-        }
-        $teacherCourse->save();
-
-        return back()->with('success', 'สถานะคอร์ส: '.TeacherCourse::STATUS_LABELS[$status]);
+        return back()->with('success', $message);
     }
 
-    /** @param array<int, int|string> $lessonIds */
-    private function syncLessons(TeacherCourse $course, array $lessonIds): void
+    /**
+     * @param  array<int, int|string>  $lessonIds
+     * @return bool whether the curriculum changed
+     */
+    private function syncLessons(TeacherCourse $course, array $lessonIds): bool
     {
-        $course->lessons()->sync(
-            collect($lessonIds)->values()->mapWithKeys(fn ($id, $index) => [(int) $id => ['position' => $index + 1]])->all()
-        );
+        $wanted = collect($lessonIds)->values()->mapWithKeys(fn ($id, $index) => [(int) $id => $index + 1]);
+        $current = $course->lessons()->get(['lessons.id'])->mapWithKeys(fn ($lesson) => [(int) $lesson->id => (int) $lesson->pivot->position]);
+
+        $course->lessons()->sync($wanted->map(fn (int $position) => ['position' => $position])->all());
+
+        // sync() reports unchanged pivot rows as "updated", so compare ids and positions directly.
+        return $wanted->sortKeys()->all() !== $current->sortKeys()->all();
     }
 
     private function languagesWithLessons()

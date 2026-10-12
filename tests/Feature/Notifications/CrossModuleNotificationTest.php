@@ -61,9 +61,11 @@ class CrossModuleNotificationTest extends TestCase
         $applicant = $this->pendingTeacher();
         $application = $applicant->teacherApplication;
         $admin = User::factory()->create(['role' => 'admin']);
+        $beforeReview = $this->countTopic($applicant, NotificationTopic::TeacherApplicationStatus);
+        $adminBeforeReview = $admin->notifications()->count();
         $payload = ['decision' => 'approved', 'review_version' => 0, 'submitted_at' => $application->submitted_at->toISOString()];
         $this->actingAs($admin)->post(route('admin.teacher-applications.review', $application), $payload)->assertSessionHasErrors('application');
-        $this->assertSame(0, $this->countTopic($applicant, NotificationTopic::TeacherApplicationStatus));
+        $this->assertSame($beforeReview, $this->countTopic($applicant, NotificationTopic::TeacherApplicationStatus));
         Storage::disk('teacher_documents')->put('fixture.pdf', 'fixture');
         $application->documents()->create([
             'document_type' => 'certificate', 'file_path' => 'fixture.pdf', 'original_name' => 'fixture.pdf',
@@ -72,8 +74,8 @@ class CrossModuleNotificationTest extends TestCase
         $this->post(route('admin.teacher-applications.review', $application), $payload)->assertSessionHasNoErrors();
         $this->post(route('admin.teacher-applications.review', $application), $payload)->assertSessionHasErrors('application');
         $this->assertTrue($applicant->fresh()->isApprovedTeacher());
-        $this->assertSame(1, $this->countTopic($applicant, NotificationTopic::TeacherApplicationStatus));
-        $this->assertSame(0, $admin->notifications()->count());
+        $this->assertSame($beforeReview + 1, $this->countTopic($applicant, NotificationTopic::TeacherApplicationStatus));
+        $this->assertSame($adminBeforeReview, $admin->notifications()->count());
         $this->actingAs($applicant->fresh())->get(route('notifications.index'))->assertSee('ใบสมัครผู้สอนได้รับการอนุมัติแล้ว');
     }
 
@@ -100,16 +102,17 @@ class CrossModuleNotificationTest extends TestCase
         $this->assertSame(5, $this->countTopic($user, NotificationTopic::EnrollmentStatus));
     }
 
-    public function test_rollback_of_real_progress_and_status_changes_leaves_no_notifications(): void
+    public function test_rollback_of_real_progress_and_status_changes_preserves_existing_notifications(): void
     {
         $user = $this->pendingTeacher();
         $lesson = $this->createContentLesson();
+        $notificationsBefore = DB::table('notifications')->orderBy('id')->get()->map(fn ($row) => (array) $row)->all();
         DB::beginTransaction();
         app(LearningProgress::class)->complete($user, $lesson, 999, 20);
         app(DailyQuestService::class)->recordLesson($user, $lesson->id, now());
         $user->teacherApplication->forceFill(['status' => TeacherApplication::REJECTED])->save();
         DB::rollBack();
-        $this->assertDatabaseCount('notifications', 0);
+        $this->assertSame($notificationsBefore, DB::table('notifications')->orderBy('id')->get()->map(fn ($row) => (array) $row)->all());
         $this->assertDatabaseCount('lesson_progress', 0);
         $this->assertSame(TeacherApplication::PENDING, $user->teacherApplication->fresh()->status);
     }

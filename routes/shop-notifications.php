@@ -12,6 +12,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/inventory/equipped/{type}', [ShopController::class, 'unequip'])->name('inventory.unequip');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::patch('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+    Route::patch('/notifications/{notification}/open', [NotificationController::class, 'open'])->whereUuid('notification')->name('notifications.open');
     Route::patch('/notifications/{notification}/read', [NotificationController::class, 'read'])->whereUuid('notification')->name('notifications.read');
     Route::patch('/notifications/{notification}/unread', [NotificationController::class, 'unread'])->whereUuid('notification')->name('notifications.unread');
 });

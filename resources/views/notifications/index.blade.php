@@ -22,7 +22,10 @@
                     <time datetime="{{ $notification->created_at->toIso8601String() }}">{{ $notification->created_at->format('d/m/Y H:i') }}</time></p>
                 <h2>{{ $notification->data['title'] }}</h2><p>{{ $notification->data['body'] }}</p>
                 <div class="hub-actions">
-                    <a class="hub-button hub-secondary" href="{{ $notification->data['path'] }}">ดูรายละเอียด</a>
+                    <form method="POST" action="{{ route('notifications.open', $notification->id) }}">
+                        @csrf @method('PATCH')
+                        <button type="submit" class="hub-button hub-secondary">ดูรายละเอียด</button>
+                    </form>
                     <form method="POST" action="{{ route($notification->read_at === null ? 'notifications.read' : 'notifications.unread', $notification->id) }}">
                         @csrf @method('PATCH')
                         <button class="hub-button hub-secondary">{{ $notification->read_at === null ? 'อ่านแล้ว' : 'ทำเครื่องหมายว่ายังไม่อ่าน' }}</button>

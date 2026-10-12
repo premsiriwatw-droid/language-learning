@@ -104,7 +104,7 @@
             color: #444;
         }
 
-        input {
+        input, select {
             width: 100%;
             padding: 13px;
             border: 1px solid #ddd;
@@ -113,7 +113,7 @@
             outline: none;
         }
 
-        input:focus {
+        input:focus, select:focus {
             border-color: #6c5ce7;
             box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
         }
@@ -222,6 +222,15 @@
             @csrf
 
             <div class="form-group">
+                <label for="account_type">สมัครเพื่อ</label>
+                <select id="account_type" name="account_type" required style="width:100%;padding:13px;border:1px solid #ddd;border-radius:10px">
+                    <option value="learner" {{ old('account_type', 'learner') === 'learner' ? 'selected' : '' }}>เรียนภาษา</option>
+                    <option value="teacher_applicant" {{ old('account_type') === 'teacher_applicant' ? 'selected' : '' }}>ยื่นสมัครเป็นผู้สอน</option>
+                </select>
+                <p style="font-size:12px;color:#777;margin-top:7px">ผู้สมัครครูต้องส่งใบสมัครและรอ Admin อนุมัติ ระหว่างรอยังเรียนภาษาได้</p>
+            </div>
+
+            <div class="form-group">
                 <label for="name">ชื่อ</label>
 
                 <input
@@ -276,6 +285,17 @@
                 >
             </div>
 
+
+            <div class="form-group">
+                <label for="learner_proficiency">Learner Proficiency Level</label>
+                <select id="learner_proficiency" name="learner_proficiency" required>
+                    @foreach (\App\Enums\LearnerProficiency::cases() as $level)
+                        <option value="{{ $level->value }}" @selected(old('learner_proficiency', 'beginner') === $level->value)>{{ $level->label() }}</option>
+                    @endforeach
+                    <option value="not_sure" @selected(old('learner_proficiency') === 'not_sure')>Not sure</option>
+                </select>
+                <p style="margin-top: 7px; font-size: 13px; color: #777;">เลือก Not sure เพื่อทำแบบทดสอบแนะนำระดับหลังสมัคร</p>
+            </div>
 
             <button type="submit" class="register-btn">
                 สมัครสมาชิก

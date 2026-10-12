@@ -344,6 +344,8 @@ Route::middleware(['auth', \App\Http\Middleware\ApprovedTeacherMiddleware::class
         Route::post('/', [\App\Http\Controllers\TeacherCourses\TeacherCourseManagementController::class, 'store'])->name('store');
         Route::get('/{teacherCourse}/dashboard', [TeacherDashboardController::class, 'show'])
             ->whereNumber('teacherCourse')->name('dashboard');
+        Route::get('/{teacherCourse}/students', [TeacherDashboardController::class, 'students'])
+            ->whereNumber('teacherCourse')->name('students');
         Route::get('/{teacherCourse}/edit', [\App\Http\Controllers\TeacherCourses\TeacherCourseManagementController::class, 'edit'])->name('edit');
         Route::put('/{teacherCourse}', [\App\Http\Controllers\TeacherCourses\TeacherCourseManagementController::class, 'update'])->name('update');
         Route::patch('/{teacherCourse}/status', [\App\Http\Controllers\TeacherCourses\TeacherCourseManagementController::class, 'updateStatus'])->name('status');

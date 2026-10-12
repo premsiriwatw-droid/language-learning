@@ -21,4 +21,19 @@ class TeacherDashboardController extends Controller
             'summary' => $analytics->summary($teacherCourse),
         ]);
     }
+
+    public function students(TeacherCourse $teacherCourse, TeacherAnalyticsService $analytics): View
+    {
+        Gate::authorize('update', $teacherCourse);
+
+        $teacherCourse->loadMissing('language');
+        $list = $analytics->studentList($teacherCourse);
+
+        return view('teacher-courses.manage.students', [
+            'course' => $teacherCourse,
+            'students' => $list['students'],
+            'lessonsCount' => $list['lessons_count'],
+            'asOf' => $list['as_of'],
+        ]);
+    }
 }

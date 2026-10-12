@@ -35,6 +35,7 @@
                     </div>
                     <div class="flex flex-wrap gap-2">
                         <a href="{{ route('teacher.courses.dashboard', $course) }}" class="rounded-lg bg-emerald-50 px-3 py-1.5 font-bold text-emerald-700">ภาพรวมการเรียน</a>
+                        <a href="{{ route('teacher.courses.students', $course) }}" class="rounded-lg bg-emerald-50 px-3 py-1.5 font-bold text-emerald-700">รายชื่อนักเรียน</a>
                         <a href="{{ route('teacher.courses.enrollments', $course) }}" class="rounded-lg bg-indigo-50 px-3 py-1.5 font-bold text-indigo-700">คำขอเข้าเรียน</a>
                         <a href="{{ route('teacher.courses.edit', $course) }}" class="rounded-lg bg-blue-50 px-3 py-1.5 font-bold text-blue-700">แก้ไข</a>
                         <a href="{{ route('teacher-courses.show', $course) }}" class="rounded-lg bg-gray-100 px-3 py-1.5 font-bold text-gray-600">ดูหน้าคอร์ส</a>

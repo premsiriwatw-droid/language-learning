@@ -22,6 +22,20 @@ class NotificationController extends Controller
         ]);
     }
 
+    public function open(Request $request, string $notification): RedirectResponse
+    {
+        $item = $request->user()->notifications()->whereKey($notification)->firstOrFail();
+        $path = $item->data['path'] ?? null;
+
+        abort_unless(is_string($path) && str_starts_with($path, '/')
+            && ! str_starts_with($path, '//') && strlen($path) <= 1000
+            && ! preg_match('/[\\\\\x00-\x20]/', $path), 422);
+
+        $item->markAsRead();
+
+        return redirect()->to($path, 303);
+    }
+
     public function read(Request $request, string $notification): RedirectResponse
     {
         $request->user()->notifications()->whereKey($notification)->firstOrFail()->markAsRead();

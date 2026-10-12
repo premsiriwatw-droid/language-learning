@@ -187,4 +187,133 @@ class TeacherAnalyticsService
 
         return $list;
     }
+    public function weakTopics(TeacherCourse $course): array
+    {
+        $now = now();
+
+        $studentIds = $course->enrollments()
+            ->learning()
+            ->select('user_id')
+            ->getQuery();
+
+        $lessons = $course->lessons()
+            ->get(['lessons.id', 'lessons.title']);
+
+        $attempts = LearningAttempt::query()
+            ->whereIn('user_id', $studentIds)
+            ->whereIn('lesson_id', $lessons->modelKeys())
+            ->whereNotNull('completed_at')
+            ->where('completed_at', '<=', $now)
+            ->select([
+                'id',
+                'user_id',
+                'lesson_id',
+                'completed_at',
+                'question_count',
+                'score_percent',
+                'results',
+            ]);
+
+        $questions = [];
+        $words = [];
+        $lessonScores = [];
+        $firstSeen = [];
+
+        foreach ($lessons as $lesson) {
+            $lessonScores[$lesson->id] = [
+                'title' => $lesson->title,
+                'score_sum' => 0.0,
+                'scored_count' => 0,
+            ];
+        }
+
+        // เรียงจากรอบเก่าสุด โหลดข้อมูลครั้งละ 200 รายการ
+        foreach (
+            $attempts->orderBy('completed_at')
+                ->orderBy('id')
+                ->lazy(200) as $attempt
+        ) {
+            $pair = $attempt->user_id.':'.$attempt->lesson_id;
+
+            // เลือกรอบที่จบครั้งแรกของคนนี้ในบทนี้
+            if (! isset($firstSeen[$pair])) {
+                $firstSeen[$pair] = true;
+
+                if (
+                    $attempt->question_count > 0
+                    && $attempt->score_percent !== null
+                ) {
+                    $lessonScores[$attempt->lesson_id]['score_sum']
+                        += $attempt->score_percent;
+
+                    $lessonScores[$attempt->lesson_id]['scored_count']++;
+                }
+            }
+
+            // จำนวนตอบผิดรวมทุกการเรียน รวมรอบที่เรียนซ้ำ
+            foreach ($attempt->results ?? [] as $result) {
+                $questionId = $result['question_id'] ?? null;
+                $wrong = (int) ($result['wrong_attempts'] ?? 0);
+
+                if ($questionId === null || $wrong <= 0) {
+                    continue;
+                }
+
+                $questions[$questionId] ??= [
+                    'text' => $result['question'] ?? 'ไม่มีข้อความคำถาม',
+                    'wrong_attempts' => 0,
+                ];
+
+                $questions[$questionId]['wrong_attempts'] += $wrong;
+
+                // คำเดียวกันนับครั้งเดียวต่อผลคำถามหนึ่งรายการ
+                foreach (
+                    collect($result['vocabulary'] ?? [])
+                        ->unique('id') as $word
+                ) {
+                    $wordId = $word['id'] ?? null;
+
+                    if ($wordId === null) {
+                        continue;
+                    }
+
+                    $words[$wordId] ??= [
+                        'word' => $word['word'] ?? 'ไม่มีข้อความคำศัพท์',
+                        'wrong_attempts' => 0,
+                    ];
+
+                    $words[$wordId]['wrong_attempts'] += $wrong;
+                }
+            }
+        }
+
+        $lowLessons = collect($lessonScores)
+            ->filter(fn (array $row): bool => $row['scored_count'] > 0)
+            ->map(fn (array $row): array => [
+                'title' => $row['title'],
+                'average_score' => round(
+                    $row['score_sum'] / $row['scored_count'],
+                    1
+                ),
+                'scored_count' => $row['scored_count'],
+            ])
+            ->sortBy('average_score')
+            ->take(10)
+            ->values();
+
+        return [
+            'wrong_questions' => collect($questions)
+                ->sortByDesc('wrong_attempts')
+                ->take(10)
+                ->values(),
+
+            'related_words' => collect($words)
+                ->sortByDesc('wrong_attempts')
+                ->take(10)
+                ->values(),
+
+            'low_lessons' => $lowLessons,
+            'as_of' => $now,
+        ];
+    }
 }

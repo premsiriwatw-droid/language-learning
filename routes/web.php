@@ -351,4 +351,17 @@ Route::middleware(['auth', \App\Http\Middleware\ApprovedTeacherMiddleware::class
         Route::patch('/{teacherCourse}/status', [\App\Http\Controllers\TeacherCourses\TeacherCourseManagementController::class, 'updateStatus'])->name('status');
         Route::get('/{teacherCourse}/enrollments', [\App\Http\Controllers\TeacherCourses\EnrollmentRequestController::class, 'index'])->name('enrollments');
         Route::patch('/enrollments/{enrollment}', [\App\Http\Controllers\TeacherCourses\EnrollmentRequestController::class, 'update'])->name('enrollments.update');
+        Route::get('/{teacherCourse}/students/{student}', [
+            TeacherDashboardController::class,
+            'studentDetail',
+        ])
+            ->whereNumber('teacherCourse')
+            ->whereNumber('student')
+            ->name('students.show');
+        Route::get('/{teacherCourse}/weak-topics', [
+            TeacherDashboardController::class,
+            'weakTopics',
+        ])
+            ->whereNumber('teacherCourse')
+            ->name('weak-topics');
     });

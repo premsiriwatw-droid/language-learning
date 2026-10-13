@@ -33,7 +33,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'You are awake but still in bed. You leave the bed. What do you do?',
+                    'question' => 'คุณตื่นแล้วแต่ยังอยู่บนเตียง จากนั้นลุกออกจากเตียง การกระทำนี้เรียกว่าอะไรในภาษาอังกฤษ?',
                     'explanation' => 'get up คือการลุกจากที่นอน ส่วน wake up คือตื่นจากการนอน',
                     'answers' => [
                         ['get up', true],
@@ -73,7 +73,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Your work is finished. You leave the office and return to your house. What do you do?',
+                    'question' => 'คุณเลิกงานแล้วและเดินทางกลับไปที่บ้าน การกระทำนี้เรียกว่าอะไรในภาษาอังกฤษ?',
                     'explanation' => 'เมื่อกลับจากที่ทำงานไปยังบ้าน ใช้ go home ซึ่งหมายถึงกลับบ้าน',
                     'answers' => [
                         ['take a shower', false],
@@ -105,7 +105,7 @@ return [
             ],
             'fill_blank' => [
                 [
-                    'question' => 'Complete: I use a toothbrush to _____ my teeth.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: I use a toothbrush to _____ my teeth.',
                     'explanation' => 'ใช้ brush กับ teeth เพื่อบอกว่าแปรงฟัน',
                     'answers' => [
                         ['wash', false],
@@ -115,7 +115,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: My first meal in the morning is _____.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: My first meal in the morning is _____.',
                     'explanation' => 'breakfast คืออาหารเช้า ซึ่งเป็นมื้อแรกของวัน',
                     'answers' => [
                         ['dinner', false],
@@ -125,7 +125,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: Our evening meal is _____.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: Our evening meal is _____.',
                     'explanation' => 'dinner คืออาหารเย็น จึงตรงกับ evening meal',
                     'answers' => [
                         ['water', false],
@@ -135,7 +135,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: I put rice and vegetables in a pan to _____ dinner.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: I put rice and vegetables in a pan to _____ dinner.',
                     'explanation' => 'cook หมายถึงทำอาหาร การใส่ข้าวและผักลงในกระทะเป็นขั้นตอนการทำอาหาร',
                     'answers' => [
                         ['cook', true],
@@ -145,7 +145,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: My room is dirty. I need to _____ it.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: My room is dirty. I need to _____ it.',
                     'explanation' => 'เมื่อห้องสกปรก ต้อง clean it คือทำความสะอาดห้อง',
                     'answers' => [
                         ['clean', true],
@@ -155,7 +155,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: To rest through the night, I _____ for eight hours.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: To rest through the night, I _____ for eight hours.',
                     'explanation' => 'sleep for eight hours หมายถึงนอนหลับเป็นเวลาแปดชั่วโมง จึงตรงกับการพักผ่อนตลอดคืน',
                     'answers' => [
                         ['cook', false],

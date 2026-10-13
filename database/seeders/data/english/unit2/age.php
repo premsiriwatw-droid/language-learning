@@ -149,7 +149,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'How do you ask someone\'s age?',
+                    'question' => 'เมื่อต้องการถามอายุ ควรใช้ประโยคใด?',
                     'explanation' => 'How old are you? ใช้ถามอายุ',
                     'answers' => [
                         [
@@ -215,7 +215,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'What do we say on someone\'s birthday?',
+                    'question' => 'เมื่อถึงวันเกิดของเพื่อน ควรพูดประโยคใด?',
                     'explanation' => 'Happy birthday! เป็นคำอวยพรวันเกิด',
                     'answers' => [
                         [
@@ -259,7 +259,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Today is Monday. What does tomorrow mean?',
+                    'question' => 'วันนี้เป็นวันจันทร์ (Today is Monday.) คำว่า tomorrow หมายถึงวันใด?',
                     'explanation' => 'tomorrow คือพรุ่งนี้ หากวันนี้เป็นวันจันทร์ พรุ่งนี้เป็นวันอังคาร',
                     'answers' => [
                         [
@@ -281,7 +281,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Today is Monday. Which day was yesterday?',
+                    'question' => 'วันอาทิตย์ (Sunday) → วันจันทร์ (Monday) → วันอังคาร (Tuesday): วันนี้เป็นวันจันทร์ คำว่า yesterday หมายถึงวันใด?',
                     'explanation' => 'yesterday คือเมื่อวาน ก่อนวันจันทร์คือวันอาทิตย์',
                     'answers' => [
                         [
@@ -303,7 +303,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'January is a ___.',
+                    'question' => 'มกราคม (January) เป็นหน่วยเวลาแบบใด? เลือกคำภาษาอังกฤษ',
                     'explanation' => 'January เป็นชื่อเดือน จึงเป็น month',
                     'answers' => [
                         [
@@ -369,7 +369,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'A person who is thirty years old is an ___.',
+                    'question' => 'คนอายุ 30 ปี อยู่ในวัยใด? เลือกคำภาษาอังกฤษ',
                     'explanation' => 'adult หมายถึง ผู้ใหญ่ ผู้ที่อายุสามสิบปีเป็นผู้ใหญ่',
                     'answers' => [
                         [
@@ -435,7 +435,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'A person who is fifteen years old is a ___.',
+                    'question' => 'คนอายุ 15 ปี อยู่ในวัยใด? เลือกคำภาษาอังกฤษ',
                     'explanation' => 'teenager ใช้เรียกวัยรุ่นที่มีอายุสิบสามถึงสิบเก้าปี',
                     'answers' => [
                         [
@@ -525,7 +525,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Today is Monday. ___ is Tuesday.',
+                    'question' => 'วันนี้เป็นวันจันทร์ (Monday) วันถัดไปเป็นวันอังคาร (Tuesday) เติมคำ: "Today is Monday. ___ is Tuesday."',
                     'explanation' => 'Tomorrow หมายถึง พรุ่งนี้ ซึ่งเป็นวันอังคารในบริบทนี้',
                     'answers' => [
                         [
@@ -547,7 +547,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Yesterday was Sunday. ___ is Monday.',
+                    'question' => 'เมื่อวานเป็นวันอาทิตย์ (Sunday) วันนี้เป็นวันจันทร์ (Monday) เติมคำ: "Yesterday was Sunday. ___ is Monday."',
                     'explanation' => 'Today หมายถึง วันนี้ หากเมื่อวานเป็นวันอาทิตย์ วันนี้เป็นวันจันทร์',
                     'answers' => [
                         [
@@ -657,7 +657,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'At thirty, Anna is an ___.',
+                    'question' => 'Anna อายุ 30 ปี เติมคำบอกวัย: "At thirty, Anna is an ___."',
                     'explanation' => 'adult หมายถึง ผู้ใหญ่ และใช้ an นำหน้าคำนี้',
                     'answers' => [
                         [
@@ -701,7 +701,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Children ___ taller as they get older.',
+                    'question' => 'เด็ก ๆ สูงขึ้นเมื่ออายุมากขึ้น เติมคำกริยาในช่องว่าง: "Children ___ taller as they get older."',
                     'explanation' => 'grow taller หมายถึง เติบโตสูงขึ้น',
                     'answers' => [
                         [

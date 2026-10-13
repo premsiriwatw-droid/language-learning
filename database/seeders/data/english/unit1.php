@@ -169,7 +169,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Which word makes "Sit down" more polite?',
+                    'question' => 'คำใดทำให้คำขอ "Sit down" (นั่งลง) สุภาพขึ้น?',
                     'explanation' => 'please ช่วยทำให้คำขอสุภาพขึ้น เช่น Please sit down.',
                     'answers' => [
                         [
@@ -191,7 +191,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'A friend says, "Thank you." What is a suitable reply?',
+                    'question' => 'เพื่อนพูดว่า "Thank you." ควรตอบรับคำขอบคุณด้วยประโยคใด?',
                     'explanation' => 'You\'re welcome. ใช้ตอบรับคำขอบคุณ หมายถึง ยินดี',
                     'answers' => [
                         [
@@ -213,7 +213,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Anna is a new classmate. What can you say when you meet her?',
+                    'question' => 'Anna เป็นเพื่อนร่วมชั้นคนใหม่ เมื่อพบเธอครั้งแรก ควรพูดประโยคใด?',
                     'explanation' => 'Nice to meet you. หมายถึง ยินดีที่ได้รู้จัก ใช้เมื่อพบคนใหม่',
                     'answers' => [
                         [
@@ -661,7 +661,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'A person who studies at school is a ___.',
+                    'question' => 'คนที่เรียนหนังสือในโรงเรียน เรียกว่าอะไรในภาษาอังกฤษ?',
                     'explanation' => 'student หมายถึง นักเรียนหรือผู้ที่กำลังศึกษา',
                     'answers' => [
                         [
@@ -683,7 +683,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'A person who teaches students is a ___.',
+                    'question' => 'คนที่สอนนักเรียน เรียกว่าอะไรในภาษาอังกฤษ?',
                     'explanation' => 'teacher หมายถึง ครู ผู้สอนนักเรียน',
                     'answers' => [
                         [
@@ -727,7 +727,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => '"Where do you live?" asks about ___.',
+                    'question' => 'คำถาม "Where do you live?" ถามเรื่องใด? (คำช่วย: Where = ที่ไหน, home = บ้าน, favorite food = อาหารที่ชอบ, time = เวลา)',
                     'explanation' => 'Where do you live? หมายถึง คุณอาศัยอยู่ที่ไหน',
                     'answers' => [
                         [
@@ -1305,7 +1305,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Ben has two pens and gets one more. How many pens does he have?',
+                    'question' => 'Ben มีปากกา 2 ด้าม และได้เพิ่มอีก 1 ด้าม ตอนนี้ Ben มีปากกากี่ด้าม? เลือกคำตอบเป็นภาษาอังกฤษ',
                     'explanation' => 'สองด้ามเพิ่มอีกหนึ่งด้าม รวมเป็นสามด้าม หรือ three',
                     'answers' => [
                         [
@@ -1327,7 +1327,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'There are four chairs. Two people sit down. How many chairs are still empty?',
+                    'question' => 'มีเก้าอี้ 4 ตัว มีคน 2 คนนั่งคนละ 1 ตัว เหลือเก้าอี้ว่างกี่ตัว? เลือกคำตอบเป็นภาษาอังกฤษ',
                     'explanation' => 'เก้าอี้สี่ตัวมีคนนั่งสองตัว เหลือว่างสองตัว หรือ two',
                     'answers' => [
                         [
@@ -1349,7 +1349,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Which number comes after ten?',
+                    'question' => 'จำนวนถัดจาก ten คือคำใด?',
                     'explanation' => 'หลัง ten คือ eleven หรือสิบเอ็ด',
                     'answers' => [
                         [

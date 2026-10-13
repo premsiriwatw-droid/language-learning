@@ -33,7 +33,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'What does a teacher usually do at school?',
+                    'question' => 'โดยทั่วไป teacher ทำหน้าที่อะไรใน school? คำช่วย: teach = สอน; drive = ขับรถ; sell = ขาย; cook = ทำอาหาร',
                     'explanation' => 'teacher คือครู งานหลักที่โรงเรียนคือสอนนักเรียน',
                     'answers' => [
                         ['Drive a taxi.', false],
@@ -43,7 +43,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Ben is learning English in a class. What is his role in that class?',
+                    'question' => 'Ben กำลังเรียนภาษาอังกฤษในชั้นเรียน เขามีบทบาทอะไรในชั้นเรียนนี้?',
                     'explanation' => 'student คือนักเรียนหรือนักศึกษา Ben มีบทบาทเป็นผู้เรียนในชั้นเรียนจึงเป็น student',
                     'answers' => [
                         ['student', true],
@@ -63,7 +63,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Which object has a flat surface for your book while you study?',
+                    'question' => 'สิ่งใดมีพื้นราบสำหรับวางหนังสือขณะเรียน?',
                     'explanation' => 'desk คือโต๊ะเรียนหรือโต๊ะทำงาน มีพื้นราบสำหรับวางหนังสือ',
                     'answers' => [
                         ['A pencil.', false],
@@ -83,7 +83,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'The teacher is speaking. Which instruction asks you to pay attention to the sound?',
+                    'question' => 'ครูกำลังพูด คำสั่งใดบอกให้คุณตั้งใจฟังครู?',
                     'explanation' => 'listen to the teacher หมายถึงฟังครู โดยใช้ listen to ตามด้วยคนหรือสิ่งที่ฟัง',
                     'answers' => [
                         ['Clean the desk.', false],
@@ -105,7 +105,7 @@ return [
             ],
             'fill_blank' => [
                 [
-                    'question' => 'Complete: Our teacher and students are in the _____ during the lesson.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: Our teacher and students are in the _____ during the lesson.',
                     'explanation' => 'classroom คือห้องเรียน จึงเป็นห้องที่ครูและนักเรียนใช้ระหว่างเรียน',
                     'answers' => [
                         ['classroom', true],
@@ -115,7 +115,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: Please open your _____ and read page ten.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: Please open your _____ and read page ten.',
                     'explanation' => 'book คือหนังสือ ซึ่งเปิดเพื่ออ่านหน้าที่กำหนดได้',
                     'answers' => [
                         ['chair', false],
@@ -125,7 +125,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: I use a _____ to write in ink.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: I use a _____ to write in ink.',
                     'explanation' => 'pen คือปากกา ใช้เขียนด้วยหมึก ส่วน pencil คือดินสอ',
                     'answers' => [
                         ['ruler', false],
@@ -135,7 +135,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: I write with a _____, so I can erase my mistakes.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: I write with a _____, so I can erase my mistakes.',
                     'explanation' => 'pencil คือดินสอ รอยที่เขียนด้วยดินสอสามารถลบด้วยยางลบได้',
                     'answers' => [
                         ['chair', false],
@@ -145,7 +145,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: Please sit on this _____.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: Please sit on this _____.',
                     'explanation' => 'chair คือเก้าอี้ ใช้ sit on a chair เพื่อบอกว่านั่งบนเก้าอี้',
                     'answers' => [
                         ['pen', false],
@@ -155,7 +155,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: Please _____ your name on the paper.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: Please _____ your name on the paper.',
                     'explanation' => 'write your name หมายถึงเขียนชื่อของคุณลงบนกระดาษ',
                     'answers' => [
                         ['write', true],
@@ -165,7 +165,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: I _____ English to learn new words.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: I _____ English to learn new words.',
                     'explanation' => 'study English หมายถึงเรียนหรือศึกษาภาษาอังกฤษ',
                     'answers' => [
                         ['sleep', false],
@@ -175,7 +175,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: The teacher gives us _____ to do at home.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: The teacher gives us _____ to do at home.',
                     'explanation' => 'homework คือการบ้าน เป็นงานที่ครูให้นักเรียนทำต่อที่บ้าน',
                     'answers' => [
                         ['a chair', false],

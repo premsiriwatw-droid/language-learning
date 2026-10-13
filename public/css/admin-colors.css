@@ -1,0 +1,32 @@
+body {
+    background-color: #fffdf9;
+    color: #203932;
+}
+
+a { color: #bd2637; }
+a:hover, a:focus-visible { color: #aa1f31; }
+
+table, th, td, hr { border-color: #c8d6cc; }
+table { background-color: #fff; }
+thead { background-color: #e5f4eb; color: #135437; }
+
+input, select {
+    background-color: #fffdf8;
+    border-color: #c8d6cc;
+    color: #203932;
+    accent-color: #bd2637;
+}
+
+input:focus, select:focus {
+    border-color: #bd2637;
+    outline-color: #bd2637;
+}
+
+button {
+    background-color: #bd2637;
+    border-color: #aa1f31;
+    color: #fff;
+}
+
+button:hover { background-color: #aa1f31; }
+button:focus-visible, a:focus-visible { outline-color: #bd2637; }

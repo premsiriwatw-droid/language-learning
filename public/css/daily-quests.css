@@ -1,0 +1,229 @@
+.daily-quests-page {
+    width: 100%;
+    max-width: 880px;
+    margin: 0 auto;
+}
+
+.daily-quests-page .daily-quests-heading {
+    align-items: flex-start;
+    gap: 24px;
+}
+
+.daily-quests-page .daily-quests-heading > div:first-child {
+    min-width: 0;
+}
+
+.daily-quests-page .daily-quests-summary {
+    flex-shrink: 0;
+    padding: 12px 16px;
+    border: 1px solid #c8d6cc;
+    border-radius: 14px;
+    background: #eef5ed;
+}
+
+.daily-quests-page .daily-quests-summary .stat-label {
+    margin-bottom: 4px;
+}
+
+.daily-quests-page .daily-quests-summary .stat-value {
+    color: var(--red);
+    font-size: 23px;
+    margin: 0;
+}
+
+.daily-quests-page .daily-quests-list {
+    display: grid;
+    gap: 18px;
+}
+
+.daily-quests-page .quest-card {
+    min-width: 0;
+    padding: 26px 28px;
+}
+
+.daily-quests-page .quest-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.daily-quests-page .quest-heading {
+    display: flex;
+    flex: 1;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
+}
+
+.daily-quests-page .quest-icon {
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.daily-quests-page .quest-copy {
+    min-width: 0;
+}
+
+.daily-quests-page .quest-copy h2 {
+    font-size: 20px;
+    line-height: 1.5;
+    font-weight: 750;
+    margin: 0 0 4px;
+    overflow-wrap: anywhere;
+}
+
+.daily-quests-page .quest-description {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.daily-quests-page .quest-reward {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    padding: 8px 11px;
+    border: 1px solid #c8d6cc;
+    border-radius: 10px;
+    background: #e5f4eb;
+    color: #177553;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.daily-quests-page .quest-progress,
+.daily-quests-page .quest-footer {
+    max-width: 520px;
+    margin-left: 46px;
+}
+
+.daily-quests-page .quest-progress {
+    margin-top: 20px;
+}
+
+.daily-quests-page .quest-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.daily-quests-page .quest-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.6;
+}
+
+.daily-quests-page .quest-status--in-progress {
+    background: #fffaf2;
+    color: #177553;
+}
+
+.daily-quests-page .quest-card--completed {
+    border-color: #9acbad;
+}
+
+.daily-quests-page .quest-status--completed {
+    background: #e5f4eb;
+    color: #135437;
+}
+
+.daily-quests-page .quest-status--claimed {
+    background: #f0f4ee;
+    color: var(--muted);
+}
+
+.daily-quests-page .quest-card--claimed .quest-icon {
+    background: #edf1e9;
+    color: #74816e;
+}
+
+.daily-quests-page .quest-card--claimed .quest-reward {
+    background: #fffaf2;
+    border-color: #dfe8e2;
+    color: #74816e;
+}
+
+.daily-quests-page .quest-claim-form {
+    margin: 0;
+    max-width: 100%;
+}
+
+.daily-quests-page .quest-claim-form .profile-button {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+}
+
+.daily-quests-page .daily-quests-helper {
+    margin: 24px 0 0;
+}
+
+@media (max-width: 620px) {
+    .daily-quests-page .daily-quests-heading {
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .daily-quests-page .daily-quests-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        max-width: 100%;
+        padding: 10px 13px;
+    }
+
+    .daily-quests-page .daily-quests-summary .stat-label {
+        margin: 0;
+    }
+
+    .daily-quests-page .daily-quests-summary .stat-value {
+        font-size: 20px;
+    }
+
+    .daily-quests-page .quest-card {
+        padding: 20px;
+    }
+
+    .daily-quests-page .quest-card-top {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .daily-quests-page .quest-copy h2 {
+        font-size: 18px;
+    }
+
+    .daily-quests-page .quest-reward {
+        margin-left: 46px;
+    }
+
+    .daily-quests-page .quest-progress,
+    .daily-quests-page .quest-footer {
+        max-width: none;
+        margin-left: 0;
+    }
+
+    .daily-quests-page .quest-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .daily-quests-page .quest-status {
+        align-self: flex-start;
+    }
+
+    .daily-quests-page .quest-claim-form,
+    .daily-quests-page .quest-claim-form .profile-button {
+        width: 100%;
+    }
+}

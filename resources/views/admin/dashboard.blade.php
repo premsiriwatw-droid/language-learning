@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ asset('css/admin-colors.css') }}">
 </head>
 <body>
 
@@ -38,5 +39,5 @@
         กลับ Profile
     </a>
 
-</body>
+<p><a href="{{ route('admin.teacher-applications.index') }}">ตรวจใบสมัครผู้สอน</a></p></body>
 </html>

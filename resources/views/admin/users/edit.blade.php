@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>แก้ไข User</title>
+    <link rel="stylesheet" href="{{ asset('css/admin-colors.css') }}">
 </head>
 <body>
 
@@ -45,6 +46,9 @@
             <label>Role</label>
 
             <select name="role" required>
+                @if($user->role === 'teacher' || $user->teacherApplication()->where('status', 'approved')->whereNotNull('approved_at')->exists())
+                    <option value="teacher" @selected(old('role', $user->role) === 'teacher')>Teacher (คงบทบาทครู / คืนสิทธิ์ครู)</option>
+                @endif
                 <option
                     value="user"
                     @selected(old('role', $user->role) === 'user')

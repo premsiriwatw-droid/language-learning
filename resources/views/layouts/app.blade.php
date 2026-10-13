@@ -7,12 +7,14 @@
     <title>LangLearn - @yield('title', 'เรียนภาษา')</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{{ asset('js/site-colors.js') }}"></script>
     <script
         defer
         src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js">
     </script>
 
     <link rel="stylesheet" href="{{ asset('css/learner-profile.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shop-notifications.css') }}">
 
     <style>
         body {
@@ -46,6 +48,7 @@
                 </a>
 
                 @auth
+                    @include('notifications.navigation')
                     @if(auth()->user()->isAdmin())
                         <a href="{{ route('admin.languages.index') }}"
                             @if(request()->is('admin/*')) aria-current="page" @endif>

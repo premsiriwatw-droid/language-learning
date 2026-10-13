@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Lesson;
+use App\Services\Content\QuestionVocabularyImporter;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -10,6 +11,8 @@ class ChineseContentSeeder extends Seeder
 {
     public function run(): void
     {
+        $importer = app(QuestionVocabularyImporter::class);
+
         foreach (require __DIR__.'/data/chinese.php' as $title => $content) {
             $lessons = Lesson::where('title', $title)
                 ->whereHas('unit.course.language', fn ($query) => $query->where('name', 'Chinese'))
@@ -25,21 +28,10 @@ class ChineseContentSeeder extends Seeder
 
             $lesson = $lessons->sole();
 
-            DB::transaction(function () use ($lesson, $content) {
-                /*
-                |--------------------------------------------------------------------------
-                | Vocabulary
-                |--------------------------------------------------------------------------
-                */
-
-                foreach (
-                    $content['vocabulary']
-                    as [$word, $pinyin, $meaning, $example, $examplePinyin, $exampleMeaning]
-                ) {
+            DB::transaction(function () use ($lesson, $content, $importer) {
+                foreach ($content['vocabulary'] as [$word, $pinyin, $meaning, $example, $examplePinyin, $exampleMeaning]) {
                     $lesson->vocabularies()->updateOrCreate(
-                        [
-                            'word' => $word,
-                        ],
+                        ['word' => $word],
                         [
                             'pinyin' => $pinyin,
                             'meaning' => $meaning,
@@ -50,49 +42,19 @@ class ChineseContentSeeder extends Seeder
                     );
                 }
 
-                /*
-                |--------------------------------------------------------------------------
-                | Exercises
-                |--------------------------------------------------------------------------
-                |
-                | Supports both formats:
-                |
-                | Old format:
-                | 'multiple_choice' => [
-                |     'question' => '...',
-                |     'answers' => [...]
-                | ]
-                |
-                | New format:
-                | 'multiple_choice' => [
-                |     [
-                |         'question' => '...',
-                |         'answers' => [...]
-                |     ],
-                |     [
-                |         'question' => '...',
-                |         'answers' => [...]
-                |     ],
-                | ]
-                |
-                */
-
                 foreach ($content['exercises'] as $type => $items) {
                     $exercise = $lesson->exercises()->firstOrCreate([
                         'type' => $type,
                         'title' => 'Chinese MVP: '.$type,
                     ]);
 
-                    // Keep backward compatibility with the original data format.
                     if (isset($items['question'])) {
                         $items = [$items];
                     }
 
                     foreach ($items as $item) {
                         $question = $exercise->questions()->updateOrCreate(
-                            [
-                                'question' => $item['question'],
-                            ],
+                            ['question' => $item['question']],
                             [
                                 'explanation' => $item['explanation'] ?? null,
                                 'audio_path' => $item['audio_path'] ?? null,
@@ -102,14 +64,12 @@ class ChineseContentSeeder extends Seeder
 
                         foreach ($item['answers'] as [$answer, $correct]) {
                             $question->answers()->updateOrCreate(
-                                [
-                                    'answer' => $answer,
-                                ],
-                                [
-                                    'is_correct' => $correct,
-                                ]
+                                ['answer' => $answer],
+                                ['is_correct' => $correct]
                             );
                         }
+
+                        $importer->apply($question, $item);
                     }
                 }
             });

@@ -303,7 +303,7 @@ class ProgressProfileTest extends TestCase
             ->assertSee('50%')
             ->assertSee('1 / 2 บทเรียน')
             ->assertSee('บทเรียนที่สอง')
-            ->assertDontSee('500');
+            ->assertDontSeeText('500');
 
         $progress->visit($user, $lesson, 1);
 
@@ -358,5 +358,114 @@ class ProgressProfileTest extends TestCase
 
         $this->get('/lessons/' . $lesson->id . '/learn/1')
             ->assertOk();
+    }
+
+    public function test_profile_shows_current_streak_when_last_active_date_is_today(): void
+    {
+        $today = now(config('app.timezone'))->toDateString();
+
+        $user = User::factory()->create([
+            'current_streak' => 5,
+            'longest_streak' => 8,
+            'last_active_date' => $today,
+        ]);
+
+        $this->actingAs($user)
+            ->get('/profile')
+            ->assertOk()
+            ->assertSee('5');
+
+        $fresh = $user->fresh();
+
+        $this->assertSame(5, $fresh->current_streak);
+        $this->assertSame(8, $fresh->longest_streak);
+        $this->assertSame(
+            $today,
+            $fresh->last_active_date?->toDateString()
+        );
+    }
+
+    public function test_profile_shows_current_streak_when_last_active_date_is_yesterday(): void
+    {
+        $yesterday = now(config('app.timezone'))
+            ->subDay()
+            ->toDateString();
+
+        $user = User::factory()->create([
+            'current_streak' => 4,
+            'longest_streak' => 9,
+            'last_active_date' => $yesterday,
+        ]);
+
+        $this->actingAs($user)
+            ->get('/profile')
+            ->assertOk()
+            ->assertSee('4');
+
+        $fresh = $user->fresh();
+
+        $this->assertSame(4, $fresh->current_streak);
+        $this->assertSame(9, $fresh->longest_streak);
+        $this->assertSame(
+            $yesterday,
+            $fresh->last_active_date?->toDateString()
+        );
+    }
+
+    public function test_profile_shows_zero_current_streak_after_missing_more_than_one_day(): void
+    {
+        $oldDate = now(config('app.timezone'))
+            ->subDays(2)
+            ->toDateString();
+
+        $user = User::factory()->create([
+            'current_streak' => 5,
+            'longest_streak' => 10,
+            'last_active_date' => $oldDate,
+        ]);
+
+        $response = $this->actingAs($user)
+            ->get('/profile');
+
+        $response->assertOk();
+
+        $this->assertStringContainsString(
+            '>0 <span>',
+            $response->getContent()
+        );
+
+        $fresh = $user->fresh();
+
+        $this->assertSame(5, $fresh->current_streak);
+        $this->assertSame(10, $fresh->longest_streak);
+        $this->assertSame(
+            $oldDate,
+            $fresh->last_active_date?->toDateString()
+        );
+    }
+
+    public function test_profile_shows_zero_streak_when_last_active_date_is_missing(): void
+    {
+        $user = User::factory()->create([
+            'current_streak' => 3,
+            'longest_streak' => 7,
+            'last_active_date' => null,
+        ]);
+
+        $response = $this->actingAs($user)
+            ->get('/profile');
+
+        $response->assertOk();
+
+        $this->assertStringContainsString(
+            '>0 <span>',
+            $response->getContent()
+        );
+
+        $fresh = $user->fresh();
+
+        $this->assertSame(3, $fresh->current_streak);
+        $this->assertSame(7, $fresh->longest_streak);
+        $this->assertNull($fresh->last_active_date);
     }
 }

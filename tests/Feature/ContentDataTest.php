@@ -52,6 +52,7 @@ class ContentDataTest extends TestCase
                 'explanation',
                 'audio_path',
                 'image_path',
+                'vocabulary_mode',
                 'created_at',
                 'updated_at',
             ],

@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'explanation',
     'audio_path',
     'image_path',
+    'vocabulary_mode',
 ])]
 class Question extends Model
 {
@@ -32,7 +33,6 @@ class Question extends Model
         return $this->hasMany(Answer::class);
     }
 
-    // คำศัพท์ที่ต้องเรียนก่อนทำคำถามนี้
     public function vocabularies(): BelongsToMany
     {
         return $this->belongsToMany(

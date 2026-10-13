@@ -19,7 +19,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(135deg, #6c5ce7, #8e7dff);
+            background: linear-gradient(135deg, #fffdf9, #eef5ed);
         }
 
         .profile-card {
@@ -28,14 +28,14 @@
             background: #ffffff;
             border-radius: 24px;
             padding: 45px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 20px 50px rgba(32, 57, 50, 0.15);
         }
 
         .logo {
             text-align: center;
             font-size: 26px;
             font-weight: bold;
-            color: #5f4bd8;
+            color: #bd2637;
             margin-bottom: 25px;
         }
 
@@ -47,25 +47,25 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #eeeaff;
+            background: #e5f4eb;
             font-size: 42px;
         }
 
         h1 {
             text-align: center;
             font-size: 30px;
-            color: #222;
+            color: #203932;
             margin-bottom: 8px;
         }
 
         .subtitle {
             text-align: center;
-            color: #777;
+            color: #65746d;
             margin-bottom: 30px;
         }
 
         .info-box {
-            background: #f8f7ff;
+            background: #fffaf2;
             border-radius: 16px;
             padding: 22px;
             margin-bottom: 25px;
@@ -82,14 +82,14 @@
         .label {
             display: block;
             font-size: 13px;
-            color: #777;
+            color: #65746d;
             margin-bottom: 5px;
         }
 
         .value {
             font-size: 17px;
             font-weight: bold;
-            color: #333;
+            color: #203932;
         }
 
         .logout-btn {
@@ -97,7 +97,7 @@
             padding: 14px;
             border: none;
             border-radius: 10px;
-            background: #6c5ce7;
+            background: #bd2637;
             color: white;
             font-size: 16px;
             font-weight: bold;
@@ -105,7 +105,7 @@
         }
 
         .logout-btn:hover {
-            background: #5946d2;
+            background: #aa1f31;
         }
     </style>
 </head>

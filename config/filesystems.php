@@ -30,6 +30,14 @@ return [
 
     'disks' => [
 
+        'teacher_documents' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/teacher-verification'),
+            'visibility' => 'private',
+            'serve' => false,
+            'throw' => true,
+        ],
+
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),

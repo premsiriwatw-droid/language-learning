@@ -36,10 +36,12 @@ class CourseReviewService
             }
             $this->ensureReadyToPublish($course);
 
+            // Every submission is a new review round, even if nothing changed since a withdrawal.
             $course->forceFill([
                 'status' => TeacherCourse::PENDING_REVIEW,
                 'submitted_at' => now(),
                 'approved_at' => null,
+                'content_revision' => $course->content_revision + 1,
             ])->save();
 
             $this->notifyAdmins($course);
@@ -96,12 +98,11 @@ class CourseReviewService
         });
     }
 
-    public function approve(TeacherCourse $course, User $admin, ?string $note = null): TeacherCourse
+    /** @param  int  $revision  content_revision the admin actually looked at */
+    public function approve(TeacherCourse $course, User $admin, int $revision, ?string $note = null): TeacherCourse
     {
-        return $this->locked($course, function (TeacherCourse $course) use ($admin, $note) {
-            if (! $course->isPendingReview()) {
-                $this->fail('คอร์สนี้ไม่ได้อยู่ระหว่างรอตรวจ (อาจถูกถอนหรือตรวจไปแล้ว)', 'review');
-            }
+        return $this->locked($course, function (TeacherCourse $course) use ($admin, $revision, $note) {
+            $this->ensureReviewable($course, $revision);
             $this->ensureReadyToPublish($course, 'review');
 
             $course->forceFill([
@@ -119,17 +120,16 @@ class CourseReviewService
         });
     }
 
-    public function reject(TeacherCourse $course, User $admin, string $note): TeacherCourse
+    /** @param  int  $revision  content_revision the admin actually looked at */
+    public function reject(TeacherCourse $course, User $admin, int $revision, string $note): TeacherCourse
     {
         $note = $this->clean($note);
         if ($note === null) {
             $this->fail('กรุณาระบุเหตุผลที่ไม่อนุมัติ เพื่อให้ผู้สอนแก้ไขได้', 'review_note');
         }
 
-        return $this->locked($course, function (TeacherCourse $course) use ($admin, $note) {
-            if (! $course->isPendingReview()) {
-                $this->fail('คอร์สนี้ไม่ได้อยู่ระหว่างรอตรวจ (อาจถูกถอนหรือตรวจไปแล้ว)', 'review');
-            }
+        return $this->locked($course, function (TeacherCourse $course) use ($admin, $revision, $note) {
+            $this->ensureReviewable($course, $revision);
 
             $course->forceFill([
                 'status' => $this->statusOffTheMarket($course),
@@ -146,12 +146,15 @@ class CourseReviewService
     }
 
     /**
-     * Call after the teacher changed course content (info, lessons, materials).
-     * Returns true when a published course was sent back for review.
+     * Call inside the same transaction that changed course content (info, lessons, materials).
+     * Bumps content_revision so an open review page goes stale, and returns true when a
+     * published course was sent back for review.
      */
     public function contentChanged(TeacherCourse $course): bool
     {
         return $this->locked($course, function (TeacherCourse $course) {
+            $course->content_revision = $course->content_revision + 1;
+
             if ($course->isPublished()) {
                 $course->forceFill([
                     'status' => TeacherCourse::PENDING_REVIEW,
@@ -163,12 +166,24 @@ class CourseReviewService
                 return true;
             }
 
-            if ($course->status === TeacherCourse::CLOSED && $course->isApproved()) {
-                $course->forceFill(['approved_at' => null])->save();
+            if ($course->status === TeacherCourse::CLOSED) {
+                $course->approved_at = null;
             }
+            $course->save();
 
             return false;
         });
+    }
+
+    /** Must run under the course lock: the decision applies only to the exact version the admin saw. */
+    private function ensureReviewable(TeacherCourse $course, int $revision): void
+    {
+        if (! $course->isPendingReview()) {
+            $this->fail('คอร์สนี้ไม่ได้อยู่ระหว่างรอตรวจ (อาจถูกถอนหรือตรวจไปแล้ว)', 'review');
+        }
+        if ((int) $course->content_revision !== $revision) {
+            $this->fail('ผู้สอนแก้ไขหรือส่งคอร์สใหม่หลังจากคุณเปิดหน้านี้ กรุณาตรวจเนื้อหาล่าสุดอีกครั้งก่อนตัดสิน', 'review');
+        }
     }
 
     public function ensureReadyToPublish(TeacherCourse $course, string $key = 'status'): void

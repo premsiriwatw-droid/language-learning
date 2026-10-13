@@ -124,6 +124,8 @@ class TeacherLessonMaterialTest extends TestCase
         $this->assertNull(TeacherLesson::embedUrlFor('https://www.youtube.com/watch?v="><script>'));
         $this->assertNull(TeacherLesson::embedUrlFor('javascript://youtube.com/%0Aalert(1)'));
         $this->assertNull(TeacherLesson::embedUrlFor('https://example.com/video.mp4'));
+        $this->assertNull(TeacherLesson::embedUrlFor('https://www.youtube.com/watch?v[]=dQw4w9WgXcQ'));
+        $this->assertNull(TeacherLesson::embedUrlFor('https://www.youtube.com/watch?v[a]=dQw4w9WgXcQ&v[b]=x'));
     }
 
     public function test_only_learning_members_owner_and_admin_open_materials(): void
@@ -314,5 +316,56 @@ class TeacherLessonMaterialTest extends TestCase
             ->assertSee(route('teacher-courses.lessons.show', [$course, $second]));
 
         $this->actingAs($learner)->get(route('teacher-courses.index'))->assertSee('2 บท');
+    }
+
+    public function test_malformed_youtube_link_is_a_validation_error_not_a_crash(): void
+    {
+        $teacher = $this->approvedTeacher();
+        $course = $this->teacherCourse($teacher, null, [], fn ($f) => $f->draft());
+
+        foreach (['https://www.youtube.com/watch?v[]=dQw4w9WgXcQ', 'https://youtube.com/watch?v[x]=1'] as $url) {
+            $this->actingAs($teacher)
+                ->post(route('teacher.courses.teacher-lessons.store', $course), ['title' => 'Video', 'video_url' => $url])
+                ->assertStatus(302)
+                ->assertSessionHasErrors('video_url');
+        }
+        $this->assertSame(0, TeacherLesson::count());
+
+        // Even a bad value already in the database must not break the pages.
+        $lesson = $this->lesson($course, ['title' => 'Legacy', 'video_url' => 'https://www.youtube.com/watch?v[]=dQw4w9WgXcQ']);
+        $this->actingAs($teacher)->get(route('teacher-courses.lessons.show', [$course, $lesson]))->assertOk();
+    }
+
+    public function test_removing_the_only_video_cannot_leave_an_empty_lesson(): void
+    {
+        $teacher = $this->approvedTeacher();
+        $course = $this->teacherCourse($teacher, null, [], fn ($f) => $f->draft());
+        $linkOnly = $this->lesson($course, ['title' => 'Link only', 'body' => null, 'video_url' => 'https://youtu.be/dQw4w9WgXcQ']);
+        $fileOnly = $this->lessonWithFiles($course);
+        $fileOnly->forceFill(['body' => null, 'document_path' => null, 'document_name' => null, 'document_size' => null])->save();
+
+        // The form still sends the old URL together with "remove video".
+        $this->actingAs($teacher)->put(route('teacher.courses.teacher-lessons.update', [$course, $linkOnly]), [
+            'title' => 'Link only', 'body' => '', 'video_url' => 'https://youtu.be/dQw4w9WgXcQ', 'remove_video' => '1',
+        ])->assertSessionHasErrors('body');
+        $this->assertSame('https://youtu.be/dQw4w9WgXcQ', $linkOnly->fresh()->video_url);
+
+        $this->actingAs($teacher)->put(route('teacher.courses.teacher-lessons.update', [$course, $fileOnly]), [
+            'title' => $fileOnly->title, 'body' => '', 'remove_video' => '1',
+        ])->assertSessionHasErrors('body');
+        $this->assertTrue($fileOnly->fresh()->hasVideoFile());
+        Storage::disk(TeacherLesson::DISK)->assertExists($fileOnly->video_path);
+
+        // Removing the video is fine when something else remains, or when a new video replaces it.
+        $this->actingAs($teacher)->put(route('teacher.courses.teacher-lessons.update', [$course, $linkOnly]), [
+            'title' => 'Link only', 'body' => 'Now with text', 'video_url' => 'https://youtu.be/dQw4w9WgXcQ', 'remove_video' => '1',
+        ])->assertSessionHasNoErrors();
+        $this->assertNull($linkOnly->fresh()->video_url);
+
+        $this->actingAs($teacher)->put(route('teacher.courses.teacher-lessons.update', [$course, $fileOnly]), [
+            'title' => $fileOnly->title, 'body' => '', 'remove_video' => '1',
+            'video_file' => UploadedFile::fake()->create('new.webm', 20, 'video/webm'),
+        ])->assertSessionHasNoErrors();
+        $this->assertSame('new.webm', $fileOnly->fresh()->video_name);
     }
 }

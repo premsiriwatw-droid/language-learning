@@ -54,20 +54,22 @@ class CourseReviewController extends Controller
 
         $data = $request->validate([
             'decision' => ['required', Rule::in(['approve', 'reject'])],
+            'revision' => ['required', 'integer', 'min:0'],
             'review_note' => ['nullable', 'string', 'max:1000'],
         ], [
             'decision.*' => 'เลือกผลการตรวจ',
+            'revision.*' => 'ข้อมูลหน้าตรวจไม่ครบ กรุณาเปิดหน้าตรวจใหม่',
             'review_note.max' => 'หมายเหตุยาวเกินไป (ไม่เกิน 1000 ตัวอักษร)',
         ]);
 
         if ($data['decision'] === 'approve') {
-            $review->approve($teacherCourse, $request->user(), $data['review_note'] ?? null);
+            $review->approve($teacherCourse, $request->user(), (int) $data['revision'], $data['review_note'] ?? null);
 
             return redirect()->route('admin.teacher-courses.index')
                 ->with('success', 'อนุมัติ "'.$teacherCourse->title.'" แล้ว คอร์สเผยแพร่ให้ผู้เรียนเห็นแล้ว');
         }
 
-        $review->reject($teacherCourse, $request->user(), (string) ($data['review_note'] ?? ''));
+        $review->reject($teacherCourse, $request->user(), (int) $data['revision'], (string) ($data['review_note'] ?? ''));
 
         return redirect()->route('admin.teacher-courses.index')
             ->with('success', 'ส่ง "'.$teacherCourse->title.'" กลับให้ผู้สอนแก้ไขแล้ว');

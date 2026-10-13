@@ -62,12 +62,12 @@ class CourseReviewTest extends TestCase
             ->assertOk()->assertSee('Emails')->assertSee('Dear team,')->assertSee('อนุมัติและเผยแพร่');
 
         // Rejection needs a reason.
-        $this->actingAs($admin)->post(route('admin.teacher-courses.review', $course), ['decision' => 'reject', 'review_note' => '  '])
+        $this->actingAs($admin)->post(route('admin.teacher-courses.review', $course), ['revision' => $course->fresh()->content_revision, 'decision' => 'reject', 'review_note' => '  '])
             ->assertSessionHasErrors('review_note');
         $this->assertSame(TeacherCourse::PENDING_REVIEW, $course->fresh()->status);
 
         $this->actingAs($admin)->post(route('admin.teacher-courses.review', $course), [
-            'decision' => 'reject', 'review_note' => 'Add a video for lesson 1',
+            'revision' => $course->fresh()->content_revision, 'decision' => 'reject', 'review_note' => 'Add a video for lesson 1',
         ])->assertSessionHasNoErrors()->assertRedirect(route('admin.teacher-courses.index'));
 
         $course->refresh();
@@ -82,7 +82,7 @@ class CourseReviewTest extends TestCase
 
         // Resubmit and approve.
         $this->actingAs($teacher)->patch(route('teacher.courses.status', $course), ['action' => 'submit'])->assertSessionHasNoErrors();
-        $this->actingAs($admin)->post(route('admin.teacher-courses.review', $course), ['decision' => 'approve', 'review_note' => 'Nice work'])
+        $this->actingAs($admin)->post(route('admin.teacher-courses.review', $course), ['revision' => $course->fresh()->content_revision, 'decision' => 'approve', 'review_note' => 'Nice work'])
             ->assertSessionHasNoErrors();
 
         $course->refresh();
@@ -102,12 +102,12 @@ class CourseReviewTest extends TestCase
         $this->actingAs($teacher)->patch(route('teacher.courses.status', $course), ['action' => 'submit']);
 
         $this->app['auth']->forgetGuards();
-        $this->post(route('admin.teacher-courses.review', $course), ['decision' => 'approve'])->assertRedirect(route('login'));
+        $this->post(route('admin.teacher-courses.review', $course), ['revision' => $course->fresh()->content_revision, 'decision' => 'approve'])->assertRedirect(route('login'));
 
         foreach ([$teacher, $this->learner(), $this->approvedTeacher()] as $user) {
             $this->actingAs($user)->get(route('admin.teacher-courses.index'))->assertForbidden();
             $this->actingAs($user)->get(route('admin.teacher-courses.show', $course))->assertForbidden();
-            $this->actingAs($user)->post(route('admin.teacher-courses.review', $course), ['decision' => 'approve'])->assertForbidden();
+            $this->actingAs($user)->post(route('admin.teacher-courses.review', $course), ['revision' => $course->fresh()->content_revision, 'decision' => 'approve'])->assertForbidden();
         }
 
         $this->assertSame(TeacherCourse::PENDING_REVIEW, $course->fresh()->status);
@@ -141,7 +141,7 @@ class CourseReviewTest extends TestCase
         $this->assertSame(TeacherCourse::DRAFT, $course->fresh()->status);
 
         // The admin still had the old page open.
-        $this->actingAs($admin)->post(route('admin.teacher-courses.review', $course), ['decision' => 'approve'])
+        $this->actingAs($admin)->post(route('admin.teacher-courses.review', $course), ['revision' => $course->fresh()->content_revision, 'decision' => 'approve'])
             ->assertSessionHasErrors('review');
         $this->assertSame(TeacherCourse::DRAFT, $course->fresh()->status);
         $this->assertSame(0, $teacher->notifications()->count());
@@ -168,7 +168,7 @@ class CourseReviewTest extends TestCase
         $this->actingAs($teacher)->patch(route('teacher.courses.status', $course), ['action' => 'submit'])->assertSessionHasNoErrors();
 
         // Rejecting a course that already has learners keeps it closed, never a draft.
-        $this->actingAs($admin)->post(route('admin.teacher-courses.review', $course), ['decision' => 'reject', 'review_note' => 'Fix title']);
+        $this->actingAs($admin)->post(route('admin.teacher-courses.review', $course), ['revision' => $course->fresh()->content_revision, 'decision' => 'reject', 'review_note' => 'Fix title']);
         $this->assertSame(TeacherCourse::CLOSED, $course->fresh()->status);
         $this->actingAs($learner)->get(route('teacher-courses.show', $course))->assertOk()->assertSee('Closed one (v2)');
     }
@@ -185,5 +185,96 @@ class CourseReviewTest extends TestCase
         ])->assertSessionHasNoErrors();
 
         $this->assertSame(TeacherCourse::PUBLISHED, $course->fresh()->status);
+    }
+
+    /** Revision exactly as the admin's review form carries it. */
+    private function revisionOnReviewPage(User $admin, TeacherCourse $course): int
+    {
+        $html = $this->actingAs($admin)->get(route('admin.teacher-courses.show', $course))->assertOk()->getContent();
+        $this->assertSame(1, preg_match('/name="revision" value="(\d+)"/', $html, $match));
+
+        return (int) $match[1];
+    }
+
+    public function test_admin_cannot_approve_content_changed_after_opening_the_page(): void
+    {
+        $teacher = $this->approvedTeacher();
+        $admin = $this->admin();
+        $course = $this->draftWithOwnLesson($teacher, 'Swapped course');
+        $this->actingAs($teacher)->patch(route('teacher.courses.status', $course), ['action' => 'submit']);
+
+        $seen = $this->revisionOnReviewPage($admin, $course);
+
+        // The teacher changes a lesson while the admin is still reading the old version.
+        $lesson = $course->teacherLessons()->first();
+        $this->actingAs($teacher)->put(route('teacher.courses.teacher-lessons.update', [$course, $lesson]), [
+            'title' => 'Emails', 'body' => 'Content the admin never saw',
+        ])->assertSessionHasNoErrors();
+        $this->assertSame(TeacherCourse::PENDING_REVIEW, $course->fresh()->status);
+
+        foreach (['approve' => null, 'reject' => 'Old note'] as $decision => $note) {
+            $this->actingAs($admin)
+                ->from(route('admin.teacher-courses.show', $course))
+                ->post(route('admin.teacher-courses.review', $course), ['revision' => $seen, 'decision' => $decision, 'review_note' => $note])
+                ->assertSessionHasErrors('review')
+                ->assertRedirect(route('admin.teacher-courses.show', $course));
+        }
+        $course->refresh();
+        $this->assertSame(TeacherCourse::PENDING_REVIEW, $course->status);
+        $this->assertNull($course->approved_at);
+
+        // Missing revision is refused too.
+        $this->actingAs($admin)->post(route('admin.teacher-courses.review', $course), ['decision' => 'approve'])
+            ->assertSessionHasErrors('revision');
+
+        // After reloading the page the admin sees the new content and can decide.
+        $this->actingAs($admin)->get(route('admin.teacher-courses.show', $course))->assertSee('Content the admin never saw');
+        $fresh = $this->revisionOnReviewPage($admin, $course);
+        $this->assertGreaterThan($seen, $fresh);
+        $this->actingAs($admin)->post(route('admin.teacher-courses.review', $course), ['revision' => $fresh, 'decision' => 'approve'])
+            ->assertSessionHasNoErrors();
+        $this->assertSame(TeacherCourse::PUBLISHED, $course->fresh()->status);
+    }
+
+    public function test_withdraw_and_resubmit_makes_an_open_review_page_stale(): void
+    {
+        $teacher = $this->approvedTeacher();
+        $admin = $this->admin();
+        $course = $this->draftWithOwnLesson($teacher);
+        $this->actingAs($teacher)->patch(route('teacher.courses.status', $course), ['action' => 'submit']);
+        $seen = $this->revisionOnReviewPage($admin, $course);
+
+        $this->actingAs($teacher)->patch(route('teacher.courses.status', $course), ['action' => 'withdraw']);
+        $this->actingAs($teacher)->patch(route('teacher.courses.status', $course), ['action' => 'submit']);
+        $this->assertSame(TeacherCourse::PENDING_REVIEW, $course->fresh()->status);
+
+        $this->actingAs($admin)->post(route('admin.teacher-courses.review', $course), ['revision' => $seen, 'decision' => 'approve'])
+            ->assertSessionHasErrors('review');
+        $this->assertSame(TeacherCourse::PENDING_REVIEW, $course->fresh()->status);
+    }
+
+    public function test_every_kind_of_content_change_bumps_the_revision(): void
+    {
+        $teacher = $this->approvedTeacher();
+        $course = $this->draftWithOwnLesson($teacher);
+        $lesson = $course->teacherLessons()->first();
+        $revision = fn () => $course->fresh()->content_revision;
+
+        $steps = [
+            fn () => $this->actingAs($teacher)->put(route('teacher.courses.update', $course), [
+                'title' => 'New title', 'description' => $course->description, 'language_id' => $course->language_id,
+                'level' => $course->level, 'price_type' => 'free', 'enrollment_mode' => 'instant',
+            ]),
+            fn () => $this->actingAs($teacher)->post(route('teacher.courses.teacher-lessons.store', $course), ['title' => 'Second', 'body' => 'b']),
+            fn () => $this->actingAs($teacher)->put(route('teacher.courses.teacher-lessons.update', [$course, $lesson]), ['title' => 'Emails v2', 'body' => 'c']),
+            fn () => $this->actingAs($teacher)->patch(route('teacher.courses.teacher-lessons.move', [$course, $lesson]), ['direction' => 'down']),
+            fn () => $this->actingAs($teacher)->delete(route('teacher.courses.teacher-lessons.destroy', [$course, $lesson])),
+        ];
+
+        foreach ($steps as $i => $step) {
+            $before = $revision();
+            $step()->assertSessionHasNoErrors();
+            $this->assertSame($before + 1, $revision(), 'step '.$i);
+        }
     }
 }

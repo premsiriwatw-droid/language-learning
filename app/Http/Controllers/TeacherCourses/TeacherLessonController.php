@@ -71,7 +71,7 @@ class TeacherLessonController extends Controller
 
         $files = array_filter([$teacherLesson->document_path, $teacherLesson->video_path]);
 
-        DB::transaction(function () use ($teacherCourse, $teacherLesson) {
+        $sentForReview = DB::transaction(function () use ($teacherCourse, $teacherLesson) {
             TeacherCourse::query()->lockForUpdate()->findOrFail($teacherCourse->id);
 
             $isLastLesson = $teacherCourse->teacherLessons()->count() === 1 && $teacherCourse->lessons()->doesntExist();
@@ -83,11 +83,13 @@ class TeacherLessonController extends Controller
 
             $teacherLesson->delete();
             $this->renumber($teacherCourse);
+
+            return $this->review->contentChanged($teacherCourse);
         });
 
         DB::afterCommit(fn () => Storage::disk(TeacherLesson::DISK)->delete($files));
 
-        return $this->backToCourse($teacherCourse, 'ลบบทเรียนแล้ว', $this->review->contentChanged($teacherCourse));
+        return $this->backToCourse($teacherCourse, 'ลบบทเรียนแล้ว', $sentForReview);
     }
 
     public function move(Request $request, TeacherCourse $teacherCourse, TeacherLesson $teacherLesson): RedirectResponse
@@ -96,7 +98,7 @@ class TeacherLessonController extends Controller
 
         $direction = $request->validate(['direction' => ['required', Rule::in(['up', 'down'])]])['direction'];
 
-        $moved = DB::transaction(function () use ($teacherCourse, $teacherLesson, $direction) {
+        [$moved, $sentForReview] = DB::transaction(function () use ($teacherCourse, $teacherLesson, $direction) {
             TeacherCourse::query()->lockForUpdate()->findOrFail($teacherCourse->id);
             $this->renumber($teacherCourse);
 
@@ -105,7 +107,7 @@ class TeacherLessonController extends Controller
             $swapWith = $direction === 'up' ? $index - 1 : $index + 1;
 
             if ($index === false || ! isset($ordered[$swapWith])) {
-                return false;
+                return [false, false];
             }
 
             [$current, $other] = [$ordered[$index], $ordered[$swapWith]];
@@ -113,10 +115,8 @@ class TeacherLessonController extends Controller
             $current->forceFill(['position' => $otherPosition])->save();
             $other->forceFill(['position' => $currentPosition])->save();
 
-            return true;
+            return [true, $this->review->contentChanged($teacherCourse)];
         });
-
-        $sentForReview = $moved && $this->review->contentChanged($teacherCourse);
 
         return $this->backToCourse($teacherCourse, $moved ? 'จัดลำดับบทเรียนแล้ว' : 'ย้ายต่อไม่ได้แล้ว', $sentForReview);
     }
@@ -160,7 +160,7 @@ class TeacherLessonController extends Controller
                 }
             }
 
-            $changed = DB::transaction(function () use ($course, $lesson, $prepare) {
+            $sentForReview = DB::transaction(function () use ($course, $lesson, $prepare) {
                 TeacherCourse::query()->lockForUpdate()->findOrFail($course->id);
                 if ($prepare) {
                     $prepare($lesson);
@@ -168,7 +168,7 @@ class TeacherLessonController extends Controller
                 $changed = $lesson->isDirty();
                 $lesson->save();
 
-                return $changed;
+                return $changed && $this->review->contentChanged($course);
             });
         } catch (Throwable $exception) {
             $disk->delete(array_filter($newFiles));
@@ -178,7 +178,7 @@ class TeacherLessonController extends Controller
 
         $disk->delete(array_values(array_filter($oldFiles)));
 
-        return $changed && $this->review->contentChanged($course);
+        return $sentForReview;
     }
 
     private function attach(TeacherLesson $lesson, string $kind, UploadedFile $file, string $directory): string

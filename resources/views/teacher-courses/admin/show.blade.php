@@ -77,8 +77,10 @@
 
     @if ($course->isPendingReview())
         <form method="POST" action="{{ route('admin.teacher-courses.review', $course) }}" class="space-y-4 rounded-2xl border-2 border-indigo-200 bg-white p-6"
-            x-data="{ decision: '{{ old('decision', 'approve') }}' }">
+            x-data="{ decision: '{{ old('decision', 'approve') === 'reject' ? 'reject' : 'approve' }}' }">
             @csrf
+            {{-- The exact version on screen; a stale page cannot approve newer content. --}}
+            <input type="hidden" name="revision" value="{{ $course->content_revision }}">
             <h2 class="text-xl font-extrabold text-gray-800">ผลการตรวจ</h2>
             <div class="flex flex-wrap gap-4">
                 <label class="flex items-center gap-2 font-bold text-emerald-700"><input type="radio" name="decision" value="approve" x-model="decision" @checked(old('decision', 'approve') === 'approve')> อนุมัติ เผยแพร่ได้</label>

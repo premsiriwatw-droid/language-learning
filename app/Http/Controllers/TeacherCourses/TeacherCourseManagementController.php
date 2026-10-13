@@ -81,16 +81,17 @@ class TeacherCourseManagementController extends Controller
 
     public function update(TeacherCourseRequest $request, TeacherCourse $teacherCourse, CourseReviewService $review): RedirectResponse
     {
-        $changed = DB::transaction(function () use ($request, $teacherCourse) {
+        [$changed, $sentForReview] = DB::transaction(function () use ($request, $teacherCourse, $review) {
+            TeacherCourse::query()->lockForUpdate()->findOrFail($teacherCourse->id);
             $teacherCourse->fill($request->safe()->except('lessons'));
             $infoChanged = $teacherCourse->isDirty();
             $teacherCourse->save();
-            $lessonsChanged = $this->syncLessons($teacherCourse, $request->validated('lessons', []));
+            $changed = $this->syncLessons($teacherCourse, $request->validated('lessons', [])) || $infoChanged;
 
-            return $infoChanged || $lessonsChanged;
+            return [$changed, $changed && $review->contentChanged($teacherCourse)];
         });
 
-        if ($changed && $review->contentChanged($teacherCourse)) {
+        if ($sentForReview) {
             return back()->with('success', 'บันทึกแล้ว คอร์สกลับไปรอแอดมินตรวจอีกครั้ง (ผู้เรียนเดิมยังเรียนต่อได้)');
         }
 

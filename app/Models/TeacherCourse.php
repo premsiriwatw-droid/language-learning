@@ -63,6 +63,7 @@ class TeacherCourse extends Model
             'submitted_at' => 'datetime',
             'approved_at' => 'datetime',
             'reviewed_at' => 'datetime',
+            'content_revision' => 'integer',
         ];
     }
 

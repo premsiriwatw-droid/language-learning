@@ -61,14 +61,19 @@ class TeacherLessonRequest extends FormRequest
                     return;
                 }
 
+                // Judge what the lesson will contain after the save, i.e. after the remove_* choices
+                // (the controller drops video_url when remove_video is ticked).
                 $lesson = $this->route('teacherLesson');
-                $keepsDocument = $lesson instanceof TeacherLesson && $lesson->hasDocument() && ! $this->boolean('remove_document');
-                $keepsVideoFile = $lesson instanceof TeacherLesson && $lesson->hasVideoFile() && ! $this->boolean('remove_video') && $url === null;
+                $removeVideo = $this->boolean('remove_video');
+                $removeDocument = $this->boolean('remove_document');
 
-                $hasContent = trim((string) $this->input('body')) !== ''
-                    || $url !== null
-                    || $this->hasFile('video_file') || $this->hasFile('document')
-                    || $keepsDocument || $keepsVideoFile;
+                $willHaveDocument = $this->hasFile('document')
+                    || ($lesson instanceof TeacherLesson && $lesson->hasDocument() && ! $removeDocument);
+                $willHaveVideo = $this->hasFile('video_file')
+                    || (! $removeVideo && $url !== null)
+                    || ($lesson instanceof TeacherLesson && $lesson->hasVideoFile() && ! $removeVideo && $url === null);
+
+                $hasContent = trim((string) $this->input('body')) !== '' || $willHaveDocument || $willHaveVideo;
 
                 if (! $hasContent) {
                     $validator->errors()->add('body', 'บทเรียนต้องมีเนื้อหาอย่างน้อย 1 อย่าง: ข้อความ เอกสาร หรือวิดีโอ');

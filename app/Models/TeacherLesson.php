@@ -67,8 +67,8 @@ class TeacherLesson extends Model
             return null;
         }
 
-        $host = strtolower(preg_replace('/^(www\.|m\.)/', '', $parts['host'] ?? ''));
-        $path = $parts['path'] ?? '';
+        $host = strtolower((string) preg_replace('/^(www\.|m\.)/', '', (string) ($parts['host'] ?? '')));
+        $path = (string) ($parts['path'] ?? '');
         parse_str($parts['query'] ?? '', $query);
 
         $youtubeId = match (true) {
@@ -79,7 +79,7 @@ class TeacherLesson extends Model
         };
 
         if ($youtubeId !== null) {
-            return preg_match('/^[A-Za-z0-9_-]{11}$/', $youtubeId) === 1
+            return is_string($youtubeId) && preg_match('/^[A-Za-z0-9_-]{11}$/', $youtubeId) === 1
                 ? 'https://www.youtube-nocookie.com/embed/'.$youtubeId
                 : null;
         }

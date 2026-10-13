@@ -157,7 +157,7 @@ class TeacherCourseManagementTest extends TestCase
         $this->actingAs($this->learner())->get(route('teacher-courses.index'))->assertDontSee('Renamed');
 
         $this->actingAs($admin)
-            ->post(route('admin.teacher-courses.review', $course), ['decision' => 'approve'])
+            ->post(route('admin.teacher-courses.review', $course), ['revision' => $course->fresh()->content_revision, 'decision' => 'approve'])
             ->assertSessionHasNoErrors();
         $course->refresh();
         $this->assertSame(TeacherCourse::PUBLISHED, $course->status);

@@ -16,6 +16,7 @@ use App\Http\Controllers\PlacementController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\TeacherApplicationController;
 use App\Http\Controllers\TeacherCourses\TeacherDashboardController;
+use App\Http\Controllers\TeacherCourses\TeacherLearningController;
 use App\Http\Middleware\RememberLearningVisit;
 use Illuminate\Support\Facades\Route;
 
@@ -366,6 +367,12 @@ Route::middleware(['auth', \App\Http\Middleware\ApprovedTeacherMiddleware::class
         ])
             ->whereNumber('teacherCourse')
             ->name('weak-topics');
+        Route::post('/{teacherCourse}/students/{student}/recommendations', [TeacherLearningController::class, 'recommend'])
+            ->whereNumber('teacherCourse')->whereNumber('student')->name('students.recommend');
+        Route::post('/{teacherCourse}/students/{student}/assignments', [TeacherLearningController::class, 'assign'])
+            ->whereNumber('teacherCourse')->whereNumber('student')->name('students.assign');
+        Route::post('/{teacherCourse}/students/{student}/messages', [TeacherLearningController::class, 'teacherMessage'])
+            ->whereNumber('teacherCourse')->whereNumber('student')->name('students.message');
     });
 
 /*
@@ -411,3 +418,14 @@ Route::middleware(['auth', 'admin'])
         Route::get('/{teacherCourse}', [\App\Http\Controllers\TeacherCourses\CourseReviewController::class, 'show'])->whereNumber('teacherCourse')->name('show');
         Route::post('/{teacherCourse}/review', [\App\Http\Controllers\TeacherCourses\CourseReviewController::class, 'decide'])->whereNumber('teacherCourse')->name('review');
     });
+
+Route::middleware('auth')->group(function () {
+    Route::get('/teacher-courses/{teacherCourse}/learning-tools', [TeacherLearningController::class, 'learnerPanel'])
+        ->whereNumber('teacherCourse')->name('teacher-courses.learning-tools');
+    Route::post('/teacher-courses/{teacherCourse}/messages', [TeacherLearningController::class, 'learnerMessage'])
+        ->whereNumber('teacherCourse')->name('teacher-courses.messages.store');
+    Route::post('/teacher-courses/{teacherCourse}/assignments/{assignment}/start', [TeacherLearningController::class, 'start'])
+        ->whereNumber('teacherCourse')->whereNumber('assignment')->name('teacher-courses.assignments.start');
+    Route::post('/teacher-courses/{teacherCourse}/assignments/{assignment}/complete', [TeacherLearningController::class, 'complete'])
+        ->whereNumber('teacherCourse')->whereNumber('assignment')->name('teacher-courses.assignments.complete');
+});

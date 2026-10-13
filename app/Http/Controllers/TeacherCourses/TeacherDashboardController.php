@@ -5,6 +5,8 @@ namespace App\Http\Controllers\TeacherCourses;
 use App\Http\Controllers\Controller;
 use App\Models\TeacherCourse;
 use App\Services\TeacherCourses\TeacherAnalyticsService;
+use App\Services\TeacherCourses\TeacherLearningService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
@@ -36,29 +38,22 @@ class TeacherDashboardController extends Controller
             'asOf' => $list['as_of'],
         ]);
     }
+
     public function studentDetail(
+        Request $request,
         TeacherCourse $teacherCourse,
-        string $student
+        string $student,
+        TeacherLearningService $service
     ): View {
-        // ชั้นแรก: ผู้ที่เปิดหน้าต้องเป็นครูเจ้าของคอร์ส
-        Gate::authorize('update', $teacherCourse);
-
-        // ชั้นที่สอง: หา enrollment ของนักเรียนภายในคอร์สนี้เท่านั้น
-        $enrollment = $teacherCourse->enrollments()
-            ->learning()
-            ->where('user_id', $student)
-            ->with('user:id,name')
-            ->firstOrFail();
-
-        $learner = $enrollment->user;
-
-        abort_if($learner === null, 404);
+        $learner = $service->teacherStudent($request->user(), $teacherCourse, $student);
 
         return view('teacher-courses.manage.student-detail', [
             'course' => $teacherCourse,
             'student' => $learner,
+            'panel' => $service->panel($request->user(), $teacherCourse, $learner),
         ]);
     }
+
     public function weakTopics(
         TeacherCourse $teacherCourse,
         TeacherAnalyticsService $analytics

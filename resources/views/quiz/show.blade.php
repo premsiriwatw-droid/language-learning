@@ -6,30 +6,30 @@
     <title>{{ $exercise->title }} | Quiz</title>
     <style>
         * { box-sizing: border-box; }
-        body { margin: 0; background: #fffdf9; color: #332a23; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        body { margin: 0; background: #fffdf9; color: #203932; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
         .container { width: min(900px, calc(100% - 32px)); margin: 40px auto; }
-        .header, .question-card { background: #fff; border: 1px solid #dbc59e; border-radius: 18px; box-shadow: 0 8px 30px rgba(115,80,36,.06); }
+        .header, .question-card { background: #fff; border: 1px solid #c8d6cc; border-radius: 18px; box-shadow: 0 8px 30px rgba(32,57,50,.06); }
         .header { padding: 28px; margin-bottom: 18px; }
-        .badge { display: inline-block; padding: 6px 10px; border-radius: 999px; background: #fff2dd; color: #806027; font-size: 13px; font-weight: 700; }
+        .badge { display: inline-block; padding: 6px 10px; border-radius: 999px; background: #e5f4eb; color: #177553; font-size: 13px; font-weight: 700; }
         h1 { margin: 12px 0 4px; font-size: 30px; }
-        .muted { color: #756454; }
+        .muted { color: #65746d; }
         .question-card { padding: 24px; margin-bottom: 16px; }
-        .question-number { color: #756454; font-size: 14px; font-weight: 700; }
+        .question-number { color: #65746d; font-size: 14px; font-weight: 700; }
         .question { margin: 8px 0 20px; font-size: 21px; line-height: 1.5; }
-        input[type=text] { width: 100%; padding: 13px 14px; border: 1px solid #e5d8c4; border-radius: 10px; font-size: 16px; outline: none; }
+        input[type=text] { width: 100%; padding: 13px 14px; border: 1px solid #dfe8e2; border-radius: 10px; font-size: 16px; outline: none; }
         input[type=text]:focus { border-color: #bd2637; box-shadow: 0 0 0 3px rgba(189,38,55,.12); }
         .choices { display: grid; gap: 10px; }
-        .choice { display: flex; align-items: center; gap: 12px; padding: 14px; border: 1px solid #e5d8c4; border-radius: 12px; cursor: pointer; transition: .15s; }
-        .choice:hover { border-color: #c86b77; background: #fff7e6; }
+        .choice { display: flex; align-items: center; gap: 12px; padding: 14px; border: 1px solid #dfe8e2; border-radius: 12px; cursor: pointer; transition: .15s; }
+        .choice:hover { border-color: #c86b77; background: #eef5ed; }
         .choice input { accent-color: #bd2637; }
-        .media-placeholder { display: flex; align-items: center; justify-content: center; min-height: 150px; margin-bottom: 18px; border: 2px dashed #dbc59e; border-radius: 14px; background: #fffaf2; color: #806e5b; text-align: center; }
+        .media-placeholder { display: flex; align-items: center; justify-content: center; min-height: 150px; margin-bottom: 18px; border: 2px dashed #c8d6cc; border-radius: 14px; background: #fffaf2; color: #65746d; text-align: center; }
         .audio-button { border: 0; border-radius: 10px; padding: 12px 18px; background: #bd2637; color: white; font-weight: 700; cursor: pointer; }
         .audio-button:disabled { opacity: .5; cursor: not-allowed; }
         .submit { width: 100%; border: 0; border-radius: 12px; padding: 15px; background: #bd2637; color: #fff; font-size: 16px; font-weight: 800; cursor: pointer; }
         .result { margin-top: 16px; padding: 12px 14px; border-radius: 10px; font-weight: 700; }
-        .correct { background: #fff2dd; color: #705024; }
+        .correct { background: #e5f4eb; color: #135437; }
         .incorrect { background: #fff0f2; color: #a12533; }
-        .explanation { margin-top: 8px; color: #655547; font-size: 14px; font-weight: 400; }
+        .explanation { margin-top: 8px; color: #4d695b; font-size: 14px; font-weight: 400; }
     </style>
 </head>
 <body>

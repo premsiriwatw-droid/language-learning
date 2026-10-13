@@ -1,319 +1,68 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@extends('layouts.auth')
 
-    <title>สมัครสมาชิก | Language Learning</title>
+@section('title', 'สมัครสมาชิก')
+@section('page-class', 'register-page')
 
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-        }
-
-        body {
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(135deg, #6c5ce7, #8e7dff);
-        }
-
-        .container {
-            width: 900px;
-            max-width: 95%;
-            min-height: 590px;
-            display: flex;
-            background: #ffffff;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
-        }
-
-        .left {
-            width: 50%;
-            padding: 55px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            background: linear-gradient(135deg, #5f4bd8, #7b68ee);
-            color: white;
-        }
-
-        .logo {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 35px;
-        }
-
-        .left h1 {
-            font-size: 42px;
-            line-height: 1.2;
-            margin-bottom: 18px;
-        }
-
-        .left p {
-            font-size: 16px;
-            line-height: 1.7;
-            opacity: 0.9;
-        }
-
-        .languages {
-            display: flex;
-            gap: 12px;
-            margin-top: 28px;
-        }
-
-        .language {
-            padding: 10px 16px;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .right {
-            width: 50%;
-            padding: 45px 55px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .right h2 {
-            font-size: 30px;
-            margin-bottom: 8px;
-            color: #222;
-        }
-
-        .subtitle {
-            color: #777;
-            margin-bottom: 25px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 7px;
-            font-size: 14px;
-            font-weight: bold;
-            color: #444;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 13px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            font-size: 15px;
-            outline: none;
-        }
-
-        input:focus, select:focus {
-            border-color: #6c5ce7;
-            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
-        }
-
-        .register-btn {
-            width: 100%;
-            padding: 14px;
-            margin-top: 5px;
-            border: none;
-            border-radius: 10px;
-            background: #6c5ce7;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .register-btn:hover {
-            background: #5946d2;
-        }
-
-        .login-text {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 14px;
-            color: #666;
-        }
-
-        .login-text a {
-            color: #6c5ce7;
-            font-weight: bold;
-            text-decoration: none;
-        }
-
-        .error-box {
-            padding: 12px;
-            margin-bottom: 18px;
-            border-radius: 10px;
-            background: #ffecec;
-            color: #d63031;
-            font-size: 14px;
-        }
-
-        @media (max-width: 760px) {
-            .left {
-                display: none;
-            }
-
-            .right {
-                width: 100%;
-                padding: 35px 25px;
-            }
-        }
-    </style>
-</head>
-
-<body>
-
-<div class="container">
-
-    <div class="left">
-
-        <div class="logo">
-            🌍 Language Learning
+@section('form')
+    <p class="card-eyebrow">YOUR JOURNEY STARTS HERE</p>
+    <h1 id="auth-heading">สร้างบัญชี<span class="heading-dot">.</span></h1>
+    <p class="login-subtitle">สมัครสมาชิกเพื่อเริ่มเรียนภาษา</p>
+    @if ($errors->any())
+        <div class="error-box" id="auth-errors" role="alert">
+            @foreach ($errors->all() as $error)
+                <p>{{ $error }}</p>
+            @endforeach
         </div>
-
-        <h1>
-            Start learning.<br>
-            Build your future.
-        </h1>
-
-        <p>
-            เริ่มต้นเรียนภาษาอังกฤษและภาษาจีน
-            ฝึกคำศัพท์ ทำแบบฝึกหัด
-            และพัฒนาทักษะภาษาของคุณทุกวัน
-        </p>
-
-        <div class="languages">
-            <div class="language">🇬🇧 English</div>
-            <div class="language">🇨🇳 中文</div>
+    @endif
+    <form id="auth-form" action="{{ route('register.store') }}" method="POST">
+        @csrf
+        <div class="form-group">
+            <label for="account_type">สมัครเพื่อ</label>
+            <select id="account_type" name="account_type" required aria-describedby="account-type-hint{{ $errors->has('account_type') ? ' auth-errors' : '' }}" @error('account_type') aria-invalid="true" @enderror>
+                <option value="learner" @selected(old('account_type', 'learner') === 'learner')>เรียนภาษา</option>
+                <option value="teacher_applicant" @selected(old('account_type') === 'teacher_applicant')>ยื่นสมัครเป็นผู้สอน</option>
+            </select>
+            <p class="field-hint" id="account-type-hint">ผู้สมัครครูต้องส่งใบสมัครและรอ Admin อนุมัติ ระหว่างรอยังเรียนภาษาได้</p>
         </div>
-
-    </div>
-
-
-    <div class="right">
-
-        <h2>สร้างบัญชี ✨</h2>
-
-        <p class="subtitle">
-            สมัครสมาชิกเพื่อเริ่มเรียนภาษา
-        </p>
-
-
-        @if ($errors->any())
-            <div class="error-box">
-                @foreach ($errors->all() as $error)
-                    <div>{{ $error }}</div>
+        <div class="form-group">
+            <label for="name">ชื่อ</label>
+            <div class="input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-2a8 8 0 0 1 16 0v2"></path></svg>
+                <input type="text" id="name" name="name" value="{{ old('name') }}" placeholder="ชื่อของคุณ" autocomplete="name" required @error('name') aria-invalid="true" aria-describedby="auth-errors" @enderror>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="email">อีเมล</label>
+            <div class="input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="m4 7 8 6 8-6"></path></svg>
+                <input type="email" id="email" name="email" value="{{ old('email') }}" placeholder="example@email.com" autocomplete="email" required @error('email') aria-invalid="true" aria-describedby="auth-errors" @enderror>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="password">รหัสผ่าน</label>
+            <div class="input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="3"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"></path></svg>
+                <input type="password" id="password" name="password" placeholder="อย่างน้อย 6 ตัวอักษร" autocomplete="new-password" minlength="6" required @error('password') aria-invalid="true" aria-describedby="auth-errors" @enderror>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="password_confirmation">ยืนยันรหัสผ่าน</label>
+            <div class="input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="3"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3m-7 5 2 2 3-3"></path></svg>
+                <input type="password" id="password_confirmation" name="password_confirmation" placeholder="กรอกรหัสผ่านอีกครั้ง" autocomplete="new-password" minlength="6" required @error('password_confirmation') aria-invalid="true" aria-describedby="auth-errors" @enderror>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="learner_proficiency">Learner Proficiency Level</label>
+            <select id="learner_proficiency" name="learner_proficiency" required aria-describedby="proficiency-hint{{ $errors->has('learner_proficiency') ? ' auth-errors' : '' }}" @error('learner_proficiency') aria-invalid="true" @enderror>
+                @foreach (\App\Enums\LearnerProficiency::cases() as $level)
+                    <option value="{{ $level->value }}" @selected(old('learner_proficiency', 'beginner') === $level->value)>{{ $level->label() }}</option>
                 @endforeach
-            </div>
-        @endif
-
-
-        <form action="{{ route('register.store') }}" method="POST">
-
-            @csrf
-
-            <div class="form-group">
-                <label for="account_type">สมัครเพื่อ</label>
-                <select id="account_type" name="account_type" required style="width:100%;padding:13px;border:1px solid #ddd;border-radius:10px">
-                    <option value="learner" {{ old('account_type', 'learner') === 'learner' ? 'selected' : '' }}>เรียนภาษา</option>
-                    <option value="teacher_applicant" {{ old('account_type') === 'teacher_applicant' ? 'selected' : '' }}>ยื่นสมัครเป็นผู้สอน</option>
-                </select>
-                <p style="font-size:12px;color:#777;margin-top:7px">ผู้สมัครครูต้องส่งใบสมัครและรอ Admin อนุมัติ ระหว่างรอยังเรียนภาษาได้</p>
-            </div>
-
-            <div class="form-group">
-                <label for="name">ชื่อ</label>
-
-                <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value="{{ old('name') }}"
-                    placeholder="ชื่อของคุณ"
-                    required
-                >
-            </div>
-
-
-            <div class="form-group">
-                <label for="email">อีเมล</label>
-
-                <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value="{{ old('email') }}"
-                    placeholder="example@email.com"
-                    required
-                >
-            </div>
-
-
-            <div class="form-group">
-                <label for="password">รหัสผ่าน</label>
-
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="อย่างน้อย 6 ตัวอักษร"
-                    required
-                >
-            </div>
-
-
-            <div class="form-group">
-                <label for="password_confirmation">
-                    ยืนยันรหัสผ่าน
-                </label>
-
-                <input
-                    type="password"
-                    id="password_confirmation"
-                    name="password_confirmation"
-                    placeholder="กรอกรหัสผ่านอีกครั้ง"
-                    required
-                >
-            </div>
-
-
-            <div class="form-group">
-                <label for="learner_proficiency">Learner Proficiency Level</label>
-                <select id="learner_proficiency" name="learner_proficiency" required>
-                    @foreach (\App\Enums\LearnerProficiency::cases() as $level)
-                        <option value="{{ $level->value }}" @selected(old('learner_proficiency', 'beginner') === $level->value)>{{ $level->label() }}</option>
-                    @endforeach
-                    <option value="not_sure" @selected(old('learner_proficiency') === 'not_sure')>Not sure</option>
-                </select>
-                <p style="margin-top: 7px; font-size: 13px; color: #777;">เลือก Not sure เพื่อทำแบบทดสอบแนะนำระดับหลังสมัคร</p>
-            </div>
-
-            <button type="submit" class="register-btn">
-                สมัครสมาชิก
-            </button>
-
-        </form>
-
-
-        <div class="login-text">
-            มีบัญชีแล้ว?
-            <a href="{{ route('login') }}">
-                เข้าสู่ระบบ
-            </a>
+                <option value="not_sure" @selected(old('learner_proficiency') === 'not_sure')>Not sure</option>
+            </select>
+            <p class="field-hint" id="proficiency-hint">เลือก Not sure เพื่อทำแบบทดสอบแนะนำระดับหลังสมัคร</p>
         </div>
-
-    </div>
-
-</div>
-
-</body>
-</html>
+        <button type="submit" class="login-button"><span>สมัครสมาชิก</span><span aria-hidden="true">↗</span></button>
+    </form>
+    <p class="register-text">มีบัญชีแล้ว? <a href="{{ route('login') }}">เข้าสู่ระบบ <span aria-hidden="true">↗</span></a></p>
+@endsection

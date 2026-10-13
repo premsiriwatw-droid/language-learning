@@ -24,5 +24,6 @@
             คอร์ส: {{ $course->title }}
         </p>
     </div>
+    @include('teacher-courses.partials.learning-panel')
 </div>
 @endsection

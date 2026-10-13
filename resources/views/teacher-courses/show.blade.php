@@ -95,6 +95,13 @@
         </div>
     </section>
 
+    @if ($enrollment?->canStudy() && ! $isOwner)
+        <a href="{{ route('teacher-courses.learning-tools', $course) }}"
+            class="inline-block rounded bg-emerald-600 px-4 py-2 font-bold text-white">
+            งาน คำแนะนำ และข้อความจากครู
+        </a>
+    @endif
+
     @if ($course->teacherLessons->isNotEmpty())
         <section class="rounded-2xl border-2 border-gray-200 bg-white p-6" aria-labelledby="teacher-lessons-heading">
             <h2 id="teacher-lessons-heading" class="text-xl font-extrabold text-gray-800">บทเรียนจากผู้สอน</h2>

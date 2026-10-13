@@ -19,7 +19,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(135deg, #fffdf9, #fff7e6);
+            background: linear-gradient(135deg, #fffdf9, #eef5ed);
         }
 
         .profile-card {
@@ -28,7 +28,7 @@
             background: #ffffff;
             border-radius: 24px;
             padding: 45px;
-            box-shadow: 0 20px 50px rgba(115, 80, 36, 0.15);
+            box-shadow: 0 20px 50px rgba(32, 57, 50, 0.15);
         }
 
         .logo {
@@ -47,20 +47,20 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #fff2dd;
+            background: #e5f4eb;
             font-size: 42px;
         }
 
         h1 {
             text-align: center;
             font-size: 30px;
-            color: #332a23;
+            color: #203932;
             margin-bottom: 8px;
         }
 
         .subtitle {
             text-align: center;
-            color: #756454;
+            color: #65746d;
             margin-bottom: 30px;
         }
 
@@ -82,14 +82,14 @@
         .label {
             display: block;
             font-size: 13px;
-            color: #756454;
+            color: #65746d;
             margin-bottom: 5px;
         }
 
         .value {
             font-size: 17px;
             font-weight: bold;
-            color: #332a23;
+            color: #203932;
         }
 
         .logout-btn {

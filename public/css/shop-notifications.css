@@ -1,5 +1,5 @@
 .reward-hub {
-    color:#332a23;
+    color:#203932;
     max-width:960px;
     margin:auto;
 }
@@ -20,12 +20,12 @@
 }
 
 .hub-eyebrow {
-    color:#806027;
+    color:#177553;
     font-weight:600;
 }
 
 .hub-muted {
-    color:#756454;
+    color:#65746d;
     font-size:14px;
 }
 
@@ -40,7 +40,7 @@
     padding:8px 14px;
     border-radius:12px;
     background:#fff;
-    border:1px solid #e5d8c4;
+    border:1px solid #dfe8e2;
 }
 
 .hub-tabs a[aria-current] {
@@ -66,10 +66,10 @@
 
 .hub-card {
     padding:22px;
-    border:1px solid #dbc59e;
+    border:1px solid #c8d6cc;
     border-radius:20px;
     background:#fff;
-    box-shadow:0 6px 18px #73502410;
+    box-shadow:0 6px 18px #20393210;
 }
 
 .hub-card h2,.hub-card h3 {
@@ -90,13 +90,13 @@
 }
 
 .hub-secondary {
-    background:#fff7e6;
-    color:#594938;
+    background:#eef5ed;
+    color:#3b574a;
 }
 
 .hub-button:disabled {
-    background:#efe4d0;
-    color:#82705e;
+    background:#edf1e9;
+    color:#74816e;
     cursor:not-allowed;
 }
 
@@ -108,13 +108,13 @@
 .hub-empty,.hub-notice,.hub-error {
     padding:22px;
     border-radius:16px;
-    background:#fff7e6;
+    background:#eef5ed;
     margin:16px 0;
 }
 
 .hub-notice,.hub-equipped {
-    color:#705024;
-    background:#fff2dd;
+    color:#135437;
+    background:#e5f4eb;
 }
 
 .hub-error {
@@ -140,12 +140,12 @@
 
 .hub-history {
     padding:12px 0;
-    border-bottom:1px solid #e5d8c4;
+    border-bottom:1px solid #dfe8e2;
 }
 
 .hub-history time {
     display:block;
-    color:#756454;
+    color:#65746d;
     font-size:13px;
 }
 

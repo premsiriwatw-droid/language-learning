@@ -1,19 +1,19 @@
 body {
     background-color: #fffdf9;
-    color: #332a23;
+    color: #203932;
 }
 
 a { color: #bd2637; }
 a:hover, a:focus-visible { color: #aa1f31; }
 
-table, th, td, hr { border-color: #dbc59e; }
+table, th, td, hr { border-color: #c8d6cc; }
 table { background-color: #fff; }
-thead { background-color: #fff2dd; color: #705024; }
+thead { background-color: #e5f4eb; color: #135437; }
 
 input, select {
     background-color: #fffdf8;
-    border-color: #dbc59e;
-    color: #332a23;
+    border-color: #c8d6cc;
+    color: #203932;
     accent-color: #bd2637;
 }
 

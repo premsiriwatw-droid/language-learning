@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Lesson;
+use App\Services\Content\EnglishBeginnerContentUpgrade;
 use App\Services\Content\QuestionVocabularyImporter;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -11,6 +12,8 @@ class EnglishContentSeeder extends Seeder
 {
     public function run(): void
     {
+        app(EnglishBeginnerContentUpgrade::class)->apply();
+
         $importer = app(QuestionVocabularyImporter::class);
 
         foreach (require __DIR__.'/data/english.php' as $title => $content) {
@@ -33,8 +36,7 @@ class EnglishContentSeeder extends Seeder
 
             DB::transaction(function () use ($lesson, $content, $importer) {
                 foreach (
-                    $content['vocabulary']
-                    as [$word, $pronunciation, $meaning, $example, $examplePronunciation, $exampleMeaning]
+                    $content['vocabulary'] as [$word, $pronunciation, $meaning, $example, $examplePronunciation, $exampleMeaning]
                 ) {
                     $lesson->vocabularies()->updateOrCreate(
                         ['word' => $word],

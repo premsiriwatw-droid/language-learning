@@ -127,7 +127,7 @@ return [
         'exercises' => [
             'multiple_choice' => [
                 [
-                    'question' => 'Your female parent is your ___.',
+                    'question' => 'แม่ ในภาษาอังกฤษคือคำใด?',
                     'explanation' => 'mother หมายถึง แม่ ซึ่งเป็นผู้ปกครองผู้หญิง',
                     'answers' => [
                         [
@@ -149,7 +149,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Your male parent is your ___.',
+                    'question' => 'พ่อ ในภาษาอังกฤษคือคำใด?',
                     'explanation' => 'father หมายถึง พ่อ ซึ่งเป็นผู้ปกครองผู้ชาย',
                     'answers' => [
                         [
@@ -193,7 +193,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Anna and Ben have the same parents. Anna is a girl. Anna is Ben\'s ___.',
+                    'question' => 'Anna และ Ben มีพ่อแม่เดียวกัน Anna เป็นผู้หญิง Anna เป็นญาติแบบใดของ Ben? เลือกคำภาษาอังกฤษ',
                     'explanation' => 'เด็กผู้หญิงที่มีพ่อแม่เดียวกันเป็น sister หรือพี่สาวหรือน้องสาว',
                     'answers' => [
                         [
@@ -215,7 +215,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Anna and Ben have the same parents. Ben is a boy. Ben is Anna\'s ___.',
+                    'question' => 'Anna และ Ben มีพ่อแม่เดียวกัน Ben เป็นผู้ชาย Ben เป็นญาติแบบใดของ Anna? เลือกคำภาษาอังกฤษ',
                     'explanation' => 'เด็กผู้ชายที่มีพ่อแม่เดียวกันเป็น brother หรือพี่ชายหรือน้องชาย',
                     'answers' => [
                         [
@@ -237,7 +237,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Your mother\'s mother is your ___.',
+                    'question' => 'แม่ของแม่ เป็นญาติของคุณแบบใด? เลือกคำภาษาอังกฤษ',
                     'explanation' => 'แม่ของแม่คือ grandmother หรือยาย',
                     'answers' => [
                         [
@@ -259,7 +259,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Your father\'s father is your ___.',
+                    'question' => 'พ่อของพ่อ เป็นญาติของคุณแบบใด? เลือกคำภาษาอังกฤษ',
                     'explanation' => 'พ่อของพ่อคือ grandfather หรือปู่',
                     'answers' => [
                         [
@@ -303,7 +303,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Which word refers to one young person?',
+                    'question' => 'คำใดหมายถึงเด็กหนึ่งคน?',
                     'explanation' => 'child เป็นเอกพจน์ หมายถึง เด็กหนึ่งคน',
                     'answers' => [
                         [
@@ -325,7 +325,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'What is the plural form of child?',
+                    'question' => 'คำว่า child เมื่อต้องการพูดถึงเด็กหลายคน ใช้คำใด?',
                     'explanation' => 'รูปพหูพจน์ของ child คือ children',
                     'answers' => [
                         [
@@ -347,7 +347,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'A mother\'s male child is her ___.',
+                    'question' => 'แม่เรียกลูกที่เป็นผู้ชายว่าอะไรในภาษาอังกฤษ?',
                     'explanation' => 'son หมายถึง ลูกชาย',
                     'answers' => [
                         [
@@ -369,7 +369,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'A father\'s female child is his ___.',
+                    'question' => 'พ่อเรียกลูกที่เป็นผู้หญิงว่าอะไรในภาษาอังกฤษ?',
                     'explanation' => 'daughter หมายถึง ลูกสาว',
                     'answers' => [
                         [
@@ -391,7 +391,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Your mother\'s sister is your ___.',
+                    'question' => 'พี่สาวหรือน้องสาวของแม่ เรียกว่าอะไรในภาษาอังกฤษ?',
                     'explanation' => 'พี่สาวหรือน้องสาวของแม่เป็น aunt หรือป้าหรือน้าผู้หญิง',
                     'answers' => [
                         [
@@ -413,7 +413,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Your father\'s brother is your ___.',
+                    'question' => 'พี่ชายหรือน้องชายของพ่อ เรียกว่าอะไรในภาษาอังกฤษ?',
                     'explanation' => 'พี่ชายหรือน้องชายของพ่อเป็น uncle หรือลุงหรืออาผู้ชาย',
                     'answers' => [
                         [
@@ -435,7 +435,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Your aunt\'s child is your ___.',
+                    'question' => 'ลูกของป้า เป็นญาติของคุณแบบใด? เลือกคำภาษาอังกฤษ',
                     'explanation' => 'ลูกของป้า น้า หรืออาเป็น cousin หรือลูกพี่ลูกน้อง',
                     'answers' => [
                         [
@@ -525,7 +525,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'I have a female sibling. She is my ___.',
+                    'question' => 'ฉันมีพี่น้องผู้หญิง เติมคำบอกความสัมพันธ์: "She is my ___."',
                     'explanation' => 'sister หมายถึง พี่สาวหรือน้องสาว',
                     'answers' => [
                         [
@@ -547,7 +547,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'I have a male sibling. He is my ___.',
+                    'question' => 'ฉันมีพี่น้องผู้ชาย เติมคำบอกความสัมพันธ์: "He is my ___."',
                     'explanation' => 'brother หมายถึง พี่ชายหรือน้องชาย',
                     'answers' => [
                         [
@@ -569,7 +569,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'My mother\'s mother is my ___.',
+                    'question' => 'เติมคำบอกความสัมพันธ์ของแม่ของแม่กับฉัน: "My mother\'s mother is my ___."',
                     'explanation' => 'แม่ของแม่คือ grandmother หรือยาย',
                     'answers' => [
                         [
@@ -591,7 +591,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'My mother\'s father is my ___.',
+                    'question' => 'เติมคำบอกความสัมพันธ์ของพ่อของแม่กับฉัน: "My mother\'s father is my ___."',
                     'explanation' => 'พ่อของแม่คือ grandfather หรือตา',
                     'answers' => [
                         [
@@ -679,7 +679,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'My father\'s sister is my ___.',
+                    'question' => 'เติมคำบอกความสัมพันธ์ของพี่สาวหรือน้องสาวของพ่อกับฉัน: "My father\'s sister is my ___."',
                     'explanation' => 'พี่สาวหรือน้องสาวของพ่อคือ aunt หรือป้าหรืออาผู้หญิง',
                     'answers' => [
                         [
@@ -701,7 +701,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'My mother\'s brother is my ___.',
+                    'question' => 'เติมคำบอกความสัมพันธ์ของพี่ชายหรือน้องชายของแม่กับฉัน: "My mother\'s brother is my ___."',
                     'explanation' => 'พี่ชายหรือน้องชายของแม่คือ uncle หรือลุงหรือน้าผู้ชาย',
                     'answers' => [
                         [

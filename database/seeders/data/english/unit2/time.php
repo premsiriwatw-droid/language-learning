@@ -157,7 +157,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'One hour has how many minutes?',
+                    'question' => 'หนึ่ง hour มีกี่ minute? (คำช่วยอ่านตัวเลข: ten = 10, twenty = 20, thirty = 30, sixty = 60)',
                     'explanation' => 'หนึ่งชั่วโมงหรือ one hour มีหกสิบนาที',
                     'answers' => [
                         [
@@ -201,7 +201,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Class starts at nine. Ben arrives at eight thirty. Ben is ___.',
+                    'question' => 'เริ่มเรียนเวลา 9:00 น. Ben มาถึงเวลา 8:30 น. เติมคำบอกเวลามาถึง: "Ben is ___."',
                     'explanation' => 'Ben มาถึงก่อนเวลาเริ่มเรียน จึงเป็น early',
                     'answers' => [
                         [
@@ -223,7 +223,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Class starts at nine. Anna arrives at nine fifteen. Anna is ___.',
+                    'question' => 'เริ่มเรียนเวลา 9:00 น. Anna มาถึงเวลา 9:15 น. เติมคำบอกเวลามาถึง: "Anna is ___."',
                     'explanation' => 'Anna มาถึงหลังเวลาเริ่มเรียน จึงเป็น late',
                     'answers' => [
                         [
@@ -245,7 +245,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Today is Friday. Which day is tomorrow?',
+                    'question' => 'วันพฤหัสบดี (Thursday) → วันศุกร์ (Friday) → วันเสาร์ (Saturday): วันนี้ (today) เป็นวันศุกร์ คำว่า tomorrow หมายถึงวันใด?',
                     'explanation' => 'tomorrow คือพรุ่งนี้ หลังวันศุกร์คือวันเสาร์',
                     'answers' => [
                         [
@@ -267,7 +267,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Today is Friday. Which day was yesterday?',
+                    'question' => 'วันพฤหัสบดี (Thursday) → วันศุกร์ (Friday) → วันเสาร์ (Saturday): วันนี้ (today) เป็นวันศุกร์ คำว่า yesterday หมายถึงวันใด?',
                     'explanation' => 'yesterday คือเมื่อวาน ก่อนวันศุกร์คือวันพฤหัสบดี',
                     'answers' => [
                         [
@@ -313,7 +313,7 @@ return [
             ],
             'fill_blank' => [
                 [
-                    'question' => 'It is 8 a.m. We say, "Good ___!"',
+                    'question' => 'เวลา 8:00 น. เติมคำทักทายในช่องว่าง: "Good ___!"',
                     'explanation' => '8 a.m. เป็นเวลาเช้า จึงใช้ Good morning',
                     'answers' => [
                         [
@@ -335,7 +335,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'It is 2 p.m. We say, "Good ___!"',
+                    'question' => 'เวลา 14:00 น. เติมคำทักทายในช่องว่าง: "Good ___!"',
                     'explanation' => '2 p.m. เป็นเวลาบ่าย จึงใช้ Good afternoon',
                     'answers' => [
                         [
@@ -357,7 +357,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'It is 7 p.m. We greet a friend: "Good ___!"',
+                    'question' => 'เวลา 19:00 น. คุณกำลังทักทายเพื่อน เติมคำในช่องว่าง: "Good ___!"',
                     'explanation' => '7 p.m. เป็นช่วงเย็น ใช้ Good evening เพื่อทักทาย',
                     'answers' => [
                         [
@@ -492,7 +492,7 @@ return [
             'listening' => [
                 [
                     'audio_path' => 'audio/english/time/eight-thirty-in-morning.mp3',
-                    'question' => 'จากเสียง ตอนนี้กี่โมง?',
+                    'question' => 'ฟังเสียงแล้วเลือกเวลาที่ได้ยิน (คำช่วย: thirty = 30, a.m. = ก่อนเที่ยง, p.m. = หลังเที่ยง)',
                     'vocabulary_mode' => 'after_vocabulary',
                     'required_vocabulary_words' => ['morning'],
                     'explanation' => 'eight thirty in the morning หมายถึง แปดโมงครึ่งตอนเช้า',
@@ -517,7 +517,7 @@ return [
                 ],
                 [
                     'audio_path' => 'audio/english/time/class-at-two-fifteen.mp3',
-                    'question' => 'จากเสียง เริ่มเรียนกี่โมง?',
+                    'question' => 'ฟังเสียงแล้วเลือกเวลาเริ่มเรียน (คำช่วย: fifteen = 15, fifty = 50, a.m. = ก่อนเที่ยง, p.m. = หลังเที่ยง)',
                     'vocabulary_mode' => 'after_vocabulary',
                     'required_vocabulary_words' => ['afternoon'],
                     'explanation' => 'two fifteen in the afternoon หมายถึง บ่ายสองโมงสิบห้านาที',

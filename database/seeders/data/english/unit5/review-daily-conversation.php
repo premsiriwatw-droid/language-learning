@@ -226,8 +226,8 @@ return [
                 [
                     'image_path' => 'images/english/review-daily-conversation/friends-walking-under-umbrella-in-rain.jpg',
                     'question' => 'ประโยคใดตรงกับสภาพอากาศในภาพ?',
-                    'vocabulary_mode' => 'after_vocabulary',
-                    'required_vocabulary_words' => ['need'],
+                    'vocabulary_mode' => 'lesson_end',
+                    'required_vocabulary_words' => [],
                     'explanation' => 'หยดฝนและร่มในภาพแสดงว่าฝนกำลังตก จึงตรงกับ It is raining.',
                     'answers' => [
                         ['It is snowing.', false],

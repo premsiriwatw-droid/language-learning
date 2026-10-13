@@ -63,7 +63,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Water falls from clouds. What is it called?',
+                    'question' => 'หยดน้ำที่ตกลงมาจากเมฆ เรียกว่าอะไรในภาษาอังกฤษ?',
                     'explanation' => 'rain คือฝน ซึ่งเป็นหยดน้ำที่ตกลงมาจากเมฆ',
                     'answers' => [
                         ['sunlight', false],
@@ -83,7 +83,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'It is raining. What can you use to keep rain off your head?',
+                    'question' => 'ฝนกำลังตก คุณใช้สิ่งใดบังฝนไม่ให้ศีรษะเปียก?',
                     'explanation' => 'umbrella คือร่ม ใช้บังฝนเพื่อให้ตัวเราเปียกน้อยลง',
                     'answers' => [
                         ['A notebook.', false],
@@ -105,7 +105,7 @@ return [
             ],
             'fill_blank' => [
                 [
-                    'question' => 'Complete: The sun is shining. It is _____.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: The sun is shining. It is _____.',
                     'explanation' => 'เมื่อมีดวงอาทิตย์ส่องแสง ใช้ sunny เพื่อบอกว่ามีแดด',
                     'answers' => [
                         ['snowy', false],
@@ -115,7 +115,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: There are many clouds in the sky. It is _____.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: There are many clouds in the sky. It is _____.',
                     'explanation' => 'cloudy หมายถึงมีเมฆมาก จึงตรงกับท้องฟ้าที่มีเมฆหลายก้อน',
                     'answers' => [
                         ['hot', false],
@@ -125,7 +125,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: Rain is falling all day. It is a _____ day.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: Rain is falling all day. It is a _____ day.',
                     'explanation' => 'rainy ใช้ขยาย day เพื่อบอกว่าเป็นวันที่มีฝนตก',
                     'answers' => [
                         ['rainy', true],
@@ -135,7 +135,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: The wind is strong. It is _____ outside.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: The wind is strong. It is _____ outside.',
                     'explanation' => 'windy หมายถึงมีลมแรง จึงตรงกับข้อความที่บอกว่าลมพัดแรง',
                     'answers' => [
                         ['rainy', false],
@@ -145,7 +145,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: Snow is falling. It is _____ today.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: Snow is falling. It is _____ today.',
                     'explanation' => 'snowy หมายถึงมีหิมะตก ส่วน rainy หมายถึงมีฝนตก',
                     'answers' => [
                         ['sunny', false],
@@ -155,7 +155,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: This coat keeps me _____.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: This coat keeps me _____.',
                     'explanation' => 'เสื้อโค้ทช่วยให้ร่างกายอบอุ่น จึงใช้ warm',
                     'answers' => [
                         ['hungry', false],
@@ -165,7 +165,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: The ground is white because there is _____ on it.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: The ground is white because there is _____ on it.',
                     'explanation' => 'snow คือหิมะ ซึ่งทำให้พื้นมีสีขาวได้',
                     'answers' => [
                         ['wind', false],
@@ -222,7 +222,7 @@ return [
                     'image_path' => 'images/english/weather/rainy-street-with-umbrella.jpg',
                 ],
                 [
-                    'question' => 'Which sentence matches the picture?',
+                    'question' => 'ประโยคใดตรงกับภาพ?',
                     'explanation' => 'ภาพมีเกล็ดหิมะกำลังตกและหิมะอยู่บนพื้น จึงตรงกับ It is snowy.',
                     'answers' => [
                         ['The ground is dry.', false],

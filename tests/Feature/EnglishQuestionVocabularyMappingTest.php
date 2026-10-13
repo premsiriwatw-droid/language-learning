@@ -76,4 +76,34 @@ class EnglishQuestionVocabularyMappingTest extends TestCase
         $this->assertTrue(app(QuestionVocabularyImporter::class)->apply($question, $item));
         $this->assertSame([$water->id], $question->vocabularies()->pluck('vocabularies.id')->all());
     }
+
+    public function test_review_weather_image_imports_as_lesson_end_without_unrelated_prerequisites(): void
+    {
+        $content = require database_path('seeders/data/english.php');
+        $review = $content['Review & Daily Conversation'];
+        $items = $review['exercises']['image_choice'];
+        $items = isset($items['question']) ? [$items] : $items;
+        $item = $items[1];
+
+        $this->assertSame('lesson_end', $item['vocabulary_mode']);
+        $this->assertSame([], $item['required_vocabulary_words']);
+
+        $lesson = $this->createContentLesson();
+        $lesson->update(['title' => 'Review & Daily Conversation']);
+        $lesson->unit->course->language->update(['name' => 'English']);
+
+        foreach ($review['vocabulary'] as $vocabulary) {
+            Vocabulary::factory()->create(['lesson_id' => $lesson->id, 'word' => $vocabulary[0]]);
+        }
+
+        $exercise = Exercise::factory()->create(['lesson_id' => $lesson->id, 'type' => 'image_choice']);
+        $question = Question::factory()->for($exercise)->create(['question' => $item['question'], 'vocabulary_mode' => 'pending']);
+        $importer = app(QuestionVocabularyImporter::class);
+
+        $this->assertTrue($importer->apply($question, $item));
+        $this->assertSame('lesson_end', $question->fresh()->vocabulary_mode);
+        $this->assertSame(0, $question->vocabularies()->count());
+        $this->assertFalse($importer->apply($question, $item));
+        $this->assertDatabaseCount('question_vocabulary', 0);
+    }
 }

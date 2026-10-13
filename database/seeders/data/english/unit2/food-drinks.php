@@ -379,7 +379,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'I want two slices of ___.',
+                    'question' => 'เติมคำในช่องว่าง: "I want two slices of ___." (คำช่วย: slices หมายถึง แผ่น)',
                     'explanation' => 'slices of bread หมายถึง ขนมปังเป็นแผ่น ๆ ตัวเลือกอื่นเป็นเครื่องดื่ม',
                     'answers' => [
                         [

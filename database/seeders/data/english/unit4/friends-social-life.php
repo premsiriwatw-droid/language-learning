@@ -83,7 +83,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Your friend is kind. Which action fits this description?',
+                    'question' => 'เพื่อนของคุณเป็นคน kind การกระทำใดตรงกับคำนี้? คำช่วย: take = เอาไป; without asking = โดยไม่ขออนุญาต; laugh at = หัวเราะเยาะ; mistakes = ข้อผิดพลาด; carry a heavy bag = ถือกระเป๋าหนัก; ignore = เมิน; need help = ต้องการความช่วยเหลือ',
                     'explanation' => 'kind หมายถึงใจดี การช่วยถือกระเป๋าหนักแสดงถึงความใจดี',
                     'answers' => [
                         ['Taking your things without asking.', false],
@@ -115,7 +115,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: I want to hear your voice. Can I _____ you?',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: I want to hear your voice. Can I _____ you?',
                     'explanation' => 'call you หมายถึงโทรหาคุณ จึงใช้เมื่อต้องการได้ยินเสียงอีกฝ่าย',
                     'answers' => [
                         ['call', true],
@@ -125,7 +125,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: I send a short _____ to my friend on my phone.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: I send a short _____ to my friend on my phone.',
                     'explanation' => 'message คือข้อความที่ส่งให้เพื่อนผ่านโทรศัพท์ได้',
                     'answers' => [
                         ['chair', false],
@@ -135,7 +135,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: I want you to come to my party, so I _____ you.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: I want you to come to my party, so I _____ you.',
                     'explanation' => 'invite หมายถึงเชิญ เช่น เชิญเพื่อนมางานเลี้ยง',
                     'answers' => [
                         ['sleep', false],
@@ -145,7 +145,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: Friends come to my house for music, food, and a _____.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: Friends come to my house for music, food, and a _____.',
                     'explanation' => 'party คืองานเลี้ยง ซึ่งอาจมีดนตรี อาหาร และเพื่อนมาร่วมงาน',
                     'answers' => [
                         ['shower', false],
@@ -155,7 +155,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: Today is my _____. I am one year older.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: Today is my _____. I am one year older.',
                     'explanation' => 'birthday คือวันเกิด วันที่อายุเพิ่มขึ้นอีกหนึ่งปี',
                     'answers' => [
                         ['message', false],
@@ -165,7 +165,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: We go to the park _____, not alone.',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: We go to the park _____, not alone.',
                     'explanation' => 'together หมายถึงด้วยกัน และตรงข้ามกับการไป alone หรือคนเดียว',
                     'answers' => [
                         ['together', true],
@@ -175,7 +175,7 @@ return [
                     ],
                 ],
                 [
-                    'question' => 'Complete: This bag is heavy. Can you _____ me carry it?',
+                    'question' => 'เติมคำในช่องว่างให้ประโยคสมบูรณ์: This bag is heavy. Can you _____ me carry it?',
                     'explanation' => 'help me carry it หมายถึงช่วยฉันถือมัน ใช้ขอความช่วยเหลือได้',
                     'answers' => [
                         ['invite', false],
@@ -213,7 +213,7 @@ return [
             ],
             'image_choice' => [
                 [
-                    'question' => 'Which sentence matches the picture?',
+                    'question' => 'ประโยคใดตรงกับภาพ?',
                     'explanation' => 'เพื่อนสองคนในภาพกำลังพูดคุยกัน จึงตรงกับ chatting together',
                     'answers' => [
                         ['The friends are cooking.', false],

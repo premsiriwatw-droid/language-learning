@@ -1,5 +1,5 @@
 .reward-hub {
-    color:#292323;
+    color:#332a23;
     max-width:960px;
     margin:auto;
 }
@@ -15,17 +15,17 @@
 }
 
 .hub-heading strong {
-    color:#b81f32;
+    color:#bd2637;
     font-size:24px;
 }
 
 .hub-eyebrow {
-    color:#a54333;
+    color:#806027;
     font-weight:600;
 }
 
 .hub-muted {
-    color:#6b6060;
+    color:#756454;
     font-size:14px;
 }
 
@@ -40,11 +40,11 @@
     padding:8px 14px;
     border-radius:12px;
     background:#fff;
-    border:1px solid #e9dfdc;
+    border:1px solid #e5d8c4;
 }
 
 .hub-tabs a[aria-current] {
-    background:#b81f32;
+    background:#bd2637;
     color:white;
 }
 
@@ -66,10 +66,10 @@
 
 .hub-card {
     padding:22px;
-    border:1px solid #eadfd7;
+    border:1px solid #dbc59e;
     border-radius:20px;
     background:#fff;
-    box-shadow:0 6px 18px #382c2210;
+    box-shadow:0 6px 18px #73502410;
 }
 
 .hub-card h2,.hub-card h3 {
@@ -82,7 +82,7 @@
     display:inline-block;
     border-radius:12px;
     padding:10px 14px;
-    background:#b81f32;
+    background:#bd2637;
     color:white;
     font-weight:600;
     margin-top:12px;
@@ -90,36 +90,36 @@
 }
 
 .hub-secondary {
-    background:#f5efeb;
-    color:#473c38;
+    background:#fff7e6;
+    color:#594938;
 }
 
 .hub-button:disabled {
-    background:#e8e3df;
-    color:#746c66;
+    background:#efe4d0;
+    color:#82705e;
     cursor:not-allowed;
 }
 
 .hub-button:focus-visible,.hub-tabs a:focus-visible {
-    outline:3px solid #443f9a;
+    outline:3px solid #bd2637;
     outline-offset:3px;
 }
 
 .hub-empty,.hub-notice,.hub-error {
     padding:22px;
     border-radius:16px;
-    background:#fff4e1;
+    background:#fff7e6;
     margin:16px 0;
 }
 
 .hub-notice,.hub-equipped {
-    color:#14603e;
-    background:#effbf4;
+    color:#705024;
+    background:#fff2dd;
 }
 
 .hub-error {
-    color:#a32030;
-    background:#fff0f0;
+    color:#a12533;
+    background:#fff0f2;
 }
 
 .hub-equipped {
@@ -134,18 +134,18 @@
     justify-content:center;
     min-height:104px;
     border-radius:16px;
-    background:#f8f3ee;
+    background:#fffaf2;
     font-weight:800;
 }
 
 .hub-history {
     padding:12px 0;
-    border-bottom:1px solid #e9dfdc;
+    border-bottom:1px solid #e5d8c4;
 }
 
 .hub-history time {
     display:block;
-    color:#6b6060;
+    color:#756454;
     font-size:13px;
 }
 
@@ -154,13 +154,13 @@
 }
 
 .notification-unread {
-    border-left:5px solid #b81f32;
+    border-left:5px solid #bd2637;
 }
 
 .notification-count {
     border-radius:50%;
     padding:2px 7px;
-    background:#b81f32;
+    background:#bd2637;
     color:#fff;
     font-size:12px;
 }

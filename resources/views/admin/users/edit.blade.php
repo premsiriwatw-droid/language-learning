@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>แก้ไข User</title>
+    <link rel="stylesheet" href="{{ asset('css/admin-colors.css') }}">
 </head>
 <body>
 

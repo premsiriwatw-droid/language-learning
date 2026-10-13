@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ asset('css/admin-colors.css') }}">
 </head>
 <body>
 

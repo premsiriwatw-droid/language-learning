@@ -12,6 +12,9 @@
         </div>
         <div class="flex flex-wrap gap-2">
             <a href="{{ route('teacher-courses.mine') }}" class="rounded-xl border-2 border-gray-200 bg-white px-4 py-2 font-bold text-gray-700 hover:border-emerald-400">คอร์สที่ฉันสมัคร</a>
+            @if ($pendingReviewCount !== null)
+                <a href="{{ route('admin.teacher-courses.index') }}" class="rounded-xl bg-indigo-500 px-4 py-2 font-bold text-white hover:bg-indigo-600">ตรวจคอร์สผู้สอน @if ($pendingReviewCount > 0)<span class="ml-1 rounded-full bg-white px-2 text-indigo-700">{{ $pendingReviewCount }}</span>@endif</a>
+            @endif
             @if ($isTeacher)
                 <a href="{{ route('teacher.courses.index') }}" class="rounded-xl bg-emerald-500 px-4 py-2 font-bold text-white hover:bg-emerald-600">จัดการคอร์สของฉัน (ผู้สอน)</a>
             @endif
@@ -61,7 +64,7 @@
                         {{ $course->teacher->teacherApplication?->full_name ?? $course->teacher->name }}
                         <span class="ml-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700" title="ผู้สอนที่ผ่านการยืนยัน">✓ Verified</span>
                     </span>
-                    <span class="text-gray-500">{{ $course->lessons_count }} บท · {{ $course->learner_count }} ผู้เรียน</span>
+                    <span class="text-gray-500">{{ $course->lessons_count + $course->teacher_lessons_count }} บท · {{ $course->learner_count }} ผู้เรียน</span>
                 </div>
                 @if (isset($myStatuses[$course->id]))
                     <span class="self-start rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700">

@@ -29,6 +29,7 @@ class MarketplaceController extends Controller
             ->with(['language', 'teacher:id,name', 'teacher.teacherApplication:id,user_id,full_name'])
             ->withCount([
                 'lessons',
+                'teacherLessons',
                 'enrollments as learner_count' => fn ($q) => $q->learning(),
             ])
             ->latest('published_at')
@@ -46,6 +47,9 @@ class MarketplaceController extends Controller
             'languages' => Language::orderBy('name')->get(['id', 'name']),
             'myStatuses' => $myStatuses,
             'isTeacher' => $request->user()->isApprovedTeacher(),
+            'pendingReviewCount' => $request->user()->isAdmin()
+                ? TeacherCourse::where('status', TeacherCourse::PENDING_REVIEW)->count()
+                : null,
         ]);
     }
 
@@ -53,7 +57,7 @@ class MarketplaceController extends Controller
     {
         Gate::authorize('view', $teacherCourse);
 
-        $teacherCourse->load(['language', 'teacher:id,name,role', 'teacher.teacherApplication:id,user_id,full_name,bio', 'lessons.unit'])
+        $teacherCourse->load(['language', 'teacher:id,name,role', 'teacher.teacherApplication:id,user_id,full_name,bio', 'lessons.unit', 'teacherLessons'])
             ->loadCount(['enrollments as learner_count' => fn ($q) => $q->learning()]);
 
         $user = $request->user();
@@ -75,6 +79,8 @@ class MarketplaceController extends Controller
             'enrollment' => $enrollment,
             'lessonOpen' => $lessonOpen,
             'isOwner' => $teacherCourse->isOwnedBy($user),
+            'canOpenMaterials' => Gate::allows('study', $teacherCourse),
+            'canReview' => Gate::allows('review', $teacherCourse),
             'teacherVerified' => $teacherCourse->teacher->isApprovedTeacher(),
         ]);
     }

@@ -28,7 +28,7 @@
 
         <dl class="grid grid-cols-3 gap-3 text-center">
             <div class="rounded-xl bg-gray-50 p-3"><dt class="text-xs text-gray-500">ราคา</dt><dd class="text-lg font-extrabold">{{ $course->priceLabel() }}</dd></div>
-            <div class="rounded-xl bg-gray-50 p-3"><dt class="text-xs text-gray-500">บทเรียน</dt><dd class="text-lg font-extrabold">{{ $course->lessons->count() }} บท</dd></div>
+            <div class="rounded-xl bg-gray-50 p-3"><dt class="text-xs text-gray-500">บทเรียน</dt><dd class="text-lg font-extrabold">{{ $course->lessons->count() + $course->teacherLessons->count() }} บท</dd></div>
             <div class="rounded-xl bg-gray-50 p-3"><dt class="text-xs text-gray-500">ผู้เรียน</dt><dd class="text-lg font-extrabold">{{ $course->learner_count }} คน</dd></div>
         </dl>
 
@@ -40,8 +40,11 @@
 
         {{-- Enrollment panel --}}
         <div class="rounded-xl border-2 border-emerald-100 bg-emerald-50/40 p-4">
-            @if ($isOwner)
-                <p class="font-bold text-gray-700">นี่คือคอร์สของคุณ ({{ \App\Models\TeacherCourse::STATUS_LABELS[$course->status] }})</p>
+            @if ($canReview)
+                <p class="font-bold text-gray-700">มุมมองแอดมิน · สถานะ: {{ $course->statusLabel() }}</p>
+                <a href="{{ route('admin.teacher-courses.show', $course) }}" class="mt-3 inline-block rounded-xl bg-indigo-500 px-4 py-2 font-bold text-white">{{ $course->isPendingReview() ? 'ตรวจคอร์สนี้' : 'ดูผลการตรวจ' }}</a>
+            @elseif ($isOwner)
+                <p class="font-bold text-gray-700">นี่คือคอร์สของคุณ ({{ $course->statusLabel() }})</p>
                 <div class="mt-3 flex flex-wrap gap-2">
                     <a href="{{ route('teacher.courses.edit', $course) }}" class="rounded-xl bg-emerald-500 px-4 py-2 font-bold text-white">แก้ไขคอร์ส</a>
                     <a href="{{ route('teacher.courses.enrollments', $course) }}" class="rounded-xl border-2 border-emerald-500 px-4 py-2 font-bold text-emerald-700">คำขอเข้าเรียน</a>
@@ -62,7 +65,7 @@
                         </button>
                     </form>
                 @else
-                    <p class="font-bold text-gray-600">คอร์สนี้ปิดรับผู้เรียนใหม่แล้ว</p>
+                    <p class="font-bold text-gray-600">{{ $course->isPendingReview() ? 'คอร์สนี้กำลังปรับปรุงเนื้อหา ยังไม่รับผู้เรียนใหม่' : 'คอร์สนี้ปิดรับผู้เรียนใหม่แล้ว' }}</p>
                 @endif
             @else
                 <p class="font-bold text-gray-800">สถานะของคุณ: {{ $enrollment->statusLabel() }}</p>
@@ -92,8 +95,38 @@
         </div>
     </section>
 
+    @if ($course->teacherLessons->isNotEmpty())
+        <section class="rounded-2xl border-2 border-gray-200 bg-white p-6" aria-labelledby="teacher-lessons-heading">
+            <h2 id="teacher-lessons-heading" class="text-xl font-extrabold text-gray-800">บทเรียนจากผู้สอน</h2>
+            @unless ($canOpenMaterials)
+                <p class="mt-1 text-sm text-gray-500">เข้าร่วมคอร์สเพื่อเปิดเนื้อหา เอกสาร และวิดีโอ</p>
+            @endunless
+            <ol class="mt-4 space-y-2">
+                @foreach ($course->teacherLessons as $teacherLesson)
+                    <li class="flex items-center justify-between gap-3 rounded-xl border border-gray-100 p-3">
+                        <span class="min-w-0">
+                            <span class="mr-2 font-bold text-gray-400">{{ $loop->iteration }}.</span>
+                            <span class="font-bold text-gray-700">{{ $teacherLesson->title }}</span>
+                            <span class="mt-0.5 flex gap-2 text-xs text-gray-400">
+                                @if ($teacherLesson->hasVideo()) <span>🎬 วิดีโอ</span> @endif
+                                @if ($teacherLesson->hasDocument()) <span>📄 เอกสาร</span> @endif
+                                @if ($teacherLesson->body) <span>📝 เนื้อหา</span> @endif
+                            </span>
+                        </span>
+                        @if ($canOpenMaterials)
+                            <a href="{{ route('teacher-courses.lessons.show', [$course, $teacherLesson]) }}" class="shrink-0 rounded-lg bg-emerald-500 px-3 py-1.5 text-sm font-bold text-white">เปิดบทเรียน</a>
+                        @else
+                            <span class="shrink-0 text-xs text-gray-400">🔒</span>
+                        @endif
+                    </li>
+                @endforeach
+            </ol>
+        </section>
+    @endif
+
+    @if ($course->lessons->isNotEmpty() || $course->teacherLessons->isEmpty())
     <section class="rounded-2xl border-2 border-gray-200 bg-white p-6">
-        <h2 class="text-xl font-extrabold text-gray-800">บทเรียนในคอร์ส</h2>
+        <h2 class="text-xl font-extrabold text-gray-800">{{ $course->teacherLessons->isEmpty() ? 'บทเรียนในคอร์ส' : 'แบบฝึกจากบทเรียนหลัก' }}</h2>
         @if (! $enrollment?->canStudy() && ! $isOwner)
             <p class="mt-1 text-sm text-gray-500">เข้าร่วมคอร์สเพื่อเริ่มเรียน</p>
         @endif
@@ -118,5 +151,6 @@
             @endforelse
         </ol>
     </section>
+    @endif
 </div>
 @endsection

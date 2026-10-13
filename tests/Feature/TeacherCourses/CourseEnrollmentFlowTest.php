@@ -173,7 +173,7 @@ class CourseEnrollmentFlowTest extends TestCase
         $learner = $this->learner();
         $this->actingAs($learner)->post(route('teacher-courses.enroll', $course));
 
-        $this->actingAs($teacher)->patch(route('teacher.courses.status', $course), ['status' => 'closed']);
+        $this->actingAs($teacher)->patch(route('teacher.courses.status', $course), ['action' => 'close'])->assertSessionHasNoErrors();
 
         $this->actingAs($learner)->get(route('teacher-courses.show', $course))
             ->assertOk()->assertSee('กำลังเรียน');

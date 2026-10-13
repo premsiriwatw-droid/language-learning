@@ -4,6 +4,7 @@ namespace Tests\Feature\TeacherCourses;
 
 use App\Models\CourseEnrollment;
 use App\Models\TeacherCourse;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\CreatesTeacherCourses;
 use Tests\TestCase;
@@ -115,7 +116,7 @@ class TeacherCourseManagementTest extends TestCase
             ->put(route('teacher.courses.update', $course), $this->validPayload($course->language_id, [], ['title' => 'Hacked']))
             ->assertForbidden();
         $this->actingAs($intruder)
-            ->patch(route('teacher.courses.status', $course), ['status' => 'closed'])
+            ->patch(route('teacher.courses.status', $course), ['action' => 'close'])
             ->assertForbidden();
 
         $course->refresh();
@@ -123,44 +124,70 @@ class TeacherCourseManagementTest extends TestCase
         $this->assertSame(TeacherCourse::PUBLISHED, $course->status);
     }
 
-    public function test_owner_edits_publishes_and_closes_course(): void
+    public function test_owner_submits_for_review_and_cannot_publish_directly(): void
     {
         $teacher = $this->approvedTeacher();
+        $admin = User::factory()->create(['role' => 'admin']);
         [$language, $lessons] = $this->languageWithLessons();
         $course = $this->teacherCourse($teacher, $language, [], fn ($f) => $f->draft());
         $course->lessons()->detach();
 
+        // No lessons yet: cannot be sent for review.
         $this->actingAs($teacher)
-            ->patch(route('teacher.courses.status', $course), ['status' => 'published'])
+            ->patch(route('teacher.courses.status', $course), ['action' => 'submit'])
             ->assertSessionHasErrors('status');
         $this->assertSame(TeacherCourse::DRAFT, $course->fresh()->status);
+
+        // The old "publish it myself" request is no longer accepted.
+        $this->actingAs($teacher)
+            ->patch(route('teacher.courses.status', $course), ['status' => 'published'])
+            ->assertSessionHasErrors('action');
 
         $this->actingAs($teacher)
             ->put(route('teacher.courses.update', $course), $this->validPayload($language->id, [$lessons[0]->id], ['title' => 'Renamed']))
             ->assertSessionHasNoErrors();
 
         $this->actingAs($teacher)
-            ->patch(route('teacher.courses.status', $course), ['status' => 'published'])
+            ->patch(route('teacher.courses.status', $course), ['action' => 'submit'])
             ->assertSessionHasNoErrors();
         $course->refresh();
         $this->assertSame('Renamed', $course->title);
+        $this->assertSame(TeacherCourse::PENDING_REVIEW, $course->status);
+        $this->assertNull($course->published_at);
+        $this->actingAs($this->learner())->get(route('teacher-courses.index'))->assertDontSee('Renamed');
+
+        $this->actingAs($admin)
+            ->post(route('admin.teacher-courses.review', $course), ['revision' => $course->fresh()->content_revision, 'decision' => 'approve'])
+            ->assertSessionHasNoErrors();
+        $course->refresh();
         $this->assertSame(TeacherCourse::PUBLISHED, $course->status);
         $this->assertNotNull($course->published_at);
 
-        $this->actingAs($teacher)->patch(route('teacher.courses.status', $course), ['status' => 'closed']);
+        $this->actingAs($teacher)->patch(route('teacher.courses.status', $course), ['action' => 'close']);
         $this->assertSame(TeacherCourse::CLOSED, $course->fresh()->status);
+
+        // Closed but untouched since approval: reopens without another review.
+        $this->actingAs($teacher)->patch(route('teacher.courses.status', $course), ['action' => 'reopen'])->assertSessionHasNoErrors();
+        $this->assertSame(TeacherCourse::PUBLISHED, $course->fresh()->status);
     }
 
-    public function test_course_with_learners_cannot_go_back_to_draft(): void
+    public function test_course_with_learners_never_goes_back_to_draft(): void
     {
         $teacher = $this->approvedTeacher();
         $course = $this->teacherCourse($teacher);
         $this->actingAs($this->learner())->post(route('teacher-courses.enroll', $course));
 
+        // Editing a live course sends it back for review…
         $this->actingAs($teacher)
-            ->patch(route('teacher.courses.status', $course), ['status' => 'draft'])
-            ->assertSessionHasErrors('status');
-        $this->assertSame(TeacherCourse::PUBLISHED, $course->fresh()->status);
+            ->put(route('teacher.courses.update', $course), $this->validPayload($course->language_id, $course->lessons->pluck('id')->all(), ['title' => 'Edited title']))
+            ->assertSessionHasNoErrors();
+        $this->assertSame(TeacherCourse::PENDING_REVIEW, $course->fresh()->status);
+
+        // …and withdrawing the review keeps it closed (not a draft), because a learner is inside.
+        $this->actingAs($teacher)
+            ->patch(route('teacher.courses.status', $course), ['action' => 'withdraw'])
+            ->assertSessionHasNoErrors();
+        $this->assertSame(TeacherCourse::CLOSED, $course->fresh()->status);
         $this->assertSame(1, CourseEnrollment::count());
     }
 

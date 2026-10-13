@@ -72,19 +72,23 @@ class TeacherLessonController extends Controller
         $files = array_filter([$teacherLesson->document_path, $teacherLesson->video_path]);
 
         $sentForReview = DB::transaction(function () use ($teacherCourse, $teacherLesson) {
-            TeacherCourse::query()->lockForUpdate()->findOrFail($teacherCourse->id);
+            // Decide on the row read under the lock: the course may have been submitted
+            // (or published) after this request loaded it.
+            $locked = TeacherCourse::query()->lockForUpdate()->findOrFail($teacherCourse->id);
 
-            $isLastLesson = $teacherCourse->teacherLessons()->count() === 1 && $teacherCourse->lessons()->doesntExist();
-            if ($isLastLesson && $teacherCourse->status !== TeacherCourse::DRAFT) {
+            $remaining = $locked->teacherLessons()->whereKeyNot($teacherLesson->id)->count() + $locked->lessons()->count();
+            if ($remaining === 0 && $locked->status !== TeacherCourse::DRAFT) {
                 throw ValidationException::withMessages([
                     'lesson' => 'ลบบทสุดท้ายไม่ได้ คอร์สที่ส่งตรวจ เปิดรับสมัคร หรือมีผู้เรียนแล้วต้องมีบทเรียนอย่างน้อย 1 บท',
                 ]);
             }
 
             $teacherLesson->delete();
-            $this->renumber($teacherCourse);
+            $this->renumber($locked);
+            $sentForReview = $this->review->contentChanged($locked);
+            $teacherCourse->setRawAttributes($locked->getAttributes(), true);
 
-            return $this->review->contentChanged($teacherCourse);
+            return $sentForReview;
         });
 
         DB::afterCommit(fn () => Storage::disk(TeacherLesson::DISK)->delete($files));

@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 /** Approved teacher: create / edit own courses, send them for admin review, close / reopen them. */
@@ -82,13 +83,25 @@ class TeacherCourseManagementController extends Controller
     public function update(TeacherCourseRequest $request, TeacherCourse $teacherCourse, CourseReviewService $review): RedirectResponse
     {
         [$changed, $sentForReview] = DB::transaction(function () use ($request, $teacherCourse, $review) {
-            TeacherCourse::query()->lockForUpdate()->findOrFail($teacherCourse->id);
-            $teacherCourse->fill($request->safe()->except('lessons'));
-            $infoChanged = $teacherCourse->isDirty();
-            $teacherCourse->save();
-            $changed = $this->syncLessons($teacherCourse, $request->validated('lessons', [])) || $infoChanged;
+            // Work on the row read under the lock; the copy bound to the route may be stale
+            // (e.g. the course was submitted for review after this request loaded it).
+            $locked = TeacherCourse::query()->lockForUpdate()->findOrFail($teacherCourse->id);
+            $lessonIds = $request->validated('lessons', []);
 
-            return [$changed, $changed && $review->contentChanged($teacherCourse)];
+            if ($lessonIds === [] && $locked->status !== TeacherCourse::DRAFT && $locked->teacherLessons()->doesntExist()) {
+                throw ValidationException::withMessages([
+                    'lessons' => 'คอร์สที่ส่งตรวจ เปิดรับสมัคร หรือมีผู้เรียนแล้วต้องมีบทเรียนอย่างน้อย 1 บท',
+                ]);
+            }
+
+            $locked->fill($request->safe()->except('lessons'));
+            $infoChanged = $locked->isDirty();
+            $locked->save();
+            $changed = $this->syncLessons($locked, $lessonIds) || $infoChanged;
+            $sentForReview = $changed && $review->contentChanged($locked);
+            $teacherCourse->setRawAttributes($locked->getAttributes(), true);
+
+            return [$changed, $sentForReview];
         });
 
         if ($sentForReview) {

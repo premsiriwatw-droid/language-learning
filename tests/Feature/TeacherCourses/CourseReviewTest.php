@@ -6,6 +6,8 @@ use App\Models\TeacherCourse;
 use App\Models\TeacherLesson;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Tests\Support\CreatesTeacherCourses;
 use Tests\TestCase;
 
@@ -277,4 +279,57 @@ class CourseReviewTest extends TestCase
             $this->assertSame($before + 1, $revision(), 'step '.$i);
         }
     }
+
+    /**
+     * Simulates a concurrent "submit for review" that commits after this request has
+     * loaded the course (route binding + authorization) but before it takes the lock.
+     */
+    private function submitConcurrentlyAfterAuthorization(TeacherCourse $course): void
+    {
+        $fired = false;
+        Gate::after(function ($user, string $ability) use ($course, &$fired) {
+            if ($ability === 'update' && ! $fired) {
+                $fired = true;
+                DB::table('teacher_courses')->where('id', $course->id)->update([
+                    'status' => TeacherCourse::PENDING_REVIEW, 'submitted_at' => now(),
+                ]);
+            }
+        });
+    }
+
+    public function test_deleting_the_last_lesson_races_with_submit(): void
+    {
+        $teacher = $this->approvedTeacher();
+        $course = $this->draftWithOwnLesson($teacher);
+        $lesson = $course->teacherLessons()->sole();
+
+        $this->submitConcurrentlyAfterAuthorization($course);
+
+        $this->actingAs($teacher)->delete(route('teacher.courses.teacher-lessons.destroy', [$course, $lesson]))
+            ->assertSessionHasErrors('lesson');
+
+        $this->assertModelExists($lesson);
+        $this->assertSame(TeacherCourse::PENDING_REVIEW, $course->fresh()->status);
+        $this->assertTrue($course->fresh()->hasAnyLesson());
+    }
+
+    public function test_removing_all_system_lessons_races_with_submit(): void
+    {
+        $teacher = $this->approvedTeacher();
+        $course = $this->teacherCourse($teacher, null, ['title' => 'System only'], fn ($f) => $f->draft());
+        $this->assertSame(0, $course->teacherLessons()->count());
+        $this->assertGreaterThan(0, $course->lessons()->count());
+
+        $this->submitConcurrentlyAfterAuthorization($course);
+
+        $this->actingAs($teacher)->put(route('teacher.courses.update', $course), [
+            'title' => 'System only', 'description' => $course->description, 'language_id' => $course->language_id,
+            'level' => $course->level, 'price_type' => 'free', 'enrollment_mode' => 'instant', 'lessons' => [],
+        ])->assertSessionHasErrors('lessons');
+
+        $course->refresh();
+        $this->assertSame(TeacherCourse::PENDING_REVIEW, $course->status);
+        $this->assertGreaterThan(0, $course->lessons()->count());
+    }
 }
+

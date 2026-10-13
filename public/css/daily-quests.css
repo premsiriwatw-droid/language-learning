@@ -16,9 +16,9 @@
 .daily-quests-page .daily-quests-summary {
     flex-shrink: 0;
     padding: 12px 16px;
-    border: 1px solid #d5e4d9;
+    border: 1px solid #dbc59e;
     border-radius: 14px;
-    background: #eef5ed;
+    background: #fff7e6;
 }
 
 .daily-quests-page .daily-quests-summary .stat-label {
@@ -26,7 +26,7 @@
 }
 
 .daily-quests-page .daily-quests-summary .stat-value {
-    color: var(--green);
+    color: var(--red);
     font-size: 23px;
     margin: 0;
 }
@@ -84,10 +84,10 @@
     gap: 6px;
     flex-shrink: 0;
     padding: 8px 11px;
-    border: 1px solid #f0dfad;
+    border: 1px solid #dbc59e;
     border-radius: 10px;
-    background: #fff5db;
-    color: #946b1d;
+    background: #fff2dd;
+    color: #806027;
     font-size: 13px;
     font-weight: 700;
     white-space: nowrap;
@@ -124,33 +124,33 @@
 }
 
 .daily-quests-page .quest-status--in-progress {
-    background: #f0f4ee;
-    color: #4d695b;
+    background: #fffaf2;
+    color: #806027;
 }
 
 .daily-quests-page .quest-card--completed {
-    border-color: #cde2d4;
+    border-color: #c5a46a;
 }
 
 .daily-quests-page .quest-status--completed {
-    background: #e5f4eb;
-    color: #135437;
+    background: #fff2dd;
+    color: #705024;
 }
 
 .daily-quests-page .quest-status--claimed {
-    background: #f0f2ef;
+    background: #f7f2eb;
     color: var(--muted);
 }
 
 .daily-quests-page .quest-card--claimed .quest-icon {
-    background: #edf1e9;
-    color: #74816e;
+    background: #efe4d0;
+    color: #82705e;
 }
 
 .daily-quests-page .quest-card--claimed .quest-reward {
-    background: #faf6eb;
-    border-color: #e9e1c9;
-    color: #887752;
+    background: #fffaf2;
+    border-color: #e5d8c4;
+    color: #82705e;
 }
 
 .daily-quests-page .quest-claim-form {
